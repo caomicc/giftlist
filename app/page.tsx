@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trash2, Plus, Gift, ShoppingCart, Users, AlertCircle, Loader2 } from "lucide-react"
+import { Trash2, Plus, Gift, ShoppingCart, Users, AlertCircle, Loader2, Edit2, Check, X } from "lucide-react"
 import { useGiftData } from "@/hooks/useGiftData"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
@@ -17,8 +17,10 @@ export default function FamilyGiftApp() {
   const [currentUser, setCurrentUser] = useState<string>("")
   const [newItem, setNewItem] = useState({ name: "", description: "", price: "", link: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingItemId, setEditingItemId] = useState<string | null>(null)
+  const [editingItem, setEditingItem] = useState({ name: "", description: "", price: "", link: "" })
 
-  const { familyMembers, giftItems, loading, error, addGiftItem, removeGiftItem, togglePurchaseStatus } = useGiftData()
+  const { familyMembers, giftItems, loading, error, addGiftItem, updateGiftItem, removeGiftItem, togglePurchaseStatus } = useGiftData()
 
   const handleAddGiftItem = async () => {
     if (!newItem.name.trim() || !currentUser || isSubmitting) return
@@ -48,11 +50,47 @@ export default function FamilyGiftApp() {
     }
   }
 
+  const handleStartEdit = (item: any) => {
+    setEditingItemId(item.id)
+    setEditingItem({
+      name: item.name,
+      description: item.description || "",
+      price: item.price || "",
+      link: item.link || ""
+    })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingItemId(null)
+    setEditingItem({ name: "", description: "", price: "", link: "" })
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingItemId || !editingItem.name.trim() || isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      await updateGiftItem(editingItemId, {
+        name: editingItem.name,
+        description: editingItem.description || undefined,
+        price: editingItem.price || undefined,
+        link: editingItem.link || undefined,
+      })
+      setEditingItemId(null)
+      setEditingItem({ name: "", description: "", price: "", link: "" })
+    } catch (err) {
+      console.error("Failed to update gift item:", err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const handleTogglePurchase = async (itemId: string, currentPurchasedBy: string | null) => {
     if (!currentUser) return
 
     try {
-      const newPurchasedBy = currentPurchasedBy ? null : currentUser
+      // Only allow unpurchasing if the current user was the one who marked it as purchased
+      const newPurchasedBy = currentPurchasedBy && currentPurchasedBy !== currentUser ? currentPurchasedBy : (currentPurchasedBy ? null : currentUser)
       await togglePurchaseStatus(itemId, newPurchasedBy)
     } catch (err) {
       console.error("Failed to toggle purchase status:", err)
@@ -125,7 +163,7 @@ export default function FamilyGiftApp() {
               <Label>Who are you?</Label>
               <Select onValueChange={setCurrentUser}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a family member" />
+                  <SelectValue placeholder="Log in as..." />
                 </SelectTrigger>
                 <SelectContent>
                   {familyMembers.map((member) => (
@@ -237,32 +275,102 @@ export default function FamilyGiftApp() {
                     </div>
                   ) : (
                     myGifts.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg bg-white">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-medium">{item.name}</h3>
-                            {item.price && <Badge variant="secondary">{item.price}</Badge>}
+                      <div key={item.id} className="p-4 border rounded-lg bg-white">
+                        {editingItemId === item.id ? (
+                          // Edit mode
+                          <div className="space-y-3">
+                            <div className="grid gap-2">
+                              <Input
+                                placeholder="Gift item name *"
+                                value={editingItem.name}
+                                onChange={(e) => setEditingItem((prev) => ({ ...prev, name: e.target.value }))}
+                                disabled={isSubmitting}
+                              />
+                              <Input
+                                placeholder="Description (optional)"
+                                value={editingItem.description}
+                                onChange={(e) => setEditingItem((prev) => ({ ...prev, description: e.target.value }))}
+                                disabled={isSubmitting}
+                              />
+                              <div className="grid grid-cols-2 gap-2">
+                                <Input
+                                  placeholder="Price (optional)"
+                                  value={editingItem.price}
+                                  onChange={(e) => setEditingItem((prev) => ({ ...prev, price: e.target.value }))}
+                                  disabled={isSubmitting}
+                                />
+                                <Input
+                                  placeholder="Link (optional)"
+                                  value={editingItem.link}
+                                  onChange={(e) => setEditingItem((prev) => ({ ...prev, link: e.target.value }))}
+                                  disabled={isSubmitting}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={handleSaveEdit}
+                                disabled={!editingItem.name.trim() || isSubmitting}
+                              >
+                                {isSubmitting ? (
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                ) : (
+                                  <Check className="w-4 h-4 mr-2" />
+                                )}
+                                {isSubmitting ? "Saving..." : "Save"}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleCancelEdit}
+                                disabled={isSubmitting}
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                Cancel
+                              </Button>
+                            </div>
                           </div>
-                          {item.description && <p className="text-sm text-muted-foreground mb-2">{item.description}</p>}
-                          {item.link && (
-                            <a
-                              href={item.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-blue-600 hover:underline"
-                            >
-                              View Link
-                            </a>
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveGiftItem(item.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        ) : (
+                          // View mode
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-medium">{item.name}</h3>
+                                {item.price && <Badge variant="secondary">{item.price}</Badge>}
+                              </div>
+                              {item.description && <p className="text-sm text-muted-foreground mb-2">{item.description}</p>}
+                              {item.link && (
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-sm text-blue-600 hover:underline"
+                                >
+                                  View Link
+                                </a>
+                              )}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleStartEdit(item)}
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveGiftItem(item.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))
                   )}
@@ -291,7 +399,7 @@ export default function FamilyGiftApp() {
                             </CardDescription>
                           </div>
                         </div>
-                        <Badge className={member.color}>{memberGifts.length} items</Badge>
+                        <Badge>{memberGifts.length} items</Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
@@ -350,10 +458,13 @@ export default function FamilyGiftApp() {
                                   variant={item.purchased_by ? "default" : "outline"}
                                   size="sm"
                                   onClick={() => handleTogglePurchase(item.id, item.purchased_by)}
+                                  disabled={!!(item.purchased_by && item.purchased_by !== currentUser)}
                                   className={item.purchased_by ? "bg-green-600 hover:bg-green-700" : ""}
                                 >
                                   <ShoppingCart className="w-4 h-4 mr-2" />
-                                  {item.purchased_by ? "Purchased" : "Mark as Purchased"}
+                                  {item.purchased_by
+                                    ? (item.purchased_by === currentUser ? "Purchased" : "Purchased by " + purchaserName)
+                                    : "Mark as Purchased"}
                                 </Button>
                               </div>
                             )

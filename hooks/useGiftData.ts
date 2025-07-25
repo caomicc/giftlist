@@ -70,6 +70,30 @@ export function useGiftData() {
     }
   }
 
+  // Update gift item
+  const updateGiftItem = async (itemId: string, updates: {
+    name?: string
+    description?: string
+    price?: string
+    link?: string
+  }) => {
+    try {
+      const { data, error } = await supabase
+        .from("gift_items")
+        .update(updates)
+        .eq("id", itemId)
+        .select()
+        .single()
+
+      if (error) throw error
+      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? data : item)))
+      return data
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update gift item")
+      throw err
+    }
+  }
+
   // Mark item as purchased/unpurchased
   const togglePurchaseStatus = async (itemId: string, purchasedBy: string | null) => {
     try {
@@ -126,6 +150,7 @@ export function useGiftData() {
     loading,
     error,
     addGiftItem,
+    updateGiftItem,
     removeGiftItem,
     togglePurchaseStatus,
     refetch: () => Promise.all([fetchFamilyMembers(), fetchGiftItems()]),
