@@ -10,6 +10,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Trash2, Plus, Gift, ShoppingCart, Users, AlertCircle, Loader2 } from "lucide-react"
 import { useGiftData } from "@/hooks/useGiftData"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
 export default function FamilyGiftApp() {
   const [currentUser, setCurrentUser] = useState<string>("")
@@ -119,18 +121,23 @@ export default function FamilyGiftApp() {
             <CardDescription>Choose your family member to start sharing gift ideas</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-3">
-              {familyMembers.map((member) => (
-                <Button
-                  key={member.id}
-                  variant="outline"
-                  className="justify-start h-auto"
-                  onClick={() => setCurrentUser(member.id)}
-                >
-                  
-                  <span className="text-lg">{member.name}</span>
-                </Button>
-              ))}
+            <div className="space-y-1">
+              <Label>Who are you?</Label>
+              <Select onValueChange={setCurrentUser}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a family member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {familyMembers.map((member) => (
+                    <SelectItem key={member.id} value={member.id}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{member.avatar}</span>
+                        <span>{member.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
@@ -181,12 +188,15 @@ export default function FamilyGiftApp() {
                 {/* Add New Item Form */}
                 <div className="grid gap-3 p-4 border rounded-lg bg-muted/50">
                   <div className="grid gap-2">
-                    <Input
-                      placeholder="Gift item name *"
-                      value={newItem.name}
-                      onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
-                      disabled={isSubmitting}
-                    />
+                  <div>
+                      <Label>Gift item name:</Label>
+                      <Input
+                        placeholder="Gift item name *"
+                        value={newItem.name}
+                        onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
+                        disabled={isSubmitting}
+                      />
+                    </div>
                     <Input
                       placeholder="Description (optional)"
                       value={newItem.description}
