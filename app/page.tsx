@@ -124,10 +124,10 @@ export default function FamilyGiftApp() {
                 <Button
                   key={member.id}
                   variant="outline"
-                  className="justify-start h-auto p-4 bg-transparent"
+                  className="justify-start h-auto"
                   onClick={() => setCurrentUser(member.id)}
                 >
-                  <span className="text-2xl mr-3">{member.avatar}</span>
+                  
                   <span className="text-lg">{member.name}</span>
                 </Button>
               ))}
@@ -143,7 +143,7 @@ export default function FamilyGiftApp() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-green-50">
-      <div className="container mx-auto p-4 max-w-6xl">
+      <div className="container mx-auto p-4 max-w-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">

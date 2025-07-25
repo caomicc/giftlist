@@ -16,7 +16,7 @@ export function useGiftData() {
   // Fetch family members
   const fetchFamilyMembers = async () => {
     try {
-      const { data, error } = await supabase.from("family_members").select("*").order("name")
+      const { data, error } = await supabase.from("family_members").select("*")
 
       if (error) throw error
       setFamilyMembers(data || [])
