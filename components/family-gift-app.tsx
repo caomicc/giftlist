@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trash2, Plus, Gift, ShoppingCart, Users, AlertCircle, Loader2, Database, Edit } from 'lucide-react'
+import { Trash2, Plus, Gift, Users, AlertCircle, Loader2, Database, Edit } from 'lucide-react'
 import { useGiftData } from "@/hooks/useGiftData"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "./ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import GiftItem from "./gift-item"
 
 interface User {
   id: string
@@ -255,47 +256,14 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     </div>
                   ) : (
                     myGifts.map((item: any) => (
-                      <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg bg-white">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-medium">{item.name}</h3>
-                            <Badge variant="secondary">
-                              {typeof item.price === "number"
-                                ? `$${item.price % 1 === 0 ? item.price.toFixed(2) : item.price}`
-                                : item.price}
-                            </Badge>
-                          </div>
-                          {item.description && <p className="text-sm text-muted-foreground mb-2">{item.description}</p>}
-                          {item.link && (
-                            <a
-                              href={item.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-blue-600 hover:underline"
-                            >
-                              View Link
-                            </a>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditGiftItem(item)}
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveGiftItem(item.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
+                      <GiftItem
+                        key={item.id}
+                        item={item}
+                        currentUserId={currentUser.id}
+                        variant="my-gifts"
+                        onEdit={handleEditGiftItem}
+                        onDelete={handleRemoveGiftItem}
+                      />
                     ))
                   )}
                 </div>
@@ -344,54 +312,14 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                               : null
 
                             return (
-                              <div
+                              <GiftItem
                                 key={item.id}
-                                className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
-                                  item.purchased_by ? "bg-green-50 border-green-200" : "bg-white hover:bg-gray-50"
-                                }`}
-                              >
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <h3
-                                      className={`font-medium ${item.purchased_by ? "line-through text-muted-foreground" : ""}`}
-                                    >
-                                      {item.name}
-                                    </h3>
-                                    {item.price && <Badge variant="secondary">{item.price}</Badge>}
-                                    {item.purchased_by && (
-                                      <Badge className="bg-green-100 text-green-800">
-                                        Purchased by {purchaserName}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  {item.description && (
-                                    <p
-                                      className={`text-sm mb-2 ${item.purchased_by ? "text-muted-foreground" : "text-muted-foreground"}`}
-                                    >
-                                      {item.description}
-                                    </p>
-                                  )}
-                                  {item.link && (
-                                    <a
-                                      href={item.link}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-sm text-blue-600 hover:underline"
-                                    >
-                                      View Link
-                                    </a>
-                                  )}
-                                </div>
-                                <Button
-                                  variant={item.purchased_by ? "default" : "outline"}
-                                  size="sm"
-                                  onClick={() => handleTogglePurchase(item.id, item.purchased_by)}
-                                  className={item.purchased_by ? "bg-green-600 hover:bg-green-700" : ""}
-                                >
-                                  <ShoppingCart className="w-4 h-4 mr-2" />
-                                  {item.purchased_by ? "Purchased" : "Mark as Purchased"}
-                                </Button>
-                              </div>
+                                item={item}
+                                currentUserId={currentUser.id}
+                                purchaserName={purchaserName || undefined}
+                                variant="family-gifts"
+                                onTogglePurchase={handleTogglePurchase}
+                              />
                             )
                           })}
                         </div>
