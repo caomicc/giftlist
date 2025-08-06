@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer'
 
+
+
 export async function sendMagicLink(email: string, magicLink: string) {
   // Development mode - just log the magic link
   if (process.env.NODE_ENV === 'development' &&
@@ -12,14 +14,22 @@ export async function sendMagicLink(email: string, magicLink: string) {
   }
 
   // Production mode - send actual email
+  // const transporter = nodemailer.createTransport({
+  //   host: process.env.EMAIL_SERVER_HOST,
+  //   port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
+  //   auth: {
+  //     user: process.env.EMAIL_SERVER_USER,
+  //     pass: process.env.EMAIL_SERVER_PASSWORD,
+  //   },
+  // })
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_SERVER_HOST,
-    port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
+    service: 'gmail',
     auth: {
       user: process.env.EMAIL_SERVER_USER,
       pass: process.env.EMAIL_SERVER_PASSWORD,
     },
   })
+
 
   const mailOptions = {
     from: process.env.EMAIL_FROM,
