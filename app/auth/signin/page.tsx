@@ -81,6 +81,7 @@ function SignInPageContent() {
       setIsLoading(false)
     }
   }
+  console.log('VerifyRequestPage rendered', process.env.NEON_DATABASE_URL)
 
   return (
     <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -199,6 +200,8 @@ export default function SignInPage() {
   return (
     <Suspense fallback={<div className='absolute top-0 left-0 flex h-screen w-screen justify-center items-center'><p className='font-heading text-2xl text-center text-pink-950'>Loading...</p></div>}>
       <SignInPageContent />
+       {console.log('SignInPage rendered eee', process.env.NEON_DATABASE_URL)}
     </Suspense>
   )
 }
+

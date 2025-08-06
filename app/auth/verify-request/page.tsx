@@ -8,6 +8,8 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
   const email = params.email
   const isDevelopment = process.env.NODE_ENV === 'development'
 
+  console.log('VerifyRequestPage rendered', process.env.NEON_DATABASE_URL)
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
@@ -49,6 +51,7 @@ export default async function VerifyRequestPage({ searchParams }: { searchParams
   return (
     <Suspense fallback={<div className='absolute top-0 left-0 flex h-screen w-screen justify-center items-center'><p className='font-heading text-2xl text-center text-pink-950'>Loading...</p></div>}>
       <VerifyRequestContent searchParams={searchParams} />
+      {console.log('SignInPage rendered', process.env.NEON_DATABASE_URL)}
     </Suspense>
   )
 }
