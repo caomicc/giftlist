@@ -67,7 +67,7 @@ export default function FamilyGiftApp() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-green-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
@@ -91,7 +91,7 @@ export default function FamilyGiftApp() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-green-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -114,7 +114,7 @@ export default function FamilyGiftApp() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-green-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
@@ -156,7 +156,7 @@ export default function FamilyGiftApp() {
   const myGifts = getMyGifts()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-green-50">
+    <div className="min-h-screen">
       <div className="container mx-auto p-4 max-w-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

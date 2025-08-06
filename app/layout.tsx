@@ -25,7 +25,7 @@ html {
 }
         `}</style>
       </head>
-      <body>{children}</body>
+      <body className={'bg-gradient-to-br from-red-100 to-violet-300'}>{children}</body>
     </html>
   )
 }
