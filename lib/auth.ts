@@ -145,7 +145,7 @@ export async function createMagicLink(email: string) {
   `
 
   // Send the magic link email
-  const baseUrl = process.env.NEXTAUTH_URL 
+  const baseUrl = process.env.NEXTAUTH_URL
     || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
   const magicLink = `${baseUrl}/api/auth/verify?token=${token}&email=${encodeURIComponent(email)}`
   await sendMagicLink(email, magicLink)
@@ -156,10 +156,10 @@ export async function createMagicLink(email: string) {
 // Verify magic link token and create session
 export async function verifyMagicLink(token: string, email: string) {
   try {
-    console.log('🔍 Verifying magic link:', { 
-      token: token.substring(0, 10) + '...', 
+    console.log('🔍 Verifying magic link:', {
+      token: token.substring(0, 10) + '...',
       email,
-      tokenLength: token.length 
+      tokenLength: token.length
     })
 
     // Check if token is valid and not expired
@@ -187,22 +187,27 @@ export async function verifyMagicLink(token: string, email: string) {
     console.log('🗑️ Used token deleted')
 
     // Get or create user
-    let [user] = await sql`
-      SELECT * FROM users WHERE email = ${email}
-    `
+    let user: Record<string, any> | undefined;
+    {
+      const [foundUser] = await sql`
+        SELECT * FROM users WHERE email = ${email}
+      `;
+      user = foundUser;
+    }
 
     if (!user) {
-      console.log('👤 Creating new user')
-      [user] = await sql`
+      console.log('👤 Creating new user');
+      const [newUser] = await sql`
         INSERT INTO users (email, email_verified)
         VALUES (${email}, NOW())
         RETURNING *
-      `
+      `;
+      user = newUser;
     } else {
-      console.log('👤 Updating existing user')
+      console.log('👤 Updating existing user');
       await sql`
         UPDATE users SET email_verified = NOW() WHERE email = ${email}
-      `
+      `;
     }
 
     // Create session
