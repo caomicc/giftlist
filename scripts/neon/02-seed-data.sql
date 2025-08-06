@@ -1,3 +1,4 @@
+-- Clear existing data
 DELETE FROM gift_items;
 DELETE FROM family_members;
 
