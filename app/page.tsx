@@ -15,9 +15,9 @@ export default async function HomePage() {
           </div>
         </div>
       </header>
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <FamilyGiftApp currentUser={user} />
+        <FamilyGiftApp currentUser={{ ...user, name: user.name ?? '' }} />
       </main>
     </div>
   )
