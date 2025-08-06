@@ -4,7 +4,6 @@ import FamilyGiftApp from '@/components/family-gift-app'
 
 export default async function HomePage() {
   const user = await requireAuth()
-  console.log('homepage rendered', process.env.NEON_DATABASE_URL)
 
   return (
     <div className="min-h-screen">

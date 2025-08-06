@@ -7,7 +7,7 @@ function createSQL() {
   return neon(process.env.NEON_DATABASE_URL)
 }
 
-// Lazy initialize on first use
+// Export sql connection - will only be used server-side
 export const sql = createSQL()
 
 export type FamilyMember = {
