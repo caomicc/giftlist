@@ -47,7 +47,7 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
 
 export default async function VerifyRequestPage({ searchParams }: { searchParams: Promise<{ email?: string }> }) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div className='absolute top-0 left-0 flex h-screen w-screen justify-center items-center'><p className='font-heading text-2xl text-center text-pink-950'>Loading...</p></div>}>
       <VerifyRequestContent searchParams={searchParams} />
     </Suspense>
   )

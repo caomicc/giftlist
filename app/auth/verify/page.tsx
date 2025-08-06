@@ -80,7 +80,7 @@ async function VerifyTokenContent({ searchParams }: { searchParams: Promise<{ to
 
 export default async function VerifyTokenPage({ searchParams }: { searchParams: Promise<{ token?: string; email?: string }> }) {
   return (
-    <Suspense fallback={<div>Verifying...</div>}>
+    <Suspense fallback={<div className='absolute top-0 left-0 flex h-screen w-screen justify-center items-center'><p className='font-heading text-2xl text-center text-pink-950'>Verifying...</p></div>}>
       <VerifyTokenContent searchParams={searchParams} />
     </Suspense>
   )
