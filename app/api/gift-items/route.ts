@@ -17,13 +17,13 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { name, description, price, link, owner_id } = await request.json()
-    
+
     const data = await sql`
       INSERT INTO gift_items (name, description, price, link, owner_id)
       VALUES (${name}, ${description || null}, ${price || null}, ${link || null}, ${owner_id})
       RETURNING *
     `
-    
+
     return NextResponse.json({ giftItem: data[0] })
   } catch (error) {
     console.error('Failed to add gift item:', error)
@@ -38,14 +38,14 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const itemId = searchParams.get('id')
-    
+
     if (!itemId) {
       return NextResponse.json(
         { error: 'Item ID is required' },
         { status: 400 }
       )
     }
-    
+
     await sql`DELETE FROM gift_items WHERE id = ${itemId}`
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -59,20 +59,43 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { id, purchased_by } = await request.json()
-    
-    const data = await sql`
-      UPDATE gift_items 
-      SET purchased_by = ${purchased_by}
-      WHERE id = ${id}
-      RETURNING *
-    `
-    
-    return NextResponse.json({ giftItem: data[0] })
-  } catch (error) {
-    console.error('Failed to update purchase status:', error)
+    const { id, purchased_by, name, description, price, link } = await request.json()
+
+    // If updating purchase status
+    if (purchased_by !== undefined && !name && !description && !price && !link) {
+      const data = await sql`
+        UPDATE gift_items
+        SET purchased_by = ${purchased_by}
+        WHERE id = ${id}
+        RETURNING *
+      `
+      return NextResponse.json({ giftItem: data[0] })
+    }
+
+    // If updating gift item details
+    if (name || description || price || link) {
+      const data = await sql`
+        UPDATE gift_items
+        SET
+          name = ${name || null},
+          description = ${description || null},
+          price = ${price || null},
+          link = ${link || null},
+          updated_at = NOW()
+        WHERE id = ${id}
+        RETURNING *
+      `
+      return NextResponse.json({ giftItem: data[0] })
+    }
+
     return NextResponse.json(
-      { error: 'Failed to update purchase status' },
+      { error: 'No valid fields to update' },
+      { status: 400 }
+    )
+  } catch (error) {
+    console.error('Failed to update gift item:', error)
+    return NextResponse.json(
+      { error: 'Failed to update gift item' },
       { status: 500 }
     )
   }

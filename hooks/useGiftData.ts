@@ -49,14 +49,41 @@ export function useGiftData() {
         },
         body: JSON.stringify(item),
       })
-      
+
       if (!response.ok) throw new Error('Failed to add gift item')
       const { giftItem } = await response.json()
-      
+
       setGiftItems((prev) => [giftItem, ...prev])
       return giftItem as GiftItem
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add gift item")
+      throw err
+    }
+  }
+
+  // Update gift item
+  const updateGiftItem = async (itemId: string, updates: {
+    name?: string
+    description?: string
+    price?: string
+    link?: string
+  }) => {
+    try {
+      const response = await fetch('/api/gift-items', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: itemId, ...updates }),
+      })
+
+      if (!response.ok) throw new Error('Failed to update gift item')
+      const { giftItem } = await response.json()
+
+      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? giftItem : item)))
+      return giftItem as GiftItem
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update gift item")
       throw err
     }
   }
@@ -67,7 +94,7 @@ export function useGiftData() {
       const response = await fetch(`/api/gift-items?id=${itemId}`, {
         method: 'DELETE',
       })
-      
+
       if (!response.ok) throw new Error('Failed to remove gift item')
       setGiftItems((prev) => prev.filter((item) => item.id !== itemId))
     } catch (err) {
@@ -86,10 +113,10 @@ export function useGiftData() {
         },
         body: JSON.stringify({ id: itemId, purchased_by: purchasedBy }),
       })
-      
+
       if (!response.ok) throw new Error('Failed to update purchase status')
       const { giftItem } = await response.json()
-      
+
       setGiftItems((prev) => prev.map((item) => (item.id === itemId ? giftItem : item)))
       return giftItem as GiftItem
     } catch (err) {
@@ -121,6 +148,7 @@ export function useGiftData() {
     loading,
     error,
     addGiftItem,
+    updateGiftItem,
     removeGiftItem,
     togglePurchaseStatus,
     refetch: () => Promise.all([fetchUsers(), fetchGiftItems()]),

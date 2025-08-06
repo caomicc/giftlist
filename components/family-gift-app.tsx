@@ -8,11 +8,12 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trash2, Plus, Gift, ShoppingCart, Users, AlertCircle, Loader2, Database } from 'lucide-react'
+import { Trash2, Plus, Gift, ShoppingCart, Users, AlertCircle, Loader2, Database, Edit } from 'lucide-react'
 import { useGiftData } from "@/hooks/useGiftData"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "./ui/textarea"
+import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "./ui/avatar"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 interface User {
   id: string
@@ -27,8 +28,11 @@ interface FamilyGiftAppProps {
 export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const [newItem, setNewItem] = useState({ name: "", description: "", price: "", link: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingItem, setEditingItem] = useState<any>(null)
+  const [editForm, setEditForm] = useState({ name: "", description: "", price: "", link: "" })
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  const { users, giftItems, loading, error, addGiftItem, removeGiftItem, togglePurchaseStatus } = useGiftData()
+  const { users, giftItems, loading, error, addGiftItem, updateGiftItem, removeGiftItem, togglePurchaseStatus } = useGiftData()
 
   const handleAddGiftItem = async () => {
     if (!newItem.name.trim() || isSubmitting) return
@@ -55,6 +59,38 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await removeGiftItem(itemId)
     } catch (err) {
       console.error("Failed to remove gift item:", err)
+    }
+  }
+
+  const handleEditGiftItem = (item: any) => {
+    setEditingItem(item)
+    setEditForm({
+      name: item.name || "",
+      description: item.description || "",
+      price: item.price || "",
+      link: item.link || ""
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const handleUpdateGiftItem = async () => {
+    if (!editingItem || !editForm.name.trim() || isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      await updateGiftItem(editingItem.id, {
+        name: editForm.name,
+        description: editForm.description || undefined,
+        price: editForm.price || undefined,
+        link: editForm.link || undefined,
+      })
+      setIsEditDialogOpen(false)
+      setEditingItem(null)
+      setEditForm({ name: "", description: "", price: "", link: "" })
+    } catch (err) {
+      console.error("Failed to update gift item:", err)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -223,7 +259,11 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="font-medium">{item.name}</h3>
-                            {item.price && <Badge variant="secondary">{item.price}</Badge>}
+                            <Badge variant="secondary">
+                              {typeof item.price === "number"
+                                ? `$${item.price % 1 === 0 ? item.price.toFixed(2) : item.price}`
+                                : item.price}
+                            </Badge>
                           </div>
                           {item.description && <p className="text-sm text-muted-foreground mb-2">{item.description}</p>}
                           {item.link && (
@@ -237,14 +277,24 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                             </a>
                           )}
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveGiftItem(item.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditGiftItem(item)}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveGiftItem(item.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     ))
                   )}
@@ -353,6 +403,82 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Edit Gift Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Gift Item</DialogTitle>
+              <DialogDescription>
+                Update your gift item details below.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-name">Gift item name *</Label>
+                <Input
+                  id="edit-name"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="Gift item name"
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                  placeholder="Description (optional)"
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-price">Price</Label>
+                  <Input
+                    id="edit-price"
+                    value={editForm.price}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, price: e.target.value }))}
+                    placeholder="Price (optional)"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-link">Link</Label>
+                  <Input
+                    id="edit-link"
+                    value={editForm.link}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, link: e.target.value }))}
+                    placeholder="Link (optional)"
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateGiftItem}
+                disabled={!editForm.name.trim() || isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Edit className="w-4 h-4 mr-2" />
+                )}
+                {isSubmitting ? "Updating..." : "Update Gift"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
