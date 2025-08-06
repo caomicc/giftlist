@@ -3,8 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-function VerifyRequestContent({ searchParams }: { searchParams: { email?: string } }) {
-  const email = searchParams.email
+async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ email?: string }> }) {
+  const params = await searchParams
+  const email = params.email
+  const isDevelopment = process.env.NODE_ENV === 'development'
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -17,10 +19,20 @@ function VerifyRequestContent({ searchParams }: { searchParams: { email?: string
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center space-y-4">
-          <div className="text-sm text-gray-600">
-            <p>Click the link in the email to sign in.</p>
-            <p>The link will expire in 24 hours.</p>
-          </div>
+          {isDevelopment ? (
+            <div className="bg-blue-50 p-4 rounded-md text-sm">
+              <p className="font-medium text-blue-800 mb-2">🧪 Development Mode</p>
+              <p className="text-blue-700">
+                Check your terminal/console for the magic link!<br />
+                The link is logged there since email isn't configured yet.
+              </p>
+            </div>
+          ) : (
+            <div className="text-sm text-gray-600">
+              <p>Click the link in the email to sign in.</p>
+              <p>The link will expire in 24 hours.</p>
+            </div>
+          )}
           
           <div className="pt-4">
             <Button variant="outline" asChild>
@@ -33,7 +45,7 @@ function VerifyRequestContent({ searchParams }: { searchParams: { email?: string
   )
 }
 
-export default function VerifyRequestPage({ searchParams }: { searchParams: { email?: string } }) {
+export default async function VerifyRequestPage({ searchParams }: { searchParams: Promise<{ email?: string }> }) {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <VerifyRequestContent searchParams={searchParams} />

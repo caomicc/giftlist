@@ -2,8 +2,8 @@ import { neon } from "@neondatabase/serverless"
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { randomBytes } from 'crypto'
-import { sendMagicLink } from './email'
 import bcrypt from 'bcryptjs'
+import { sendMagicLink } from "./email"
 
 const sql = neon(process.env.NEON_DATABASE_URL!)
 
@@ -24,29 +24,29 @@ export interface Session {
 export async function signInWithPassword(email: string, password: string) {
   // Find user with password
   const [user] = await sql`
-    SELECT * FROM users 
+    SELECT * FROM users
     WHERE email = ${email} AND password_hash IS NOT NULL
   `
-  
+
   if (!user || !user.password_hash) {
     return null
   }
-  
+
   // Verify password
   const isValidPassword = await bcrypt.compare(password, user.password_hash)
   if (!isValidPassword) {
     return null
   }
-  
+
   // Create session
   const sessionToken = randomBytes(32).toString('hex')
   const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-  
+
   await sql`
     INSERT INTO sessions (session_token, user_id, expires)
     VALUES (${sessionToken}, ${user.id}, ${expires})
   `
-  
+
   // Set cookie
   const cookieStore = await cookies()
   cookieStore.set('session-token', sessionToken, {
@@ -56,7 +56,7 @@ export async function signInWithPassword(email: string, password: string) {
     expires: expires,
     path: '/'
   })
-  
+
   return user
 }
 
@@ -66,30 +66,30 @@ export async function registerWithPassword(email: string, password: string, name
   const [existingUser] = await sql`
     SELECT id FROM users WHERE email = ${email}
   `
-  
+
   if (existingUser) {
     throw new Error('User already exists')
   }
-  
+
   // Hash password
   const passwordHash = await bcrypt.hash(password, 12)
-  
+
   // Create user
   const [user] = await sql`
     INSERT INTO users (email, password_hash, name, email_verified)
     VALUES (${email}, ${passwordHash}, ${name || null}, NOW())
     RETURNING *
   `
-  
+
   // Create session
   const sessionToken = randomBytes(32).toString('hex')
   const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-  
+
   await sql`
     INSERT INTO sessions (session_token, user_id, expires)
     VALUES (${sessionToken}, ${user.id}, ${expires})
   `
-  
+
   // Set cookie
   const cookieStore = await cookies()
   cookieStore.set('session-token', sessionToken, {
@@ -99,7 +99,7 @@ export async function registerWithPassword(email: string, password: string, name
     expires: expires,
     path: '/'
   })
-  
+
   return user
 }
 
@@ -107,19 +107,19 @@ export async function registerWithPassword(email: string, password: string, name
 export async function setPassword(email: string, password: string) {
   // Hash password
   const passwordHash = await bcrypt.hash(password, 12)
-  
+
   // Update user with password
   const [user] = await sql`
-    UPDATE users 
+    UPDATE users
     SET password_hash = ${passwordHash}
     WHERE email = ${email}
     RETURNING *
   `
-  
+
   if (!user) {
     throw new Error('User not found')
   }
-  
+
   return user
 }
 
@@ -128,7 +128,7 @@ export async function userHasPassword(email: string): Promise<boolean> {
   const [user] = await sql`
     SELECT password_hash FROM users WHERE email = ${email}
   `
-  
+
   return user && user.password_hash !== null
 }
 
@@ -136,18 +136,18 @@ export async function userHasPassword(email: string): Promise<boolean> {
 export async function createMagicLink(email: string) {
   const token = randomBytes(32).toString('hex')
   const expires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-  
+
   // Store the token in database
   await sql`
     INSERT INTO verification_tokens (identifier, token, expires)
     VALUES (${email}, ${token}, ${expires})
     ON CONFLICT (identifier, token) DO UPDATE SET expires = ${expires}
   `
-  
+
   // Send the magic link email
   const magicLink = `${process.env.NEXTAUTH_URL}/auth/verify?token=${token}&email=${email}`
   await sendMagicLink(email, magicLink)
-  
+
   return { success: true }
 }
 
@@ -155,25 +155,25 @@ export async function createMagicLink(email: string) {
 export async function verifyMagicLink(token: string, email: string) {
   // Check if token is valid and not expired
   const [verification] = await sql`
-    SELECT * FROM verification_tokens 
+    SELECT * FROM verification_tokens
     WHERE identifier = ${email} AND token = ${token} AND expires > NOW()
   `
-  
+
   if (!verification) {
     return null
   }
-  
+
   // Delete the used token
   await sql`
-    DELETE FROM verification_tokens 
+    DELETE FROM verification_tokens
     WHERE identifier = ${email} AND token = ${token}
   `
-  
+
   // Get or create user
   let [user] = await sql`
     SELECT * FROM users WHERE email = ${email}
   `
-  
+
   if (!user) {
     [user] = await sql`
       INSERT INTO users (email, email_verified)
@@ -185,16 +185,16 @@ export async function verifyMagicLink(token: string, email: string) {
       UPDATE users SET email_verified = NOW() WHERE email = ${email}
     `
   }
-  
+
   // Create session
   const sessionToken = randomBytes(32).toString('hex')
   const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-  
+
   await sql`
     INSERT INTO sessions (session_token, user_id, expires)
     VALUES (${sessionToken}, ${user.id}, ${expires})
   `
-  
+
   // Set cookie
   const cookieStore = await cookies()
   cookieStore.set('session-token', sessionToken, {
@@ -204,7 +204,7 @@ export async function verifyMagicLink(token: string, email: string) {
     expires: expires,
     path: '/'
   })
-  
+
   return user
 }
 
@@ -212,21 +212,21 @@ export async function verifyMagicLink(token: string, email: string) {
 export async function getSession(): Promise<Session | null> {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session-token')?.value
-  
+
   if (!sessionToken) {
     return null
   }
-  
+
   const [session] = await sql`
     SELECT s.*, u.* FROM sessions s
     JOIN users u ON s.user_id = u.id
     WHERE s.session_token = ${sessionToken} AND s.expires > NOW()
   `
-  
+
   if (!session) {
     return null
   }
-  
+
   return {
     id: session.id,
     user: {
@@ -243,11 +243,11 @@ export async function getSession(): Promise<Session | null> {
 export async function signOut() {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session-token')?.value
-  
+
   if (sessionToken) {
     await sql`DELETE FROM sessions WHERE session_token = ${sessionToken}`
   }
-  
+
   cookieStore.delete('session-token')
 }
 

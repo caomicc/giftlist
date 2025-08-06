@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-async function VerifyTokenContent({ searchParams }: { searchParams: { token?: string; email?: string } }) {
-  const { token, email } = searchParams
+async function VerifyTokenContent({ searchParams }: { searchParams: Promise<{ token?: string; email?: string }> }) {
+  const params = await searchParams
+  const { token, email } = params
 
   if (!token || !email) {
     return (
@@ -75,7 +76,7 @@ async function VerifyTokenContent({ searchParams }: { searchParams: { token?: st
   }
 }
 
-export default function VerifyTokenPage({ searchParams }: { searchParams: { token?: string; email?: string } }) {
+export default async function VerifyTokenPage({ searchParams }: { searchParams: Promise<{ token?: string; email?: string }> }) {
   return (
     <Suspense fallback={<div>Verifying...</div>}>
       <VerifyTokenContent searchParams={searchParams} />

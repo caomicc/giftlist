@@ -47,7 +47,7 @@ NEXTAUTH_SECRET=generate-a-random-secret-key-here
 - **Security**: Passwords hashed with bcrypt (12 rounds)
 - **Validation**: Minimum 6 characters required
 
-### 🪄 Magic Links  
+### 🪄 Magic Links
 - **Sign in**: `/auth/signin` (Magic Link tab) - Email-only authentication
 - **Process**: Enter email → receive secure link → click to sign in
 - **Security**: Tokens expire after 24 hours, one-time use
@@ -87,7 +87,7 @@ import { requireAuth } from '@/lib/auth'
 
 export default async function ProtectedPage() {
   const user = await requireAuth() // Redirects if not signed in
-  
+
   return <div>Hello {user.email}!</div>
 }
 ```
@@ -98,11 +98,11 @@ import { getSession } from '@/lib/auth'
 
 export default async function MyPage() {
   const session = await getSession()
-  
+
   if (!session) {
     return <SignInPrompt />
   }
-  
+
   return <div>Welcome {session.user.email}</div>
 }
 ```
@@ -114,7 +114,7 @@ import { requireAuth } from '@/lib/auth'
 
 export default async function Header() {
   const user = await requireAuth()
-  
+
   return (
     <header>
       <div>Gift List App</div>
