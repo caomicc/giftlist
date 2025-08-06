@@ -30,7 +30,9 @@ async function VerifyTokenContent({ searchParams }: { searchParams: Promise<{ to
   }
 
   try {
+    console.log('Verifying magic link:', { token: token?.substring(0, 10) + '...', email })
     const user = await verifyMagicLink(token, email)
+    console.log('Verification result:', user ? 'SUCCESS' : 'FAILED')
 
     if (!user) {
       return (

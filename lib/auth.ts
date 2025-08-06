@@ -155,59 +155,82 @@ export async function createMagicLink(email: string) {
 
 // Verify magic link token and create session
 export async function verifyMagicLink(token: string, email: string) {
-  // Check if token is valid and not expired
-  const [verification] = await sql`
-    SELECT * FROM verification_tokens
-    WHERE identifier = ${email} AND token = ${token} AND expires > NOW()
-  `
+  try {
+    console.log('🔍 Verifying magic link:', { 
+      token: token.substring(0, 10) + '...', 
+      email,
+      tokenLength: token.length 
+    })
 
-  if (!verification) {
+    // Check if token is valid and not expired
+    const [verification] = await sql`
+      SELECT * FROM verification_tokens
+      WHERE identifier = ${email} AND token = ${token} AND expires > NOW()
+    `
+
+    console.log('🎫 Verification token found:', !!verification)
+    if (verification) {
+      console.log('🕒 Token expires:', verification.expires)
+      console.log('🕒 Current time:', new Date().toISOString())
+    }
+
+    if (!verification) {
+      console.log('❌ No valid verification token found')
+      return null
+    }
+
+    // Delete the used token
+    await sql`
+      DELETE FROM verification_tokens
+      WHERE identifier = ${email} AND token = ${token}
+    `
+    console.log('🗑️ Used token deleted')
+
+    // Get or create user
+    let [user] = await sql`
+      SELECT * FROM users WHERE email = ${email}
+    `
+
+    if (!user) {
+      console.log('👤 Creating new user')
+      [user] = await sql`
+        INSERT INTO users (email, email_verified)
+        VALUES (${email}, NOW())
+        RETURNING *
+      `
+    } else {
+      console.log('👤 Updating existing user')
+      await sql`
+        UPDATE users SET email_verified = NOW() WHERE email = ${email}
+      `
+    }
+
+    // Create session
+    console.log('🎫 Creating session for user:', user.id)
+    const sessionToken = randomBytes(32).toString('hex')
+    const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+
+    await sql`
+      INSERT INTO sessions (session_token, user_id, expires)
+      VALUES (${sessionToken}, ${user.id}, ${expires})
+    `
+
+    // Set cookie
+    const cookieStore = await cookies()
+    cookieStore.set('session-token', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      expires: expires,
+      path: '/'
+    })
+
+    console.log('✅ Magic link verification successful')
+    return user
+  } catch (error) {
+    console.error('❌ Error verifying magic link:', error)
     return null
   }
-
-  // Delete the used token
-  await sql`
-    DELETE FROM verification_tokens
-    WHERE identifier = ${email} AND token = ${token}
-  `
-
-  // Get or create user
-  let [user] = await sql`
-    SELECT * FROM users WHERE email = ${email}
-  `
-
-  if (!user) {
-    [user] = await sql`
-      INSERT INTO users (email, email_verified)
-      VALUES (${email}, NOW())
-      RETURNING *
-    `
-  } else {
-    await sql`
-      UPDATE users SET email_verified = NOW() WHERE email = ${email}
-    `
-  }
-
-  // Create session
-  const sessionToken = randomBytes(32).toString('hex')
-  const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-
-  await sql`
-    INSERT INTO sessions (session_token, user_id, expires)
-    VALUES (${sessionToken}, ${user.id}, ${expires})
-  `
-
-  // Set cookie
-  const cookieStore = await cookies()
-  cookieStore.set('session-token', sessionToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    expires: expires,
-    path: '/'
-  })
-
-  return user
 }
 
 // Get current session
