@@ -1,11 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
-import type { Database } from "@/lib/supabase"
-
-type FamilyMember = Database["public"]["Tables"]["family_members"]["Row"]
-type GiftItem = Database["public"]["Tables"]["gift_items"]["Row"]
+import { sql } from "@/lib/neon"
+import type { FamilyMember, GiftItem } from "@/lib/neon"
 
 export function useGiftData() {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([])
@@ -16,10 +13,8 @@ export function useGiftData() {
   // Fetch family members
   const fetchFamilyMembers = async () => {
     try {
-      const { data, error } = await supabase.from("family_members").select("*")
-
-      if (error) throw error
-      setFamilyMembers(data || [])
+      const data = await sql`SELECT * FROM family_members ORDER BY name`
+      setFamilyMembers(data as FamilyMember[])
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch family members")
     }
@@ -28,10 +23,8 @@ export function useGiftData() {
   // Fetch gift items
   const fetchGiftItems = async () => {
     try {
-      const { data, error } = await supabase.from("gift_items").select("*").order("created_at", { ascending: false })
-
-      if (error) throw error
-      setGiftItems(data || [])
+      const data = await sql`SELECT * FROM gift_items ORDER BY created_at DESC`
+      setGiftItems(data as GiftItem[])
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch gift items")
     }
@@ -46,11 +39,15 @@ export function useGiftData() {
     owner_id: string
   }) => {
     try {
-      const { data, error } = await supabase.from("gift_items").insert([item]).select().single()
-
-      if (error) throw error
-      setGiftItems((prev) => [data, ...prev])
-      return data
+      const data = await sql`
+        INSERT INTO gift_items (name, description, price, link, owner_id)
+        VALUES (${item.name}, ${item.description || null}, ${item.price || null}, ${item.link || null}, ${item.owner_id})
+        RETURNING *
+      `
+      
+      const newItem = data[0] as GiftItem
+      setGiftItems((prev) => [newItem, ...prev])
+      return newItem
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add gift item")
       throw err
@@ -60,9 +57,7 @@ export function useGiftData() {
   // Remove gift item
   const removeGiftItem = async (itemId: string) => {
     try {
-      const { error } = await supabase.from("gift_items").delete().eq("id", itemId)
-
-      if (error) throw error
+      await sql`DELETE FROM gift_items WHERE id = ${itemId}`
       setGiftItems((prev) => prev.filter((item) => item.id !== itemId))
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to remove gift item")
@@ -70,43 +65,19 @@ export function useGiftData() {
     }
   }
 
-  // Update gift item
-  const updateGiftItem = async (itemId: string, updates: {
-    name?: string
-    description?: string
-    price?: string
-    link?: string
-  }) => {
-    try {
-      const { data, error } = await supabase
-        .from("gift_items")
-        .update(updates)
-        .eq("id", itemId)
-        .select()
-        .single()
-
-      if (error) throw error
-      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? data : item)))
-      return data
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update gift item")
-      throw err
-    }
-  }
-
   // Mark item as purchased/unpurchased
   const togglePurchaseStatus = async (itemId: string, purchasedBy: string | null) => {
     try {
-      const { data, error } = await supabase
-        .from("gift_items")
-        .update({ purchased_by: purchasedBy })
-        .eq("id", itemId)
-        .select()
-        .single()
-
-      if (error) throw error
-      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? data : item)))
-      return data
+      const data = await sql`
+        UPDATE gift_items 
+        SET purchased_by = ${purchasedBy}
+        WHERE id = ${itemId}
+        RETURNING *
+      `
+      
+      const updatedItem = data[0] as GiftItem
+      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? updatedItem : item)))
+      return updatedItem
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update purchase status")
       throw err
@@ -117,31 +88,17 @@ export function useGiftData() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true)
-      await Promise.all([fetchFamilyMembers(), fetchGiftItems()])
-      setLoading(false)
+      setError(null)
+      try {
+        await Promise.all([fetchFamilyMembers(), fetchGiftItems()])
+      } catch (err) {
+        console.error("Failed to fetch data:", err)
+      } finally {
+        setLoading(false)
+      }
     }
 
     fetchData()
-  }, [])
-
-  // Set up real-time subscriptions
-  useEffect(() => {
-    const giftItemsSubscription = supabase
-      .channel("gift_items_changes")
-      .on("postgres_changes", { event: "*", schema: "public", table: "gift_items" }, (payload) => {
-        if (payload.eventType === "INSERT") {
-          setGiftItems((prev) => [payload.new as GiftItem, ...prev])
-        } else if (payload.eventType === "UPDATE") {
-          setGiftItems((prev) => prev.map((item) => (item.id === payload.new.id ? (payload.new as GiftItem) : item)))
-        } else if (payload.eventType === "DELETE") {
-          setGiftItems((prev) => prev.filter((item) => item.id !== payload.old.id))
-        }
-      })
-      .subscribe()
-
-    return () => {
-      giftItemsSubscription.unsubscribe()
-    }
   }, [])
 
   return {
@@ -150,7 +107,6 @@ export function useGiftData() {
     loading,
     error,
     addGiftItem,
-    updateGiftItem,
     removeGiftItem,
     togglePurchaseStatus,
     refetch: () => Promise.all([fetchFamilyMembers(), fetchGiftItems()]),
