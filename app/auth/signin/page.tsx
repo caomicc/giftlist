@@ -1,19 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useRouter } from 'next/navigation'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function SignInPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error === 'invalid-link') {
+      setErrorMessage('This magic link is invalid or malformed.')
+    } else if (error === 'expired-link') {
+      setErrorMessage('This magic link has expired or has already been used.')
+    } else if (error === 'server-error') {
+      setErrorMessage('Something went wrong during sign in.')
+    }
+  }, [searchParams])
 
   const handleMagicLinkSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,6 +92,11 @@ export default function SignInPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {errorMessage && (
+            <Alert className="mb-4" variant="destructive">
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          )}
           <Tabs defaultValue="password" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="password">Password</TabsTrigger>
