@@ -35,7 +35,7 @@ EMAIL_FROM=your-email@gmail.com
 
 ### 3. Update Security Settings
 ```env
-NEXTAUTH_URL=http://localhost:3000  # Change for production
+VERCEL_URL=http://localhost:3000  # Change for production
 NEXTAUTH_SECRET=generate-a-random-secret-key-here
 ```
 

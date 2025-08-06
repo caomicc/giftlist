@@ -33,7 +33,7 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
               <p>The link will expire in 24 hours.</p>
             </div>
           )}
-          
+
           <div className="pt-4">
             <Button variant="outline" asChild>
               <Link href="/auth/signin">Back to sign in</Link>
