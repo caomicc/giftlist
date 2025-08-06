@@ -13,15 +13,24 @@ import { useGiftData } from "@/hooks/useGiftData"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 
-export default function FamilyGiftApp() {
-  const [currentUser, setCurrentUser] = useState<string>("")
+interface User {
+  id: string
+  name: string
+  email: string
+}
+
+interface FamilyGiftAppProps {
+  currentUser: User
+}
+
+export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const [newItem, setNewItem] = useState({ name: "", description: "", price: "", link: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { familyMembers, giftItems, loading, error, addGiftItem, removeGiftItem, togglePurchaseStatus } = useGiftData()
+  const { users, giftItems, loading, error, addGiftItem, removeGiftItem, togglePurchaseStatus } = useGiftData()
 
   const handleAddGiftItem = async () => {
-    if (!newItem.name.trim() || !currentUser || isSubmitting) return
+    if (!newItem.name.trim() || isSubmitting) return
 
     setIsSubmitting(true)
     try {
@@ -30,7 +39,7 @@ export default function FamilyGiftApp() {
         description: newItem.description || undefined,
         price: newItem.price || undefined,
         link: newItem.link || undefined,
-        owner_id: currentUser,
+        owner_id: currentUser.id,
       })
       setNewItem({ name: "", description: "", price: "", link: "" })
     } catch (err) {
@@ -49,19 +58,17 @@ export default function FamilyGiftApp() {
   }
 
   const handleTogglePurchase = async (itemId: string, currentPurchasedBy: string | null) => {
-    if (!currentUser) return
-
     try {
-      const newPurchasedBy = currentPurchasedBy ? null : currentUser
+      const newPurchasedBy = currentPurchasedBy ? null : currentUser.id
       await togglePurchaseStatus(itemId, newPurchasedBy)
     } catch (err) {
       console.error("Failed to toggle purchase status:", err)
     }
   }
 
-  const getCurrentMember = () => familyMembers.find((m: any) => m.id === currentUser)
-  const getOtherMembers = () => familyMembers.filter((m: any) => m.id !== currentUser)
-  const getMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser)
+  const getCurrentMember = () => currentUser
+  const getOtherMembers = () => users.filter((u: any) => u.id !== currentUser.id)
+  const getMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id)
   const getMemberGifts = (memberId: string) => giftItems.filter((item: any) => item.owner_id === memberId)
 
   // Loading state
@@ -112,46 +119,6 @@ export default function FamilyGiftApp() {
     )
   }
 
-  if (!currentUser) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-              <Gift className="w-8 h-8 text-red-600" />
-            </div>
-            <CardTitle className="text-2xl">Family Gift Sharing</CardTitle>
-            <CardDescription>Choose your family member to start sharing gift ideas</CardDescription>
-            <div className="flex items-center justify-center gap-2 mt-2 text-sm text-muted-foreground">
-              <Database className="w-4 h-4" />
-              <span>Powered by Neon Database</span>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-1">
-              <Label>Who are you?</Label>
-              <Select onValueChange={setCurrentUser}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a family member" />
-                </SelectTrigger>
-                <SelectContent>
-                  {familyMembers.map((member: any) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{member.avatar}</span>
-                        <span>{member.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   const currentMember = getCurrentMember()
   const myGifts = getMyGifts()
 
@@ -161,7 +128,9 @@ export default function FamilyGiftApp() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{currentMember?.avatar}</span>
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+              <Users className="w-6 h-6 text-blue-600" />
+            </div>
             <div>
               <h1 className="text-2xl font-bold">Welcome, {currentMember?.name}!</h1>
               <p className="text-muted-foreground flex items-center gap-1">
@@ -170,10 +139,6 @@ export default function FamilyGiftApp() {
               </p>
             </div>
           </div>
-          <Button variant="outline" onClick={() => setCurrentUser("")}>
-            <Users className="w-4 h-4 mr-2" />
-            Switch User
-          </Button>
         </div>
 
         <Tabs defaultValue="my-list" className="space-y-6">
@@ -314,7 +279,7 @@ export default function FamilyGiftApp() {
                         <div className="space-y-3">
                           {memberGifts.map((item: any) => {
                             const purchaserName = item.purchased_by
-                              ? familyMembers.find((m: any) => m.id === item.purchased_by)?.name
+                              ? users.find((u: any) => u.id === item.purchased_by)?.name
                               : null
 
                             return (

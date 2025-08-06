@@ -3,12 +3,12 @@ import { sql } from '@/lib/neon'
 
 export async function GET() {
   try {
-    const familyMembers = await sql`SELECT * FROM family_members ORDER BY name`
-    return NextResponse.json({ familyMembers })
+    const users = await sql`SELECT id, name, email, created_at FROM users ORDER BY name`
+    return NextResponse.json({ users })
   } catch (error) {
-    console.error('Failed to fetch family members:', error)
+    console.error('Failed to fetch users:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch family members' },
+      { error: 'Failed to fetch users' },
       { status: 500 }
     )
   }

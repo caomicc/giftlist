@@ -10,11 +10,10 @@ function createSQL() {
 // Export sql connection - will only be used server-side
 export const sql = createSQL()
 
-export type FamilyMember = {
+export type User = {
   id: string
   name: string
-  avatar: string
-  color: string
+  email: string
   created_at: string
 }
 

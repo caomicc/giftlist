@@ -1,23 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import type { FamilyMember, GiftItem } from "@/lib/neon"
+import type { User, GiftItem } from "@/lib/neon"
 
 export function useGiftData() {
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [giftItems, setGiftItems] = useState<GiftItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch family members
-  const fetchFamilyMembers = async () => {
+  // Fetch users
+  const fetchUsers = async () => {
     try {
       const response = await fetch('/api/family-members')
-      if (!response.ok) throw new Error('Failed to fetch family members')
-      const { familyMembers } = await response.json()
-      setFamilyMembers(familyMembers as FamilyMember[])
+      if (!response.ok) throw new Error('Failed to fetch users')
+      const { users } = await response.json()
+      setUsers(users as User[])
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch family members")
+      setError(err instanceof Error ? err.message : "Failed to fetch users")
     }
   }
 
@@ -104,7 +104,7 @@ export function useGiftData() {
       setLoading(true)
       setError(null)
       try {
-        await Promise.all([fetchFamilyMembers(), fetchGiftItems()])
+        await Promise.all([fetchUsers(), fetchGiftItems()])
       } catch (err) {
         console.error("Failed to fetch data:", err)
       } finally {
@@ -116,13 +116,13 @@ export function useGiftData() {
   }, [])
 
   return {
-    familyMembers,
+    users,
     giftItems,
     loading,
     error,
     addGiftItem,
     removeGiftItem,
     togglePurchaseStatus,
-    refetch: () => Promise.all([fetchFamilyMembers(), fetchGiftItems()]),
+    refetch: () => Promise.all([fetchUsers(), fetchGiftItems()]),
   }
 }
