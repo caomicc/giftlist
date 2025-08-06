@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import './globals.css'
+import { UserMenuWrapper } from '@/components/user-menu-wrapper'
 
 export const metadata: Metadata = {
   title: 'Meep Family Wishlist',
@@ -25,7 +26,10 @@ html {
 }
         `}</style>
       </head>
-      <body className={'bg-gradient-to-br from-red-100 to-violet-300'}>{children}</body>
+      <body className={'bg-gradient-to-br from-red-100 to-violet-300'}>
+        <UserMenuWrapper />
+        {children}
+      </body>
     </html>
   )
 }

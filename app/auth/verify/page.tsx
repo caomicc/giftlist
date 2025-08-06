@@ -12,7 +12,7 @@ async function VerifyTokenContent({ searchParams }: { searchParams: Promise<{ to
   if (!token || !email) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <Card className="w-full max-w-md">
+        <Card className="container w-full max-w-xl">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-red-600">Invalid Link</CardTitle>
             <CardDescription>
@@ -37,7 +37,7 @@ async function VerifyTokenContent({ searchParams }: { searchParams: Promise<{ to
     if (!user) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-          <Card className="w-full max-w-md">
+          <Card className="container w-full max-w-xl">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl font-bold text-red-600">Link Expired</CardTitle>
               <CardDescription>
@@ -60,7 +60,7 @@ async function VerifyTokenContent({ searchParams }: { searchParams: Promise<{ to
     console.error('Verification error:', error)
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <Card className="w-full max-w-md">
+        <Card className="container w-full max-w-xl">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-red-600">Error</CardTitle>
             <CardDescription>

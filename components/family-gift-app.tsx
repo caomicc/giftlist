@@ -10,8 +10,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Trash2, Plus, Gift, ShoppingCart, Users, AlertCircle, Loader2, Database } from 'lucide-react'
 import { useGiftData } from "@/hooks/useGiftData"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "./ui/textarea"
+import { Avatar, AvatarFallback } from "./ui/avatar"
 
 interface User {
   id: string
@@ -75,7 +76,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-xl">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
               <Database className="w-8 h-8 text-blue-600 animate-pulse" />
@@ -99,7 +100,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-xl">
           <CardHeader className="text-center">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <CardTitle className="text-2xl text-red-600">Database Connection Error</CardTitle>
@@ -124,7 +125,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto p-4 max-w-2xl">
+      <div className="container mx-auto max-w-xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -159,49 +160,55 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   Add items you'd like to receive. Family members can see this list and mark items as purchased.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="px-6 flex flex-col gap-6">
                 {/* Add New Item Form */}
-                <div className="grid gap-3 p-4 border rounded-lg bg-muted/50">
-                  <div className="grid gap-2">
-                    <div>
-                      <Label>Gift item name:</Label>
-                      <Input
-                        placeholder="Gift item name *"
-                        value={newItem.name}
-                        onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
-                        disabled={isSubmitting}
-                      />
-                    </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col gap-3">
+                    <Label>Gift:</Label>
                     <Input
-                      placeholder="Description (optional)"
-                      value={newItem.description}
-                      onChange={(e) => setNewItem((prev) => ({ ...prev, description: e.target.value }))}
+                      placeholder="Gift item name *"
+                      value={newItem.name}
+                      onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
                       disabled={isSubmitting}
                     />
-                    <div className="grid grid-cols-2 gap-2">
-                      <Input
-                        placeholder="Price (optional)"
-                        value={newItem.price}
-                        onChange={(e) => setNewItem((prev) => ({ ...prev, price: e.target.value }))}
-                        disabled={isSubmitting}
-                      />
-                      <Input
-                        placeholder="Link (optional)"
-                        value={newItem.link}
-                        onChange={(e) => setNewItem((prev) => ({ ...prev, link: e.target.value }))}
-                        disabled={isSubmitting}
-                      />
-                    </div>
                   </div>
-                  <Button onClick={handleAddGiftItem} disabled={!newItem.name.trim() || isSubmitting}>
-                    {isSubmitting ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Plus className="w-4 h-4 mr-2" />
-                    )}
-                    {isSubmitting ? "Adding..." : "Add Gift Idea"}
-                  </Button>
+                  <div className="flex flex-col gap-3">
+                    <Label>Price:</Label>
+                    <Input
+                      placeholder="Price (optional)"
+                      value={newItem.price}
+                      onChange={(e) => setNewItem((prev) => ({ ...prev, price: e.target.value }))}
+                      disabled={isSubmitting}
+                    />
+                  </div>
                 </div>
+                <div className="flex flex-col gap-3">
+                  <Label>Link:</Label>
+                  <Input
+                    placeholder="Link (optional)"
+                    value={newItem.link}
+                    onChange={(e) => setNewItem((prev) => ({ ...prev, link: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Label>Description:</Label>
+                  <Textarea
+                    placeholder="Description (optional)"
+                    value={newItem.description}
+                    onChange={(e) => setNewItem((prev) => ({ ...prev, description: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <Button onClick={handleAddGiftItem} disabled={!newItem.name.trim() || isSubmitting}>
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Plus className="w-4 h-4 mr-2" />
+                  )}
+                  {isSubmitting ? "Adding..." : "Add Gift Idea"}
+                </Button>
 
                 {/* My Gift Items */}
                 <div className="space-y-3">
@@ -257,9 +264,13 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   <Card key={member.id}>
                     <CardHeader>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{member.avatar}</span>
-                          <div>
+                        <div className="flex items-center justify-center gap-3">
+                          <Avatar className="size-9 bg-blue-300">
+                            <AvatarFallback className="bg-blue-100 text-blue-600">
+                              {member.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col">
                             <CardTitle>{member.name}'s Gift List</CardTitle>
                             <CardDescription>
                               {memberGifts.length} items • {purchasedCount} purchased

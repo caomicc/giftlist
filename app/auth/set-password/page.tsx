@@ -56,7 +56,7 @@ export default function SetPasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
+        <Card className="container w-full max-w-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Set Password</CardTitle>
           <CardDescription>
@@ -78,7 +78,7 @@ export default function SetPasswordPage() {
                 minLength={6}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="confirm-password">Confirm Password</Label>
               <Input
@@ -92,13 +92,13 @@ export default function SetPasswordPage() {
                 minLength={6}
               />
             </div>
-            
+
             {message && (
               <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
                 {message}
               </div>
             )}
-            
+
             <Button
               type="submit"
               disabled={isLoading || !password || !confirmPassword}
@@ -106,7 +106,7 @@ export default function SetPasswordPage() {
             >
               {isLoading ? 'Setting Password...' : 'Set Password'}
             </Button>
-            
+
             <div className="text-center">
               <Button variant="link" asChild>
                 <Link href="/">Skip for now</Link>
