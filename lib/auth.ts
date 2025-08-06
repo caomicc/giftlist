@@ -145,7 +145,9 @@ export async function createMagicLink(email: string) {
   `
 
   // Send the magic link email
-  const magicLink = `${process.env.VERCEL_URL}/auth/verify?token=${token}&email=${email}`
+  const baseUrl = process.env.NEXTAUTH_URL
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  const magicLink = `${baseUrl}/auth/verify?token=${token}&email=${encodeURIComponent(email)}`
   await sendMagicLink(email, magicLink)
 
   return { success: true }
