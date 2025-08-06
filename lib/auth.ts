@@ -1,11 +1,9 @@
-import { neon } from "@neondatabase/serverless"
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { randomBytes } from 'crypto'
 import bcrypt from 'bcryptjs'
 import { sendMagicLink } from "./email"
-
-const sql = neon(process.env.NEON_DATABASE_URL!)
+import { sql } from "./neon"
 
 export interface User {
   id: string

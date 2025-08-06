@@ -1,10 +1,14 @@
 import { neon } from '@neondatabase/serverless'
 
-if (!process.env.NEON_DATABASE_URL) {
-  throw new Error('NEON_DATABASE_URL is not set')
+function createSQL() {
+  if (!process.env.NEON_DATABASE_URL) {
+    throw new Error('NEON_DATABASE_URL is not set')  
+  }
+  return neon(process.env.NEON_DATABASE_URL)
 }
 
-export const sql = neon(process.env.NEON_DATABASE_URL)
+// Lazy initialize on first use
+export const sql = createSQL()
 
 export type FamilyMember = {
   id: string
