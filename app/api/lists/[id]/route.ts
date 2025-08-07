@@ -28,7 +28,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   try {
     const user = await requireAuth()
     const { id } = params
-    const { name, description, is_public } = await request.json()
+    const { name, description, is_public, is_visible } = await request.json()
 
     if (!name?.trim()) {
       return NextResponse.json({ error: 'List name is required' }, { status: 400 })
@@ -61,6 +61,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         name = ${name.trim()},
         description = ${description || null},
         is_public = ${is_public !== false},
+        is_visible = ${is_visible !== false},
         updated_at = NOW()
       WHERE id = ${id} AND owner_id = ${user.id}
       RETURNING *

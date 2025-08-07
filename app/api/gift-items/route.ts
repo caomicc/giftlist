@@ -6,7 +6,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const listId = searchParams.get('list_id')
     const userId = searchParams.get('user_id')
-
+    
+    // Get current user from session for permission checking
+    const currentUser = request.headers.get('x-user-id') // We'll need to pass this from the client
+    
     let giftItems;
 
     if (listId) {
@@ -43,7 +46,8 @@ export async function GET(request: NextRequest) {
         ORDER BY l.name, gi.created_at DESC
       `
     } else {
-      // Get all items (maintain backward compatibility)
+      // Get all items that the current user can view based on list permissions
+      // For now, we'll get all items and filter on the client side since we need proper session handling
       giftItems = await sql`
         SELECT 
           gi.*,
@@ -77,6 +81,7 @@ export async function POST(request: NextRequest) {
       description,
       price,
       link,
+      image_url,
       owner_id,
       list_id,
       is_gift_card,
@@ -109,7 +114,7 @@ export async function POST(request: NextRequest) {
 
     const data = await sql`
       INSERT INTO gift_items (
-        name, description, price, link, owner_id, list_id, is_gift_card, gift_card_target_amount,
+        name, description, price, link, image_url, owner_id, list_id, is_gift_card, gift_card_target_amount,
         og_title, og_description, og_image, og_site_name
       )
       VALUES (
@@ -117,6 +122,7 @@ export async function POST(request: NextRequest) {
         ${description || null},
         ${price || null},
         ${link || null},
+        ${image_url || null},
         ${owner_id},
         ${list_id},
         ${is_gift_card || false},
@@ -171,6 +177,7 @@ export async function PUT(request: NextRequest) {
       description,
       price,
       link,
+      image_url,
       list_id,
       is_gift_card,
       gift_card_target_amount,
@@ -182,7 +189,7 @@ export async function PUT(request: NextRequest) {
     } = await request.json()
 
     // If updating archive status only
-    if (archived !== undefined && !name && !description && !price && !link && !list_id && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && purchased_by === undefined) {
+    if (archived !== undefined && !name && !description && !price && !link && !image_url && !list_id && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && purchased_by === undefined) {
       const data = await sql`
         UPDATE gift_items
         SET archived = ${archived}, updated_at = NOW()
@@ -193,7 +200,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // If updating purchase status (regular items)
-    if (purchased_by !== undefined && !name && !description && !price && !link && !list_id && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && archived === undefined) {
+    if (purchased_by !== undefined && !name && !description && !price && !link && !image_url && !list_id && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && archived === undefined) {
       const data = await sql`
         UPDATE gift_items
         SET purchased_by = ${purchased_by}
@@ -204,7 +211,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // If updating gift item details
-    if (name || description || price || link || list_id || is_gift_card !== undefined || gift_card_target_amount !== undefined || og_title || og_description || og_image || og_site_name || archived !== undefined) {
+    if (name || description || price || link || image_url || list_id || is_gift_card !== undefined || gift_card_target_amount !== undefined || og_title || og_description || og_image || og_site_name || archived !== undefined) {
       // If list_id is being updated, verify ownership
       if (list_id) {
         const [listCheck] = await sql`
@@ -230,6 +237,7 @@ export async function PUT(request: NextRequest) {
           description = ${description || null},
           price = ${price || null},
           link = ${link || null},
+          image_url = ${image_url || null},
           list_id = ${list_id || null},
           is_gift_card = ${is_gift_card !== undefined ? is_gift_card : false},
           gift_card_target_amount = ${gift_card_target_amount || null},

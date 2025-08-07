@@ -36,6 +36,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     description: "",
     price: "",
     link: "",
+    imageUrl: "",
     isGiftCard: false,
     giftCardTargetAmount: "",
     selectedListId: ""
@@ -49,6 +50,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     description: "",
     price: "",
     link: "",
+    imageUrl: "",
     isGiftCard: false,
     giftCardTargetAmount: "",
     selectedListId: ""
@@ -62,12 +64,14 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const [editListForm, setEditListForm] = useState({
     name: "",
     description: "",
-    isPublic: false
+    isPublic: false,
+    hiddenFromUsers: [] as string[]
   })
   const [newListForm, setNewListForm] = useState({
     name: "",
     description: "",
-    isPublic: false
+    isPublic: false,
+    hiddenFromUsers: [] as string[]
   })
   const [userLists, setUserLists] = useState<any[]>([])
 
@@ -118,7 +122,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         body: JSON.stringify({
           name: `${currentUser.name || 'My'}'s List`,
           description: 'Default wishlist',
-          is_public: false
+          is_public: false,
+          is_visible: true
         }),
       })
 
@@ -146,6 +151,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         description: newItem.description || undefined,
         price: newItem.price || undefined,
         link: newItem.link || undefined,
+        image_url: newItem.imageUrl || undefined,
         owner_id: currentUser.id,
         list_id: newItem.selectedListId,
         is_gift_card: newItem.isGiftCard,
@@ -162,6 +168,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         description: "",
         price: "",
         link: "",
+        imageUrl: "",
         isGiftCard: false,
         giftCardTargetAmount: "",
         selectedListId: prev.selectedListId // Keep the same list selected
@@ -189,6 +196,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       description: item.description || "",
       price: item.price || "",
       link: item.link || "",
+      imageUrl: item.image_url || "",
       isGiftCard: item.is_gift_card || false,
       giftCardTargetAmount: item.gift_card_target_amount ? item.gift_card_target_amount.toString() : "",
       selectedListId: item.list_id || ""
@@ -217,6 +225,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         description: editForm.description || undefined,
         price: editForm.price || undefined,
         link: editForm.link || undefined,
+        image_url: editForm.imageUrl || undefined,
         list_id: editForm.selectedListId,
         is_gift_card: editForm.isGiftCard,
         gift_card_target_amount: editForm.isGiftCard && editForm.giftCardTargetAmount
@@ -234,6 +243,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         description: "",
         price: "",
         link: "",
+        imageUrl: "",
         isGiftCard: false,
         giftCardTargetAmount: "",
         selectedListId: ""
@@ -284,7 +294,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         body: JSON.stringify({
           name: newListForm.name.trim(),
           description: newListForm.description.trim() || null,
-          is_public: newListForm.isPublic
+          is_public: newListForm.isPublic,
+          hidden_from: newListForm.hiddenFromUsers
         }),
       })
 
@@ -296,7 +307,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await response.json()
 
       // Reset form and close dialog
-      setNewListForm({ name: "", description: "", isPublic: false })
+      setNewListForm({ name: "", description: "", isPublic: false, hiddenFromUsers: [] })
       setIsCreateListDialogOpen(false)
 
       // Refresh lists to include the new one
@@ -309,13 +320,30 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     }
   }
 
-  const handleEditList = (list: any) => {
+  const handleEditList = async (list: any) => {
     setEditingList(list)
-    setEditListForm({
-      name: list.name,
-      description: list.description || "",
-      isPublic: list.is_public
-    })
+
+    // Fetch current permissions for this list
+    try {
+      const response = await fetch(`/api/lists/${list.id}/permissions`)
+      const { permissions } = await response.json()
+      const hiddenFromUsers = permissions.filter((p: any) => !p.can_view).map((p: any) => p.user_id)
+
+      setEditListForm({
+        name: list.name,
+        description: list.description || "",
+        isPublic: list.is_public,
+        hiddenFromUsers: hiddenFromUsers
+      })
+    } catch (err) {
+      console.error("Failed to fetch list permissions:", err)
+      setEditListForm({
+        name: list.name,
+        description: list.description || "",
+        isPublic: list.is_public,
+        hiddenFromUsers: []
+      })
+    }
   }
 
   const handleUpdateList = async () => {
@@ -340,9 +368,28 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         throw new Error(error.error || 'Failed to update list')
       }
 
+      // Update permissions
+      const allUsers = getOtherMembers()
+      const permissions = allUsers.map(member => ({
+        user_id: member.id,
+        can_view: !editListForm.hiddenFromUsers.includes(member.id)
+      }))
+
+      const permissionsResponse = await fetch(`/api/lists/${editingList.id}/permissions`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ permissions }),
+      })
+
+      if (!permissionsResponse.ok) {
+        console.warn('Failed to update list permissions')
+      }
+
       // Reset and refresh
       setEditingList(null)
-      setEditListForm({ name: "", description: "", isPublic: false })
+      setEditListForm({ name: "", description: "", isPublic: false, hiddenFromUsers: [] })
       await fetchUserLists()
     } catch (err) {
       console.error("Failed to update list:", err)
@@ -477,7 +524,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
               <Users className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Welcome, {currentMember?.name}!</h1>
+              <h1 className="text-2xl font-heading">Welcome, {currentMember?.name}!</h1>
               <p className="text-muted-foreground flex items-center gap-1">
                 <Database className="w-3 h-3" />
                 Manage your family gift lists
@@ -536,6 +583,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                       </Badge>
                                       <span className="text-xs text-muted-foreground">
                                         {list.item_count || 0} items
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">
+                                        Created {new Date(list.created_at).toLocaleDateString()}
                                       </span>
                                     </div>
                                   </div>
@@ -602,11 +652,11 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div className="space-y-0.5">
-                            <Label htmlFor="list-privacy">Public List</Label>
+                            <Label htmlFor="list-privacy">Privacy</Label>
                             <p className="text-sm text-muted-foreground">
                               {newListForm.isPublic
-                                ? "Family members can see which items are purchased"
-                                : "Hide purchase status from list owner"}
+                                ? "See purchased items"
+                                : "Can't see purchased items"}
                             </p>
                           </div>
                           <Switch
@@ -615,6 +665,39 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                             onCheckedChange={(checked) => setNewListForm(prev => ({ ...prev, isPublic: checked }))}
                             disabled={isSubmitting}
                           />
+                        </div>
+                        <div className="p-4 border rounded-lg space-y-3">
+                          <Label>Hide from Family Members</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Select family members who should not be able to see this list
+                          </p>
+                          <div className="space-y-2">
+                            {getOtherMembers().map((member: any) => (
+                              <div key={member.id} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`hide-from-${member.id}`}
+                                  checked={newListForm.hiddenFromUsers.includes(member.id)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setNewListForm(prev => ({
+                                        ...prev,
+                                        hiddenFromUsers: [...prev.hiddenFromUsers, member.id]
+                                      }))
+                                    } else {
+                                      setNewListForm(prev => ({
+                                        ...prev,
+                                        hiddenFromUsers: prev.hiddenFromUsers.filter(id => id !== member.id)
+                                      }))
+                                    }
+                                  }}
+                                  disabled={isSubmitting}
+                                />
+                                <Label htmlFor={`hide-from-${member.id}`} className="text-sm">
+                                  {member.name}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                       <div className="flex justify-end gap-3">
@@ -667,8 +750,6 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     />
                   </div>
                 </div>
-
-
 
                 {/* Gift Card Section */}
                 <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
@@ -732,6 +813,18 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   )}
                 </div>
                 <div className="flex flex-col gap-3">
+                  <Label>Image URL:</Label>
+                  <Input
+                    placeholder="Image URL (optional)"
+                    value={newItem.imageUrl}
+                    onChange={(e) => setNewItem((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Provide an image URL if no preview is loaded from the link above
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3">
                   <Label>Description:</Label>
                   <Textarea
                     placeholder="Description (optional)"
@@ -769,8 +862,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   {isSubmitting ? "Adding..." : "Add Gift Idea"}
                 </Button>
 
-                {/* My Gift Items */}
-                <div className="space-y-3">
+                {/* My Gift Items - Organized by List */}
+                <div className="space-y-6">
                   {activeMyGifts.length === 0 && archivedMyGifts.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Gift className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -778,43 +871,174 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     </div>
                   ) : (
                     <>
-                      {/* Active Items */}
-                      {activeMyGifts.map((item: any) => (
-                        <GiftItem
-                          key={item.id}
-                          item={item}
-                          currentUserId={currentUser.id}
-                          variant="my-gifts"
-                          onEdit={handleEditGiftItem}
-                          onDelete={handleRemoveGiftItem}
-                          onArchive={handleArchiveItem}
-                        />
-                      ))}
+                      {/* Group items by list */}
+                      {(() => {
+                        // Group active items by list
+                        const itemsByList = activeMyGifts.reduce((acc: any, item: any) => {
+                          const listId = item.list_id || 'unknown'
+                          if (!acc[listId]) {
+                            const listInfo = userLists.find(l => l.id === listId)
+                            acc[listId] = {
+                              name: listInfo?.name || 'Unknown List',
+                              description: listInfo?.description || '',
+                              isPublic: listInfo?.is_public || false,
+                              createdAt: listInfo?.created_at || null,
+                              items: []
+                            }
+                          }
+                          acc[listId].items.push(item)
+                          return acc
+                        }, {})
 
-                      {/* Archived Items */}
-                      {archivedMyGifts.length > 0 && (
-                        <>
-                          <div className="pt-4 border-t">
-                            <h4 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
-                              <Archive className="w-4 h-4" />
-                              Archived Items ({archivedMyGifts.length})
-                            </h4>
-                            <div className="space-y-3">
-                              {archivedMyGifts.map((item: any) => (
-                                <GiftItem
-                                  key={item.id}
-                                  item={item}
-                                  currentUserId={currentUser.id}
-                                  variant="my-gifts"
-                                  onEdit={handleEditGiftItem}
-                                  onDelete={handleRemoveGiftItem}
-                                  onArchive={handleArchiveItem}
-                                />
+                        // Group archived items by list
+                        const archivedByList = archivedMyGifts.reduce((acc: any, item: any) => {
+                          const listId = item.list_id || 'unknown'
+                          if (!acc[listId]) {
+                            const listInfo = userLists.find(l => l.id === listId)
+                            acc[listId] = {
+                              name: listInfo?.name || 'Unknown List',
+                              description: listInfo?.description || '',
+                              isPublic: listInfo?.is_public || false,
+                              createdAt: listInfo?.created_at || null,
+                              items: []
+                            }
+                          }
+                          acc[listId].items.push(item)
+                          return acc
+                        }, {})
+
+                        return (
+                          <div className="space-y-6">
+                            {/* Active Lists and Items */}
+                            <Accordion type="single" collapsible className="w-full">
+                              {Object.entries(itemsByList).map(([listId, listData]: [string, any]) => (
+                                <AccordionItem key={listId} value={listId}>
+                                  <AccordionTrigger className="hover:no-underline items-center">
+                                    <div className="flex items-center gap-3 w-full">
+                                      <div className="flex-1">
+                                        <h3 className="font-medium text-lg">{listData.name}</h3>
+                                        {listData.description && (
+                                          <p className="text-sm text-muted-foreground">{listData.description}</p>
+                                        )}
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <Badge variant={listData.isPublic ? "default" : "secondary"} className="text-xs">
+                                            {listData.isPublic ? "Can see purchased items" : "Cannot see purchased items"}
+                                          </Badge>
+                                          <span className="text-xs text-muted-foreground">
+                                            {listData.items.length} items
+                                          </span>
+                                          {listData.createdAt && (
+                                            <span className="text-xs text-muted-foreground">
+                                              Created {new Date(listData.createdAt).toLocaleDateString()}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </AccordionTrigger>
+                                  <AccordionContent>
+                                    <div className="space-y-3">
+                                      {listData.items.map((item: any) => (
+                                        <GiftItem
+                                          key={item.id}
+                                          item={item}
+                                          currentUserId={currentUser.id}
+                                          variant="my-gifts"
+                                          onEdit={handleEditGiftItem}
+                                          onDelete={handleRemoveGiftItem}
+                                          onArchive={handleArchiveItem}
+                                        />
+                                      ))}
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
                               ))}
-                            </div>
+                            </Accordion>
+                                  {/* <AccordionItem key={listId} value={listId}>
+                                    <AccordionTrigger className="hover:no-underline items-center">
+                                      <div className="flex items-center gap-3 w-full">
+                                        <div className="flex-1">
+                                          <h3 className="font-medium text-lg">{listData.name}</h3>
+                                          {listData.description && (
+                                            <p className="text-sm text-muted-foreground">{listData.description}</p>
+                                          )}
+                                          <div className="flex items-center gap-2 mt-1">
+                                            <Badge variant={listData.isPublic ? "default" : "secondary"} className="text-xs">
+                                              {listData.isPublic ? "Can see purchased items" : "Cannot see purchased items"}
+                                            </Badge>
+                                            <span className="text-xs text-muted-foreground">
+                                              {listData.items.length} items
+                                            </span>
+                                            {listData.createdAt && (
+                                              <span className="text-xs text-muted-foreground">
+                                                Created {new Date(listData.createdAt).toLocaleDateString()}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                      <div className="space-y-3">
+                                        {listData.items.map((item: any) => (
+                                          <GiftItem
+                                            key={item.id}
+                                            item={item}
+                                            currentUserId={currentUser.id}
+                                            variant="my-gifts"
+                                            onEdit={handleEditGiftItem}
+                                            onDelete={handleRemoveGiftItem}
+                                            onArchive={handleArchiveItem}
+                                          />
+                                        ))}
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                ))}
+                              </Accordion> */}
+                            {/* ))} */}
+
+                            {/* Archived Items by List */}
+                            {Object.keys(archivedByList).length > 0 && (
+                              <div className="pt-4 border-t">
+                                <h4 className="text-lg font-medium text-muted-foreground mb-4 flex items-center gap-2">
+                                  <Archive className="w-5 h-5" />
+                                  Archived Items
+                                </h4>
+                                <div className="space-y-6">
+                                  {Object.entries(archivedByList).map(([listId, listData]: [string, any]) => (
+                                    <div key={`archived-${listId}`} className="space-y-3">
+                                      <div className="flex items-center gap-3 pb-2 border-b border-dashed">
+                                        <div className="flex-1">
+                                          <h4 className="font-medium text-sm opacity-75">{listData.name} (Archived)</h4>
+                                          <div className="flex items-center gap-2 mt-1">
+                                            <Badge variant="outline" className="text-xs opacity-60">
+                                              {listData.items.length} archived items
+                                            </Badge>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="space-y-3">
+                                        {listData.items.map((item: any) => (
+                                          <GiftItem
+                                            key={item.id}
+                                            item={item}
+                                            currentUserId={currentUser.id}
+                                            variant="my-gifts"
+                                            onEdit={handleEditGiftItem}
+                                            onDelete={handleRemoveGiftItem}
+                                            onArchive={handleArchiveItem}
+                                          />
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </>
-                      )}
+                        )
+                      })()}
                     </>
                   )}
                 </div>
@@ -839,13 +1063,13 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   {getOtherMembers().map((member: any) => {
                     const memberGifts = getMemberGifts(member.id)
                     const purchasedCount = memberGifts.filter((item: any) => item.purchased_by).length
-                    
+
                     // Group gifts by list to show privacy indicators
                     const giftsByList = memberGifts.reduce((acc: any, item: any) => {
                       const listId = item.list_id
                       const listName = item.list_name || 'Unnamed List'
                       const isPublic = item.is_public
-                      
+
                       if (!acc[listId]) {
                         acc[listId] = {
                           name: listName,
@@ -856,7 +1080,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                       acc[listId].items.push(item)
                       return acc
                     }, {})
-                    
+
                     const listCount = Object.keys(giftsByList).length
 
                     return (
@@ -879,18 +1103,18 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                   )}
                                 </div>
                                 <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                                  <span>{memberGifts.length} items • {purchasedCount} purchased</span>
-                                  <div className="flex items-center gap-1">
+                                  <span>{memberGifts.length} item(s) • {purchasedCount} purchased</span>
+                                  {/* <div className="flex items-center gap-1">
                                     {Object.values(giftsByList).map((list: any, index: number) => (
-                                      <Badge 
-                                        key={index} 
-                                        variant={list.isPublic ? "default" : "secondary"} 
+                                      <Badge
+                                        key={index}
+                                        variant={list.isPublic ? "default" : "secondary"}
                                         className="text-xs"
                                       >
                                         {list.isPublic ? "Public" : "Private"}
                                       </Badge>
                                     ))}
-                                  </div>
+                                  </div> */}
                                 </div>
                               </div>
                             </div>
@@ -909,17 +1133,17 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                   <div key={listId} className="space-y-3">
                                     <div className="flex items-center gap-2 pb-2 border-b">
                                       <h4 className="font-medium text-sm">{listData.name}</h4>
-                                      <Badge 
-                                        variant={listData.isPublic ? "default" : "secondary"} 
+                                      <Badge
+                                        variant={listData.isPublic ? "default" : "secondary"}
                                         className="text-xs"
                                       >
                                         {listData.isPublic ? "Public" : "Private"}
                                       </Badge>
                                       <span className="text-xs text-muted-foreground">
-                                        {listData.items.length} items
+                                        {listData.items.length} item(s)
                                       </span>
                                     </div>
-                                    <div className="space-y-3 pl-4">
+                                    <div className="space-y-3">
                                       {listData.items.map((item: any) => {
                                         const purchaserName = item.purchased_by
                                           ? users.find((u: any) => u.id === item.purchased_by)?.name
@@ -1041,6 +1265,20 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     </div>
                   )}
                 </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-imageUrl">Image URL (optional):</Label>
+                  <Input
+                    id="edit-imageUrl"
+                    placeholder="https://example.com/image.jpg"
+                    value={editForm.imageUrl}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Provide a custom image URL if no preview is available
+                  </p>
+                </div>
               </div>
 
               {/* Gift Card Section */}
@@ -1137,11 +1375,11 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                 </div>
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="space-y-0.5">
-                    <Label htmlFor="edit-list-privacy">Public List</Label>
+                    <Label htmlFor="edit-list-privacy">Privacy</Label>
                     <p className="text-sm text-muted-foreground">
-                      {editListForm.isPublic 
-                        ? "Family members can see which items are purchased" 
-                        : "Hide purchase status from list owner"}
+                      {editListForm.isPublic
+                        ? "See purchased items"
+                        : "Can't see purchased items"}
                     </p>
                   </div>
                   <Switch
@@ -1151,16 +1389,49 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     disabled={isSubmitting}
                   />
                 </div>
+                <div className="p-4 border rounded-lg space-y-3">
+                  <Label>Hide from Family Members</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Select family members who should not be able to see this list
+                  </p>
+                  <div className="space-y-2">
+                    {getOtherMembers().map((member: any) => (
+                      <div key={member.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`edit-hide-from-${member.id}`}
+                          checked={editListForm.hiddenFromUsers.includes(member.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setEditListForm(prev => ({
+                                ...prev,
+                                hiddenFromUsers: [...prev.hiddenFromUsers, member.id]
+                              }))
+                            } else {
+                              setEditListForm(prev => ({
+                                ...prev,
+                                hiddenFromUsers: prev.hiddenFromUsers.filter(id => id !== member.id)
+                              }))
+                            }
+                          }}
+                          disabled={isSubmitting}
+                        />
+                        <Label htmlFor={`edit-hide-from-${member.id}`} className="text-sm">
+                          {member.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end gap-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setEditingList(null)}
                   disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={handleUpdateList}
                   disabled={!editListForm.name.trim() || isSubmitting}
                 >

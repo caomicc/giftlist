@@ -39,6 +39,7 @@ export function useGiftData() {
     description?: string
     price?: string
     link?: string
+    image_url?: string
     owner_id: string
     list_id: string
     is_gift_card?: boolean
@@ -74,6 +75,7 @@ export function useGiftData() {
     description?: string
     price?: string
     link?: string
+    image_url?: string
     list_id?: string
     is_gift_card?: boolean
     gift_card_target_amount?: number

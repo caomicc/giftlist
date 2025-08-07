@@ -27,12 +27,22 @@ export type List = {
   updated_at: string
 }
 
+export type ListPermission = {
+  id: string
+  list_id: string
+  user_id: string
+  can_view: boolean
+  created_at: string
+  updated_at: string
+}
+
 export type GiftItem = {
   id: string
   name: string
   description: string | null
   price: string | null
   link: string | null
+  image_url: string | null
   owner_id: string
   purchased_by: string | null
   list_id: string
