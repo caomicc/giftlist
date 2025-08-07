@@ -60,7 +60,7 @@ export function UserMenu({ user }: UserMenuProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center space-x-2">
-          <Avatar className="size-10 bg-violet-200 no-underline group-hover:no-underline!">
+          <Avatar className="size-12 bg-violet-200 no-underline group-hover:no-underline!">
             <AvatarFallback className=''>{initials}</AvatarFallback>
           </Avatar>
           <span>My Profile</span>
