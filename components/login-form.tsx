@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 
 function LoginFormContent({
   className,
@@ -93,7 +94,7 @@ function LoginFormContent({
           <div className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
+                <h1 className="text-2xl font-bold">Hi 😊</h1>
                 <p className="text-zinc-500 text-balance dark:text-zinc-400">
                   Login to your Meep Giftlist account
                 </p>
@@ -203,16 +204,17 @@ function LoginFormContent({
               </Tabs>
             </div>
           </div>
-          <div className="bg-zinc-100 relative hidden md:block dark:bg-zinc-800">
-            <img
-              src="/placeholder.svg"
+          <div className="bg-zinc-100 aspect-4/3 md:aspect-[unset] relative block dark:bg-zinc-800">
+            <Image
+              src="/baby.webp"
               alt="Image"
+              fill
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
           </div>
         </CardContent>
       </Card>
-      <div className="text-zinc-500 text-center text-xs text-balance dark:text-zinc-400">
+      {/* <div className="text-zinc-500 text-center text-xs text-balance dark:text-zinc-400">
         By clicking continue, you agree to our{" "}
         <a href="#" className="underline underline-offset-4 hover:text-zinc-900 dark:hover:text-zinc-50">
           Terms of Service
@@ -222,7 +224,7 @@ function LoginFormContent({
           Privacy Policy
         </a>
         .
-      </div>
+      </div> */}
     </div>
   )
 }
