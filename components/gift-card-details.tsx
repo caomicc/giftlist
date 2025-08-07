@@ -85,17 +85,20 @@ const GiftCardDetails: React.FC<GiftCardDetailsProps> = ({
     <div className="space-y-2">
       {/* Main total badge */}
       <Badge variant="secondary" className="flex items-center gap-2">
-        {formatCurrency(displayTotal, currency, locale)}
-        {targetAmount && targetAmount > 0 && ` / ${formatCurrency(targetAmount, currency, locale)}`}
-        {visiblePurchases.length > 0 && (
+        {!isOwner
+          ? formatCurrency(displayTotal, currency, locale)
+          : targetAmount && targetAmount > 0
+        ? `${formatCurrency(displayTotal, currency, locale)} / ${formatCurrency(targetAmount, currency, locale)}`
+        : '$ --'}
+        {visiblePurchases.length > 0 && isOwner && (
           <Button
-            variant="ghost"
-            size="sm"
-            className="h-4 w-4 p-0 ml-1"
-            onClick={() => setShowDetails(!showDetails)}
-            title={showDetails ? "Hide contributors" : "Show contributors"}
+        variant="ghost"
+        size="sm"
+        className="h-4 w-4 p-0 ml-1"
+        onClick={() => setShowDetails(!showDetails)}
+        title={showDetails ? "Hide contributors" : "Show contributors"}
           >
-            {showDetails ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+        {showDetails ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
           </Button>
         )}
       </Badge>

@@ -242,7 +242,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
               )}
 
           {/* Gift Card Contributions */}
-          {isGiftCard && (
+            {isGiftCard && !isMyGift && (
             <GiftCardContributions
               key={`contributions-${refreshKey}`}
               giftItemId={item.id}
@@ -250,7 +250,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
               isOwner={isMyGift}
               onPurchaseUpdate={handlePurchaseUpdate}
             />
-          )}
+            )}
         </div>
 
         {/* Action Buttons */}

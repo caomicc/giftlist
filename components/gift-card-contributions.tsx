@@ -36,7 +36,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
 
   const fetchPurchases = async () => {
     if (loading) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(`/api/gift-card-purchases?gift_item_id=${giftItemId}`);
@@ -114,9 +114,11 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
   };
 
   // Filter purchases to show appropriate ones based on context
-  const visiblePurchases = isOwner 
-    ? purchases // Owners can see all contributions for editing
-    : purchases.filter(purchase => purchase.purchaser_id !== currentUserId); // Others can't see their own contributions
+  // Users should always see their own contributions so they can edit them
+  // Gift owners see all contributions for management purposes
+  const visiblePurchases = isOwner
+    ? purchases // Owners can see all contributions
+    : purchases.filter(purchase => purchase.purchaser_id === currentUserId); // Non-owners only see their own contributions
 
   if (purchases.length === 0) {
     return null;
