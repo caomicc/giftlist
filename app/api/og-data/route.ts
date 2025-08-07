@@ -158,12 +158,18 @@ export async function POST(request: NextRequest) {
     if (ogData.description) {
       ogData.description = ogData.description.trim().substring(0, 500) // Limit description length
     }
-    if (ogData.image && !ogData.image.startsWith('http')) {
-      // Convert relative URLs to absolute
-      try {
-        ogData.image = new URL(ogData.image, validUrl.origin).toString()
-      } catch (error) {
-        ogData.image = null
+    if (ogData.image) {
+      if (!ogData.image.startsWith('http')) {
+        // Convert relative URLs to absolute
+        try {
+          ogData.image = new URL(ogData.image, validUrl.origin).toString()
+        } catch (error) {
+          ogData.image = null
+        }
+      }
+      // Ensure HTTPS for security (convert HTTP to HTTPS)
+      if (ogData.image && ogData.image.startsWith('http://')) {
+        ogData.image = ogData.image.replace('http://', 'https://')
       }
     }
 

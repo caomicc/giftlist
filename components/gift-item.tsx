@@ -89,7 +89,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                 <PriceTag price={item.price} />
               )}
               {isGiftCard && (
-                <Badge variant="secondary"> gc
+                <Badge variant="secondary">
                   ${giftCardTotal.toFixed(2)}
                   {giftCardTarget && giftCardTarget > 0 && ` / $${giftCardTarget.toFixed(2)}`}
                 </Badge>

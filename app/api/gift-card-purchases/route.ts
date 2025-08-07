@@ -14,9 +14,9 @@ export async function GET(request: NextRequest) {
     }
 
     const purchases = await sql`
-      SELECT gcp.*, fm.name as purchaser_name 
+      SELECT gcp.*, u.name as purchaser_name 
       FROM gift_card_purchases gcp
-      JOIN family_members fm ON gcp.purchaser_id = fm.id
+      JOIN users u ON gcp.purchaser_id = u.id
       WHERE gcp.gift_item_id = ${giftItemId}
       ORDER BY gcp.created_at DESC
     `
