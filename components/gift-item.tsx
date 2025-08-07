@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Info } from 'lucide-react';
+import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive } from 'lucide-react';
 import Link from 'next/link';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
@@ -22,12 +22,14 @@ export type GiftItemProps = {
     og_description?: string | null;
     og_image?: string | null;
     og_site_name?: string | null;
+    archived?: boolean;
   };
   currentUserId: string;
   purchaserName?: string;
   variant?: 'my-gifts' | 'family-gifts';
   onEdit?: (item: any) => void;
   onDelete?: (itemId: string) => void;
+  onArchive?: (itemId: string) => void;
   onTogglePurchase?: (itemId: string, currentPurchasedBy: string | null) => void;
   onGiftCardPurchase?: (itemId: string, amount: number) => Promise<void>;
 };
@@ -39,6 +41,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
   variant = 'my-gifts',
   onEdit,
   onDelete,
+  onArchive,
   onTogglePurchase,
   onGiftCardPurchase
 }) => {
@@ -47,6 +50,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
   const isMyGift = variant === 'my-gifts';
   const isPurchased = !!item.purchased_by;
   const isGiftCard = item.is_gift_card;
+  const isArchived = item.archived;
   const giftCardTotal = parseFloat(item.gift_card_total_purchased?.toString() || '0') || 0;
   const giftCardTarget = parseFloat(item.gift_card_target_amount?.toString() || '0') || null;
   const isGiftCardComplete = giftCardTarget ? giftCardTotal >= giftCardTarget : false;
@@ -61,23 +65,31 @@ const GiftItem: React.FC<GiftItemProps> = ({
     <>
       <div
         className={`flex items-center justify-between p-4 border rounded-lg transition-colors relative ${
-          (isPurchased && !isMyGift) || (isGiftCard && isGiftCardComplete && !isMyGift)
+          isArchived
+            ? "bg-gray-100 border-gray-300 opacity-75"
+            : (isPurchased && !isMyGift) || (isGiftCard && isGiftCardComplete && !isMyGift)
             ? "bg-green-50 border-green-200"
             : "bg-indigo-50"
         }`}
       >
         <div className="flex items-center gap-1 absolute right-4 top-4">
+              {isArchived && (
+                <Badge variant="outline" className="text-gray-600 border-gray-400">
+                  <Archive className="w-3 h-3 mr-1" />
+                  Archived
+                </Badge>
+              )}
               {isGiftCard && (
                 <Badge variant="outline" className="text-purple-600 border-purple-300">
                   <CreditCard className="w-3 h-3 mr-1" />
                   Gift Card
                 </Badge>
               )}
-              {item.price && !isGiftCard && (
+              {item.price !== undefined && !isGiftCard && (
                 <PriceTag price={item.price} />
               )}
               {isGiftCard && (
-                <Badge variant="secondary">
+                <Badge variant="secondary"> gc
                   ${giftCardTotal.toFixed(2)}
                   {giftCardTarget && giftCardTarget > 0 && ` / $${giftCardTarget.toFixed(2)}`}
                 </Badge>
@@ -93,6 +105,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
           <div className="flex items-center gap-2 mb-1">
             <h3
               className={`font-medium ${
+                isArchived ? "line-through text-gray-500" :
                 ((isPurchased && !isMyGift) || (isGiftCard && isGiftCardComplete && !isMyGift)) ? "line-through text-muted-foreground" : ""
               }`}
             >
@@ -183,15 +196,25 @@ const GiftItem: React.FC<GiftItemProps> = ({
               </>
             )}
             {isMyGift && (
-          // My Gifts - Edit/Delete buttons
+          // My Gifts - Edit/Delete/Archive buttons
           <div className="flex gap-2 ml-auto">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onEdit?.(item)}
               className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              disabled={isArchived}
             >
               <Edit className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onArchive?.(item.id)}
+              className={isArchived ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50" : "text-orange-600 hover:text-orange-700 hover:bg-orange-50"}
+              title={isArchived ? "Unarchive item" : "Archive item"}
+            >
+              <Archive className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"

@@ -32,6 +32,7 @@ export type GiftItem = {
   og_description: string | null
   og_image: string | null
   og_site_name: string | null
+  archived: boolean
   created_at: string
   updated_at: string
 }

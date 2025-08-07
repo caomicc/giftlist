@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trash2, Plus, Gift, Users, AlertCircle, Loader2, Database, Edit, CreditCard } from 'lucide-react'
+import { Trash2, Plus, Gift, Users, AlertCircle, Loader2, Database, Edit, CreditCard, Archive } from 'lucide-react'
 import { useGiftData } from "@/hooks/useGiftData"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "./ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Checkbox } from "@/components/ui/checkbox"
 import GiftItem from "./gift-item"
 
@@ -28,39 +29,40 @@ interface FamilyGiftAppProps {
 }
 
 export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
-  const [newItem, setNewItem] = useState({ 
-    name: "", 
-    description: "", 
-    price: "", 
-    link: "", 
-    isGiftCard: false, 
-    giftCardTargetAmount: "" 
+  const [newItem, setNewItem] = useState({
+    name: "",
+    description: "",
+    price: "",
+    link: "",
+    isGiftCard: false,
+    giftCardTargetAmount: ""
   })
   const [newItemOGData, setNewItemOGData] = useState<any>(null)
   const [newItemOGLoading, setNewItemOGLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
-  const [editForm, setEditForm] = useState({ 
-    name: "", 
-    description: "", 
-    price: "", 
-    link: "", 
-    isGiftCard: false, 
-    giftCardTargetAmount: "" 
+  const [editForm, setEditForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    link: "",
+    isGiftCard: false,
+    giftCardTargetAmount: ""
   })
   const [editFormOGData, setEditFormOGData] = useState<any>(null)
   const [editFormOGLoading, setEditFormOGLoading] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  const { 
-    users, 
-    giftItems, 
-    loading, 
-    error, 
-    addGiftItem, 
-    updateGiftItem, 
-    removeGiftItem, 
+  const {
+    users,
+    giftItems,
+    loading,
+    error,
+    addGiftItem,
+    updateGiftItem,
+    removeGiftItem,
     togglePurchaseStatus,
+    toggleArchiveStatus,
     addGiftCardPurchase,
     fetchOGData
   } = useGiftData()
@@ -77,21 +79,21 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         link: newItem.link || undefined,
         owner_id: currentUser.id,
         is_gift_card: newItem.isGiftCard,
-        gift_card_target_amount: newItem.isGiftCard && newItem.giftCardTargetAmount 
-          ? parseFloat(newItem.giftCardTargetAmount) 
+        gift_card_target_amount: newItem.isGiftCard && newItem.giftCardTargetAmount
+          ? parseFloat(newItem.giftCardTargetAmount)
           : undefined,
         og_title: newItemOGData?.title,
         og_description: newItemOGData?.description,
         og_image: newItemOGData?.image,
         og_site_name: newItemOGData?.siteName,
       })
-      setNewItem({ 
-        name: "", 
-        description: "", 
-        price: "", 
-        link: "", 
-        isGiftCard: false, 
-        giftCardTargetAmount: "" 
+      setNewItem({
+        name: "",
+        description: "",
+        price: "",
+        link: "",
+        isGiftCard: false,
+        giftCardTargetAmount: ""
       })
       setNewItemOGData(null)
     } catch (err) {
@@ -144,8 +146,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         price: editForm.price || undefined,
         link: editForm.link || undefined,
         is_gift_card: editForm.isGiftCard,
-        gift_card_target_amount: editForm.isGiftCard && editForm.giftCardTargetAmount 
-          ? parseFloat(editForm.giftCardTargetAmount) 
+        gift_card_target_amount: editForm.isGiftCard && editForm.giftCardTargetAmount
+          ? parseFloat(editForm.giftCardTargetAmount)
           : undefined,
         og_title: editFormOGData?.title,
         og_description: editFormOGData?.description,
@@ -154,13 +156,13 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       })
       setIsEditDialogOpen(false)
       setEditingItem(null)
-      setEditForm({ 
-        name: "", 
-        description: "", 
-        price: "", 
-        link: "", 
-        isGiftCard: false, 
-        giftCardTargetAmount: "" 
+      setEditForm({
+        name: "",
+        description: "",
+        price: "",
+        link: "",
+        isGiftCard: false,
+        giftCardTargetAmount: ""
       })
       setEditFormOGData(null)
     } catch (err) {
@@ -187,16 +189,24 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     }
   }
 
+  const handleArchiveItem = async (itemId: string) => {
+    try {
+      await toggleArchiveStatus(itemId)
+    } catch (err) {
+      console.error("Failed to toggle archive status:", err)
+    }
+  }
+
   // Handle OG data fetching for new item
   const handleNewItemLinkChange = async (link: string) => {
     setNewItem((prev) => ({ ...prev, link }))
-    
+
     if (link && link.startsWith('http')) {
       setNewItemOGLoading(true)
       const ogData = await fetchOGData(link)
       setNewItemOGData(ogData)
       setNewItemOGLoading(false)
-      
+
       // Auto-fill name if empty and OG title exists
       if (!newItem.name && ogData?.title) {
         setNewItem((prev) => ({ ...prev, name: ogData.title }))
@@ -210,7 +220,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   // Handle OG data fetching for edit form
   const handleEditFormLinkChange = async (link: string) => {
     setEditForm((prev) => ({ ...prev, link }))
-    
+
     if (link && link.startsWith('http')) {
       setEditFormOGLoading(true)
       const ogData = await fetchOGData(link)
@@ -225,7 +235,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const getCurrentMember = () => currentUser
   const getOtherMembers = () => users.filter((u: any) => u.id !== currentUser.id)
   const getMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id)
-  const getMemberGifts = (memberId: string) => giftItems.filter((item: any) => item.owner_id === memberId)
+  const getActiveMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id && !item.archived)
+  const getArchivedMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id && item.archived)
+  const getMemberGifts = (memberId: string) => giftItems.filter((item: any) => item.owner_id === memberId && !item.archived)
 
   // Loading state
   if (loading) {
@@ -276,7 +288,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   }
 
   const currentMember = getCurrentMember()
-  const myGifts = getMyGifts()
+  const activeMyGifts = getActiveMyGifts()
+  const archivedMyGifts = getArchivedMyGifts()
 
   return (
     <div className="min-h-screen">
@@ -337,15 +350,15 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     />
                   </div>
                 </div>
-                
+
                 {/* Gift Card Section */}
                 <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
                   <div className="flex items-center space-x-2">
-                    <Checkbox 
+                    <Checkbox
                       id="isGiftCard"
                       checked={newItem.isGiftCard}
-                      onCheckedChange={(checked) => setNewItem((prev) => ({ 
-                        ...prev, 
+                      onCheckedChange={(checked) => setNewItem((prev) => ({
+                        ...prev,
                         isGiftCard: checked === true,
                         price: checked === true ? "" : prev.price // Clear price if gift card
                       }))}
@@ -420,22 +433,51 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
                 {/* My Gift Items */}
                 <div className="space-y-3">
-                  {myGifts.length === 0 ? (
+                  {activeMyGifts.length === 0 && archivedMyGifts.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Gift className="w-12 h-12 mx-auto mb-3 opacity-50" />
                       <p>No gift ideas yet. Add some items above!</p>
                     </div>
                   ) : (
-                    myGifts.map((item: any) => (
-                      <GiftItem
-                        key={item.id}
-                        item={item}
-                        currentUserId={currentUser.id}
-                        variant="my-gifts"
-                        onEdit={handleEditGiftItem}
-                        onDelete={handleRemoveGiftItem}
-                      />
-                    ))
+                    <>
+                      {/* Active Items */}
+                      {activeMyGifts.map((item: any) => (
+                        <GiftItem
+                          key={item.id}
+                          item={item}
+                          currentUserId={currentUser.id}
+                          variant="my-gifts"
+                          onEdit={handleEditGiftItem}
+                          onDelete={handleRemoveGiftItem}
+                          onArchive={handleArchiveItem}
+                        />
+                      ))}
+                      
+                      {/* Archived Items */}
+                      {archivedMyGifts.length > 0 && (
+                        <>
+                          <div className="pt-4 border-t">
+                            <h4 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
+                              <Archive className="w-4 h-4" />
+                              Archived Items ({archivedMyGifts.length})
+                            </h4>
+                            <div className="space-y-3">
+                              {archivedMyGifts.map((item: any) => (
+                                <GiftItem
+                                  key={item.id}
+                                  item={item}
+                                  currentUserId={currentUser.id}
+                                  variant="my-gifts"
+                                  onEdit={handleEditGiftItem}
+                                  onDelete={handleRemoveGiftItem}
+                                  onArchive={handleArchiveItem}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </>
                   )}
                 </div>
               </CardContent>
@@ -444,63 +486,78 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
           {/* Family Lists Tab */}
           <TabsContent value="family-lists" className="space-y-6">
-            <div className="grid gap-6">
-              {getOtherMembers().map((member: any) => {
-                const memberGifts = getMemberGifts(member.id)
-                const purchasedCount = memberGifts.filter((item: any) => item.purchased_by).length
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Family Gift Lists
+                </CardTitle>
+                <CardDescription>
+                  Click on a family member to view and purchase their gift items.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Accordion type="single" collapsible className="w-full">
+                  {getOtherMembers().map((member: any) => {
+                    const memberGifts = getMemberGifts(member.id)
+                    const purchasedCount = memberGifts.filter((item: any) => item.purchased_by).length
 
-                return (
-                  <Card key={member.id}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center justify-center gap-3">
-                          <Avatar className="size-9 bg-blue-300">
-                            <AvatarFallback className="bg-blue-100 text-blue-600">
-                              {member.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col">
-                            <CardTitle>{member.name}'s Gift List</CardTitle>
-                            <CardDescription>
-                              {memberGifts.length} items • {purchasedCount} purchased
-                            </CardDescription>
+                    return (
+                      <AccordionItem key={member.id} value={member.id}>
+                        <AccordionTrigger className="hover:no-underline">
+                          <div className="flex items-center justify-between w-full pr-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="size-9">
+                                <AvatarFallback className="bg-blue-100 text-blue-600">
+                                  {member.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col text-left">
+                                <span className="font-medium">{member.name}'s Gift List</span>
+                                <span className="text-sm text-muted-foreground">
+                                  {memberGifts.length} items • {purchasedCount} purchased
+                                </span>
+                              </div>
+                            </div>
+                            <Badge variant="secondary">{memberGifts.length}</Badge>
                           </div>
-                        </div>
-                        <Badge className={member.color}>{memberGifts.length} items</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      {memberGifts.length === 0 ? (
-                        <div className="text-center py-6 text-muted-foreground">
-                          <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p>{member.name} hasn't added any gift ideas yet.</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {memberGifts.map((item: any) => {
-                            const purchaserName = item.purchased_by
-                              ? users.find((u: any) => u.id === item.purchased_by)?.name
-                              : null
+                        </AccordionTrigger>
+                        <AccordionContent>
+                          <div className="pt-4">
+                            {memberGifts.length === 0 ? (
+                              <div className="text-center py-6 text-muted-foreground">
+                                <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                <p>{member.name} hasn't added any gift ideas yet.</p>
+                              </div>
+                            ) : (
+                              <div className="space-y-3">
+                                {memberGifts.map((item: any) => {
+                                  const purchaserName = item.purchased_by
+                                    ? users.find((u: any) => u.id === item.purchased_by)?.name
+                                    : null
 
-                            return (
-                              <GiftItem
-                                key={item.id}
-                                item={item}
-                                currentUserId={currentUser.id}
-                                purchaserName={purchaserName || undefined}
-                                variant="family-gifts"
-                                onTogglePurchase={handleTogglePurchase}
-                                onGiftCardPurchase={handleGiftCardPurchase}
-                              />
-                            )
-                          })}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )
-              })}
-            </div>
+                                  return (
+                                    <GiftItem
+                                      key={item.id}
+                                      item={item}
+                                      currentUserId={currentUser.id}
+                                      purchaserName={purchaserName || undefined}
+                                      variant="family-gifts"
+                                      onTogglePurchase={handleTogglePurchase}
+                                      onGiftCardPurchase={handleGiftCardPurchase}
+                                    />
+                                  )
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    )
+                  })}
+                </Accordion>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
@@ -534,7 +591,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   disabled={isSubmitting}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="edit-price">Price</Label>
                   <Input
@@ -572,15 +629,15 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   )}
                 </div>
               </div>
-              
+
               {/* Gift Card Section */}
               <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
                 <div className="flex items-center space-x-2">
-                  <Checkbox 
+                  <Checkbox
                     id="edit-isGiftCard"
                     checked={editForm.isGiftCard}
-                    onCheckedChange={(checked) => setEditForm((prev) => ({ 
-                      ...prev, 
+                    onCheckedChange={(checked) => setEditForm((prev) => ({
+                      ...prev,
                       isGiftCard: checked === true,
                       price: checked === true ? "" : prev.price // Clear price if gift card
                     }))}

@@ -98,11 +98,23 @@ export async function PUT(request: NextRequest) {
       og_title,
       og_description,
       og_image,
-      og_site_name
+      og_site_name,
+      archived
     } = await request.json()
 
+    // If updating archive status only
+    if (archived !== undefined && !name && !description && !price && !link && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && purchased_by === undefined) {
+      const data = await sql`
+        UPDATE gift_items
+        SET archived = ${archived}, updated_at = NOW()
+        WHERE id = ${id}
+        RETURNING *
+      `
+      return NextResponse.json({ giftItem: data[0] })
+    }
+
     // If updating purchase status (regular items)
-    if (purchased_by !== undefined && !name && !description && !price && !link && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name) {
+    if (purchased_by !== undefined && !name && !description && !price && !link && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && archived === undefined) {
       const data = await sql`
         UPDATE gift_items
         SET purchased_by = ${purchased_by}
@@ -113,7 +125,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // If updating gift item details
-    if (name || description || price || link || is_gift_card !== undefined || gift_card_target_amount !== undefined || og_title || og_description || og_image || og_site_name) {
+    if (name || description || price || link || is_gift_card !== undefined || gift_card_target_amount !== undefined || og_title || og_description || og_image || og_site_name || archived !== undefined) {
       const data = await sql`
         UPDATE gift_items
         SET
@@ -127,6 +139,7 @@ export async function PUT(request: NextRequest) {
           og_description = ${og_description || null},
           og_image = ${og_image || null},
           og_site_name = ${og_site_name || null},
+          archived = ${archived !== undefined ? archived : false},
           updated_at = NOW()
         WHERE id = ${id}
         RETURNING *

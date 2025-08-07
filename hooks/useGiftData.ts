@@ -137,6 +137,32 @@ export function useGiftData() {
     }
   }
 
+  // Archive/unarchive item
+  const toggleArchiveStatus = async (itemId: string) => {
+    try {
+      // Get current item to toggle its archive status
+      const currentItem = giftItems.find(item => item.id === itemId)
+      if (!currentItem) throw new Error('Item not found')
+
+      const response = await fetch('/api/gift-items', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: itemId, archived: !currentItem.archived }),
+      })
+
+      if (!response.ok) throw new Error('Failed to update archive status')
+      const { giftItem } = await response.json()
+
+      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? giftItem : item)))
+      return giftItem as GiftItem
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update archive status")
+      throw err
+    }
+  }
+
   // Add gift card purchase
   const addGiftCardPurchase = async (giftItemId: string, purchaserId: string, amount: number) => {
     try {
@@ -228,6 +254,7 @@ export function useGiftData() {
     updateGiftItem,
     removeGiftItem,
     togglePurchaseStatus,
+    toggleArchiveStatus,
     addGiftCardPurchase,
     getGiftCardPurchases,
     fetchOGData,
