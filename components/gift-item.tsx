@@ -60,12 +60,35 @@ const GiftItem: React.FC<GiftItemProps> = ({
   return (
     <>
       <div
-        className={`flex items-center justify-between p-4 border rounded-lg transition-colors ${
+        className={`flex items-center justify-between p-4 border rounded-lg transition-colors relative ${
           (isPurchased && !isMyGift) || (isGiftCard && isGiftCardComplete && !isMyGift)
             ? "bg-green-50 border-green-200"
-            : "bg-white hover:bg-gray-50"
+            : "bg-indigo-50"
         }`}
       >
+        <div className="flex items-center gap-1 absolute right-4 top-4">
+              {isGiftCard && (
+                <Badge variant="outline" className="text-purple-600 border-purple-300">
+                  <CreditCard className="w-3 h-3 mr-1" />
+                  Gift Card
+                </Badge>
+              )}
+              {item.price && !isGiftCard && (
+                <PriceTag price={item.price} />
+              )}
+              {isGiftCard && (
+                <Badge variant="secondary">
+                  ${giftCardTotal.toFixed(2)}
+                  {giftCardTarget && giftCardTarget > 0 && ` / $${giftCardTarget.toFixed(2)}`}
+                </Badge>
+              )}
+
+              {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
+                <Badge className="bg-green-100 text-green-800">
+                  {isGiftCard ? 'Complete' : `Purchased by ${purchaserName}`}
+                </Badge>
+              )}
+            </div>
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             <h3
@@ -75,36 +98,17 @@ const GiftItem: React.FC<GiftItemProps> = ({
             >
               {item.name}
             </h3>
-            {isGiftCard && (
-              <Badge variant="outline" className="text-purple-600 border-purple-300">
-                <CreditCard className="w-3 h-3 mr-1" />
-                Gift Card
-              </Badge>
-            )}
-            {item.price && !isGiftCard && (
-              <PriceTag price={item.price} />
-            )}
-            {isGiftCard && (
-              <Badge variant="secondary">
-                ${giftCardTotal.toFixed(2)}
-                {giftCardTarget && giftCardTarget > 0 && ` / $${giftCardTarget.toFixed(2)}`}
-              </Badge>
-            )}
-            {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
-              <Badge className="bg-green-100 text-green-800">
-                {isGiftCard ? 'Complete' : `Purchased by ${purchaserName}`}
-              </Badge>
-            )}
+
           </div>
           {item.description && (
-            <p className="text-sm text-muted-foreground mb-2">
+            <p className="text-sm text-foreground mb-6">
               {item.description}
             </p>
           )}
 
           {/* OpenGraph Data Display */}
           {(item.og_title || item.og_description || item.og_image) && (
-            <div className="border rounded-lg p-3 mb-2 bg-gray-50">
+            <div className="mb-6">
               <div className="flex gap-3">
                 {item.og_image && (
                   <div className="flex-shrink-0">
@@ -120,7 +124,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                 )}
                 <div className="flex-1 min-w-0">
                   {item.og_title && (
-                    <h4 className="text-sm font-medium text-gray-900 truncate">
+                    <h4 className="text-sm font-medium text-gray-900 truncate tracking-wider">
                       {item.og_title}
                     </h4>
                   )}
@@ -130,7 +134,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                     </p>
                   )}
                   {item.og_site_name && (
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-foreground mt-1 font-medium tracking-wider">
                       {item.og_site_name}
                     </p>
                   )}
@@ -178,13 +182,9 @@ const GiftItem: React.FC<GiftItemProps> = ({
                 )}
               </>
             )}
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        {isMyGift && (
+            {isMyGift && (
           // My Gifts - Edit/Delete buttons
-          <div className="flex gap-2">
+          <div className="flex gap-2 ml-auto">
             <Button
               variant="ghost"
               size="sm"
@@ -203,6 +203,11 @@ const GiftItem: React.FC<GiftItemProps> = ({
             </Button>
           </div>
         )}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+
       </div>
 
       {/* Gift Card Purchase Dialog */}

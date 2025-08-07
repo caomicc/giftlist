@@ -191,7 +191,7 @@ export function useGiftData() {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Failed to fetch OG data')
       }
-      
+
       const { ogData } = await response.json()
       return ogData
     } catch (err) {

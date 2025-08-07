@@ -20,7 +20,7 @@ const badgeVariants = cva(
         purple:
           "border-transparent bg-purple-500 text-white [a&]:hover:bg-purple-600 focus-visible:ring-purple-300",
         price:
-          "border-transparent bg-green-100 text-green-800 [a&]:hover:bg-green-200 focus-visible:ring-green-300",
+          "border-transparent bg-emerald-100 text-emerald-950 [a&]:hover:bg-emerald-200 focus-visible:ring-emerald-300",
       },
     },
     defaultVariants: {
