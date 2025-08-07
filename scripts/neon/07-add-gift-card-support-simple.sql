@@ -1,11 +1,15 @@
 -- Simplified gift card migration without foreign key constraints
 -- The app handles data integrity through the API layer
 
--- Add new columns for gift card functionality
-ALTER TABLE gift_items 
+-- Add new columns for gift card functionality and OpenGraph data
+ALTER TABLE gift_items
 ADD COLUMN IF NOT EXISTS is_gift_card BOOLEAN DEFAULT FALSE,
 ADD COLUMN IF NOT EXISTS gift_card_target_amount DECIMAL(10,2) DEFAULT NULL,
-ADD COLUMN IF NOT EXISTS gift_card_total_purchased DECIMAL(10,2) DEFAULT 0.00;
+ADD COLUMN IF NOT EXISTS gift_card_total_purchased DECIMAL(10,2) DEFAULT 0.00,
+ADD COLUMN IF NOT EXISTS og_title TEXT DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS og_description TEXT DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS og_image TEXT DEFAULT NULL,
+ADD COLUMN IF NOT EXISTS og_site_name TEXT DEFAULT NULL;
 
 -- Create gift card purchases table (no foreign keys to avoid type issues)
 CREATE TABLE IF NOT EXISTS gift_card_purchases (
@@ -25,14 +29,14 @@ CREATE INDEX IF NOT EXISTS idx_gift_items_is_gift_card ON gift_items(is_gift_car
 CREATE OR REPLACE FUNCTION update_gift_card_total()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE gift_items 
+  UPDATE gift_items
   SET gift_card_total_purchased = (
     SELECT COALESCE(SUM(amount), 0)
-    FROM gift_card_purchases 
+    FROM gift_card_purchases
     WHERE gift_item_id = COALESCE(NEW.gift_item_id, OLD.gift_item_id)
   )
   WHERE id = COALESCE(NEW.gift_item_id, OLD.gift_item_id);
-  
+
   RETURN COALESCE(NEW, OLD);
 END;
 $$ language 'plpgsql';

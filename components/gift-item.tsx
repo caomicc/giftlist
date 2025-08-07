@@ -18,6 +18,10 @@ export type GiftItemProps = {
     is_gift_card?: boolean;
     gift_card_target_amount?: number | string | null;
     gift_card_total_purchased?: number | string;
+    og_title?: string | null;
+    og_description?: string | null;
+    og_image?: string | null;
+    og_site_name?: string | null;
   };
   currentUserId: string;
   purchaserName?: string;
@@ -39,7 +43,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
   onGiftCardPurchase
 }) => {
   const [isGiftCardDialogOpen, setIsGiftCardDialogOpen] = useState(false);
-  
+
   const isMyGift = variant === 'my-gifts';
   const isPurchased = !!item.purchased_by;
   const isGiftCard = item.is_gift_card;
@@ -97,6 +101,44 @@ const GiftItem: React.FC<GiftItemProps> = ({
               {item.description}
             </p>
           )}
+
+          {/* OpenGraph Data Display */}
+          {(item.og_title || item.og_description || item.og_image) && (
+            <div className="border rounded-lg p-3 mb-2 bg-gray-50">
+              <div className="flex gap-3">
+                {item.og_image && (
+                  <div className="flex-shrink-0">
+                    <img
+                      src={item.og_image}
+                      alt={item.og_title || item.name}
+                      className="w-16 h-16 object-cover rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none'
+                      }}
+                    />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  {item.og_title && (
+                    <h4 className="text-sm font-medium text-gray-900 truncate">
+                      {item.og_title}
+                    </h4>
+                  )}
+                  {item.og_description && (
+                    <p className="text-xs text-gray-600 line-clamp-2 mt-1">
+                      {item.og_description}
+                    </p>
+                  )}
+                  {item.og_site_name && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      {item.og_site_name}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className='flex items-center gap-2'>
             {item.link && (
               <Link

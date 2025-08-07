@@ -36,6 +36,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     isGiftCard: false, 
     giftCardTargetAmount: "" 
   })
+  const [newItemOGData, setNewItemOGData] = useState<any>(null)
+  const [newItemOGLoading, setNewItemOGLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [editForm, setEditForm] = useState({ 
@@ -46,6 +48,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     isGiftCard: false, 
     giftCardTargetAmount: "" 
   })
+  const [editFormOGData, setEditFormOGData] = useState<any>(null)
+  const [editFormOGLoading, setEditFormOGLoading] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const { 
@@ -57,7 +61,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     updateGiftItem, 
     removeGiftItem, 
     togglePurchaseStatus,
-    addGiftCardPurchase
+    addGiftCardPurchase,
+    fetchOGData
   } = useGiftData()
 
   const handleAddGiftItem = async () => {
@@ -75,6 +80,10 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         gift_card_target_amount: newItem.isGiftCard && newItem.giftCardTargetAmount 
           ? parseFloat(newItem.giftCardTargetAmount) 
           : undefined,
+        og_title: newItemOGData?.title,
+        og_description: newItemOGData?.description,
+        og_image: newItemOGData?.image,
+        og_site_name: newItemOGData?.siteName,
       })
       setNewItem({ 
         name: "", 
@@ -84,6 +93,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         isGiftCard: false, 
         giftCardTargetAmount: "" 
       })
+      setNewItemOGData(null)
     } catch (err) {
       console.error("Failed to add gift item:", err)
     } finally {
@@ -109,6 +119,17 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       isGiftCard: item.is_gift_card || false,
       giftCardTargetAmount: item.gift_card_target_amount ? item.gift_card_target_amount.toString() : ""
     })
+    // Set existing OG data if available
+    if (item.og_title || item.og_description || item.og_image) {
+      setEditFormOGData({
+        title: item.og_title,
+        description: item.og_description,
+        image: item.og_image,
+        siteName: item.og_site_name
+      })
+    } else {
+      setEditFormOGData(null)
+    }
     setIsEditDialogOpen(true)
   }
 
@@ -126,6 +147,10 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         gift_card_target_amount: editForm.isGiftCard && editForm.giftCardTargetAmount 
           ? parseFloat(editForm.giftCardTargetAmount) 
           : undefined,
+        og_title: editFormOGData?.title,
+        og_description: editFormOGData?.description,
+        og_image: editFormOGData?.image,
+        og_site_name: editFormOGData?.siteName,
       })
       setIsEditDialogOpen(false)
       setEditingItem(null)
@@ -137,6 +162,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         isGiftCard: false, 
         giftCardTargetAmount: "" 
       })
+      setEditFormOGData(null)
     } catch (err) {
       console.error("Failed to update gift item:", err)
     } finally {
@@ -158,6 +184,41 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await addGiftCardPurchase(itemId, currentUser.id, amount)
     } catch (err) {
       console.error("Failed to add gift card purchase:", err)
+    }
+  }
+
+  // Handle OG data fetching for new item
+  const handleNewItemLinkChange = async (link: string) => {
+    setNewItem((prev) => ({ ...prev, link }))
+    
+    if (link && link.startsWith('http')) {
+      setNewItemOGLoading(true)
+      const ogData = await fetchOGData(link)
+      setNewItemOGData(ogData)
+      setNewItemOGLoading(false)
+      
+      // Auto-fill name if empty and OG title exists
+      if (!newItem.name && ogData?.title) {
+        setNewItem((prev) => ({ ...prev, name: ogData.title }))
+      }
+    } else {
+      setNewItemOGData(null)
+      setNewItemOGLoading(false)
+    }
+  }
+
+  // Handle OG data fetching for edit form
+  const handleEditFormLinkChange = async (link: string) => {
+    setEditForm((prev) => ({ ...prev, link }))
+    
+    if (link && link.startsWith('http')) {
+      setEditFormOGLoading(true)
+      const ogData = await fetchOGData(link)
+      setEditFormOGData(ogData)
+      setEditFormOGLoading(false)
+    } else {
+      setEditFormOGData(null)
+      setEditFormOGLoading(false)
     }
   }
 
@@ -318,9 +379,25 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   <Input
                     placeholder="Link (optional)"
                     value={newItem.link}
-                    onChange={(e) => setNewItem((prev) => ({ ...prev, link: e.target.value }))}
+                    onChange={(e) => handleNewItemLinkChange(e.target.value)}
                     disabled={isSubmitting}
                   />
+                  {newItemOGLoading && (
+                    <div className="text-xs text-blue-600 flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Loading link preview...
+                    </div>
+                  )}
+                  {!newItemOGLoading && newItemOGData && (
+                    <div className="text-xs text-green-600 flex items-center gap-1">
+                      ✓ Link preview loaded: {newItemOGData.title || 'Data found'}
+                    </div>
+                  )}
+                  {!newItemOGLoading && newItem.link && newItem.link.startsWith('http') && !newItemOGData && (
+                    <div className="text-xs text-orange-600 flex items-center gap-1">
+                      ⚠ Couldn't load preview (some sites block automated requests)
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col gap-3">
                   <Label>Description:</Label>
@@ -473,10 +550,26 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   <Input
                     id="edit-link"
                     value={editForm.link}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, link: e.target.value }))}
+                    onChange={(e) => handleEditFormLinkChange(e.target.value)}
                     placeholder="Link (optional)"
                     disabled={isSubmitting}
                   />
+                  {editFormOGLoading && (
+                    <div className="text-xs text-blue-600 flex items-center gap-1">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Loading link preview...
+                    </div>
+                  )}
+                  {!editFormOGLoading && editFormOGData && (
+                    <div className="text-xs text-green-600 flex items-center gap-1">
+                      ✓ Link preview loaded: {editFormOGData.title || 'Data found'}
+                    </div>
+                  )}
+                  {!editFormOGLoading && editForm.link && editForm.link.startsWith('http') && !editFormOGData && (
+                    <div className="text-xs text-orange-600 flex items-center gap-1">
+                      ⚠ Couldn't load preview (some sites block automated requests)
+                    </div>
+                  )}
                 </div>
               </div>
               

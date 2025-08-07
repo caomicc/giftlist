@@ -16,11 +16,38 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, description, price, link, owner_id, is_gift_card, gift_card_target_amount } = await request.json()
+    const {
+      name,
+      description,
+      price,
+      link,
+      owner_id,
+      is_gift_card,
+      gift_card_target_amount,
+      og_title,
+      og_description,
+      og_image,
+      og_site_name
+    } = await request.json()
 
     const data = await sql`
-      INSERT INTO gift_items (name, description, price, link, owner_id, is_gift_card, gift_card_target_amount)
-      VALUES (${name}, ${description || null}, ${price || null}, ${link || null}, ${owner_id}, ${is_gift_card || false}, ${gift_card_target_amount || null})
+      INSERT INTO gift_items (
+        name, description, price, link, owner_id, is_gift_card, gift_card_target_amount,
+        og_title, og_description, og_image, og_site_name
+      )
+      VALUES (
+        ${name},
+        ${description || null},
+        ${price || null},
+        ${link || null},
+        ${owner_id},
+        ${is_gift_card || false},
+        ${gift_card_target_amount || null},
+        ${og_title || null},
+        ${og_description || null},
+        ${og_image || null},
+        ${og_site_name || null}
+      )
       RETURNING *
     `
 
@@ -59,10 +86,23 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { id, purchased_by, name, description, price, link, is_gift_card, gift_card_target_amount } = await request.json()
+    const {
+      id,
+      purchased_by,
+      name,
+      description,
+      price,
+      link,
+      is_gift_card,
+      gift_card_target_amount,
+      og_title,
+      og_description,
+      og_image,
+      og_site_name
+    } = await request.json()
 
     // If updating purchase status (regular items)
-    if (purchased_by !== undefined && !name && !description && !price && !link && !is_gift_card && !gift_card_target_amount) {
+    if (purchased_by !== undefined && !name && !description && !price && !link && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name) {
       const data = await sql`
         UPDATE gift_items
         SET purchased_by = ${purchased_by}
@@ -73,7 +113,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // If updating gift item details
-    if (name || description || price || link || is_gift_card !== undefined || gift_card_target_amount !== undefined) {
+    if (name || description || price || link || is_gift_card !== undefined || gift_card_target_amount !== undefined || og_title || og_description || og_image || og_site_name) {
       const data = await sql`
         UPDATE gift_items
         SET
@@ -83,6 +123,10 @@ export async function PUT(request: NextRequest) {
           link = ${link || null},
           is_gift_card = ${is_gift_card !== undefined ? is_gift_card : false},
           gift_card_target_amount = ${gift_card_target_amount || null},
+          og_title = ${og_title || null},
+          og_description = ${og_description || null},
+          og_image = ${og_image || null},
+          og_site_name = ${og_site_name || null},
           updated_at = NOW()
         WHERE id = ${id}
         RETURNING *

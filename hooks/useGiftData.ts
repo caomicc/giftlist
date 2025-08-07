@@ -42,6 +42,10 @@ export function useGiftData() {
     owner_id: string
     is_gift_card?: boolean
     gift_card_target_amount?: number
+    og_title?: string
+    og_description?: string
+    og_image?: string
+    og_site_name?: string
   }) => {
     try {
       const response = await fetch('/api/gift-items', {
@@ -71,6 +75,10 @@ export function useGiftData() {
     link?: string
     is_gift_card?: boolean
     gift_card_target_amount?: number
+    og_title?: string
+    og_description?: string
+    og_image?: string
+    og_site_name?: string
   }) => {
     try {
       const response = await fetch('/api/gift-items', {
@@ -168,6 +176,32 @@ export function useGiftData() {
     }
   }
 
+  // Fetch OpenGraph data
+  const fetchOGData = async (url: string) => {
+    try {
+      const response = await fetch('/api/og-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch OG data')
+      }
+      
+      const { ogData } = await response.json()
+      return ogData
+    } catch (err) {
+      console.warn('Failed to fetch OG data for URL:', url, err)
+      // Don't set error state for OG data failures, just log and return null
+      // This allows the form to continue working even if OG data can't be fetched
+      return null
+    }
+  }
+
   // Initial data fetch
   useEffect(() => {
     const fetchData = async () => {
@@ -196,6 +230,7 @@ export function useGiftData() {
     togglePurchaseStatus,
     addGiftCardPurchase,
     getGiftCardPurchases,
+    fetchOGData,
     refetch: () => Promise.all([fetchUsers(), fetchGiftItems()]),
   }
 }

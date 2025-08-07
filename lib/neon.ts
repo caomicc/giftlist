@@ -28,6 +28,10 @@ export type GiftItem = {
   is_gift_card: boolean
   gift_card_target_amount: number | null
   gift_card_total_purchased: number
+  og_title: string | null
+  og_description: string | null
+  og_image: string | null
+  og_site_name: string | null
   created_at: string
   updated_at: string
 }
