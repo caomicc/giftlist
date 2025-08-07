@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
+import { requireAuth } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,13 +8,13 @@ export async function GET(request: NextRequest) {
     const listId = searchParams.get('list_id')
     const userId = searchParams.get('user_id')
     
-    // Get current user from session for permission checking
-    const currentUser = request.headers.get('x-user-id') // We'll need to pass this from the client
+    // Get current user from authentication
+    const currentUser = await requireAuth()
     
     let giftItems;
 
     if (listId) {
-      // Get items for a specific list, including visibility logic
+      // Get items for a specific list, checking permissions
       giftItems = await sql`
         SELECT 
           gi.*,
@@ -26,7 +27,16 @@ export async function GET(request: NextRequest) {
         JOIN lists l ON gi.list_id = l.id
         LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
         LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
+        LEFT JOIN list_permissions lp ON l.id = lp.list_id AND lp.user_id = ${currentUser.id}
         WHERE gi.list_id = ${listId}
+        AND (
+          l.owner_id = ${currentUser.id}  -- User owns the list
+          OR (lp.user_id IS NOT NULL AND lp.can_view = TRUE)  -- User has explicit permission to view
+          OR (lp.user_id IS NULL AND NOT EXISTS (
+            SELECT 1 FROM list_permissions lp2 
+            WHERE lp2.list_id = l.id
+          ))  -- No permissions set for this list means visible by default
+        )
         ORDER BY gi.created_at DESC
       `
     } else if (userId) {
@@ -47,7 +57,6 @@ export async function GET(request: NextRequest) {
       `
     } else {
       // Get all items that the current user can view based on list permissions
-      // For now, we'll get all items and filter on the client side since we need proper session handling
       giftItems = await sql`
         SELECT 
           gi.*,
@@ -60,6 +69,15 @@ export async function GET(request: NextRequest) {
         JOIN lists l ON gi.list_id = l.id
         LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
         LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
+        LEFT JOIN list_permissions lp ON l.id = lp.list_id AND lp.user_id = ${currentUser.id}
+        WHERE (
+          l.owner_id = ${currentUser.id}  -- User owns the list
+          OR (lp.user_id IS NOT NULL AND lp.can_view = TRUE)  -- User has explicit permission to view
+          OR (lp.user_id IS NULL AND NOT EXISTS (
+            SELECT 1 FROM list_permissions lp2 
+            WHERE lp2.list_id = l.id
+          ))  -- No permissions set for this list means visible by default
+        )
         ORDER BY gi.created_at DESC
       `
     }
