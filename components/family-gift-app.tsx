@@ -514,12 +514,12 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                               </Avatar>
                               <div className="flex flex-col text-left">
                                 <span className="font-medium">{member.name}'s Gift List</span>
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-xs md:text-sm text-muted-foreground">
                                   {memberGifts.length} items • {purchasedCount} purchased
                                 </span>
                               </div>
                             </div>
-                            <Badge className="min-w-[3rem]" variant="secondary">{memberGifts.length}</Badge>
+                            {/* <Badge className="min-w-[3rem]" variant="secondary">{memberGifts.length}</Badge> */}
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>

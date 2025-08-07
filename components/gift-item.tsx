@@ -73,7 +73,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
   return (
     <>
       <div
-        className={`flex items-center justify-between p-4 border rounded-lg transition-colors relative ${
+        className={`flex items-center flex-col md:flex-row justify-between p-4 border rounded-lg transition-colors relative ${
           isArchived
             ? "bg-gray-100 border-gray-300 opacity-75"
             : (isPurchased && !isMyGift) || (isGiftCard && isGiftCardComplete && !isMyGift)
@@ -81,7 +81,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
             : "bg-indigo-50"
         }`}
       >
-        <div className="flex items-center gap-1 absolute right-4 top-4">
+        <div className="flex items-start md:items-center gap-1 md:absolute w-full md:w-auto md:right-4 md:top-4 mb-2">
             {isArchived && (
               <Badge variant="outline" className="text-gray-600 border-gray-400">
                 <Archive className="w-3 h-3 mr-1" />
@@ -89,7 +89,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
               </Badge>
             )}
             {isGiftCard && (
-              <Badge variant="outline" className="text-purple-600 border-purple-300">
+              <Badge variant="giftcard" className="">
                 <CreditCard className="w-3 h-3 mr-1" />
                 Gift Card
               </Badge>
@@ -111,7 +111,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
         <div className="flex-1 w-full">
           <div className="flex flex-col gap-1 mb-1">
             <h3
-              className={`font-medium truncate text-lg pr-20 ${
+              className={`font-medium truncate md:text-lg md:pr-20 ${
                 isArchived ? "line-through text-gray-500" :
                 ((isPurchased && !isMyGift) || (isGiftCard && isGiftCardComplete && !isMyGift)) ? "line-through text-muted-foreground" : ""
               }`}
@@ -129,13 +129,13 @@ const GiftItem: React.FC<GiftItemProps> = ({
           {/* OpenGraph Data Display */}
           {(item.og_title || item.og_description || item.og_image) && (
             <div className="mb-6">
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-col md:flex-row">
                 {item.og_image && (
                   <div className="flex-shrink-0">
                     <img
                       src={item.og_image}
                       alt={item.og_title || item.name}
-                      className="w-16 h-16 object-cover rounded"
+                      className="size-20 md:size-16 object-cover rounded"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none'
                       }}
@@ -163,15 +163,16 @@ const GiftItem: React.FC<GiftItemProps> = ({
             </div>
           )}
 
-          <div className='flex items-center gap-2'>
+          <div className='flex md:items-center gap-2  flex-col md:flex-row'>
             {item.link && (
               <Link
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
+                className='w-full md:w-auto'
                 passHref
               >
-                <Button variant="default" size="sm">
+                <Button variant="default" size="sm" className="w-full md:w-auto">
                   View Link <ExternalLink className="size-3" />
                 </Button>
               </Link>
@@ -204,7 +205,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
             )}
             {isMyGift && (
           // My Gifts - Edit/Delete/Archive buttons
-          <div className="flex gap-2 ml-auto">
+          <div className="flex md:flex-row gap-2 ml-auto">
             <Button
               variant="ghost"
               size="sm"

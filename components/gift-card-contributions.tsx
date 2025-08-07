@@ -134,11 +134,12 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
         return (
           <div
             key={purchase.id}
-            className="flex items-center justify-between text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded"
+            className="flex flex-col gap-3 md:flex-row items-center justify-between text-xs text-gray-600 bg-white/90 p-2 rounded-lg"
           >
-            <div className="flex items-center gap-2">
-              <span className="font-medium">{purchase.purchaser_name}</span>
-              <span>added</span>
+            <div className="flex items-center gap-2  justify-between w-full md:w-auto">
+              <span>
+                <span className="font-medium">{purchase.purchaser_name}</span> added:
+              </span>
               {isEditing ? (
                 <div className="flex items-center gap-1">
                   <span>$</span>

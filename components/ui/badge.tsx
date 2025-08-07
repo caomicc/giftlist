@@ -21,6 +21,8 @@ const badgeVariants = cva(
           "border-purple-600 bg-purple-500 text-white [a&]:hover:bg-purple-600 focus-visible:ring-purple-300",
         price:
           "border-emerald-300 bg-emerald-200 text-emerald-950 [a&]:hover:bg-emerald-200 focus-visible:ring-emerald-300",
+        giftcard:
+          "border-yellow-300 bg-yellow-100 text-yellow-950 [a&]:hover:bg-yellow-200 focus-visible:ring-yellow-300",
       },
     },
     defaultVariants: {
