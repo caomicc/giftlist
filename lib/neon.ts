@@ -17,6 +17,16 @@ export type User = {
   created_at: string
 }
 
+export type List = {
+  id: string
+  name: string
+  description: string | null
+  owner_id: string
+  is_public: boolean
+  created_at: string
+  updated_at: string
+}
+
 export type GiftItem = {
   id: string
   name: string
@@ -25,6 +35,7 @@ export type GiftItem = {
   link: string | null
   owner_id: string
   purchased_by: string | null
+  list_id: string
   is_gift_card: boolean
   gift_card_target_amount: number | null
   gift_card_total_purchased: number

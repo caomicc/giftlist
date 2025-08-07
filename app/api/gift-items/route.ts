@@ -1,9 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const giftItems = await sql`SELECT * FROM gift_items ORDER BY created_at DESC`
+    const { searchParams } = new URL(request.url)
+    const listId = searchParams.get('list_id')
+    const userId = searchParams.get('user_id')
+
+    let giftItems;
+
+    if (listId) {
+      // Get items for a specific list, including visibility logic
+      giftItems = await sql`
+        SELECT 
+          gi.*,
+          l.is_public,
+          l.name as list_name,
+          l.owner_id as list_owner_id,
+          u_owner.name as owner_name,
+          u_purchaser.name as purchaser_name
+        FROM gift_items gi
+        JOIN lists l ON gi.list_id = l.id
+        LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
+        LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
+        WHERE gi.list_id = ${listId}
+        ORDER BY gi.created_at DESC
+      `
+    } else if (userId) {
+      // Get all items owned by a specific user across all their lists
+      giftItems = await sql`
+        SELECT 
+          gi.*,
+          l.is_public,
+          l.name as list_name,
+          u_owner.name as owner_name,
+          u_purchaser.name as purchaser_name
+        FROM gift_items gi
+        JOIN lists l ON gi.list_id = l.id
+        LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
+        LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
+        WHERE gi.owner_id = ${userId}
+        ORDER BY l.name, gi.created_at DESC
+      `
+    } else {
+      // Get all items (maintain backward compatibility)
+      giftItems = await sql`
+        SELECT 
+          gi.*,
+          l.is_public,
+          l.name as list_name,
+          l.owner_id as list_owner_id,
+          u_owner.name as owner_name,
+          u_purchaser.name as purchaser_name
+        FROM gift_items gi
+        JOIN lists l ON gi.list_id = l.id
+        LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
+        LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
+        ORDER BY gi.created_at DESC
+      `
+    }
+
     return NextResponse.json({ giftItems })
   } catch (error) {
     console.error('Failed to fetch gift items:', error)
@@ -22,6 +78,7 @@ export async function POST(request: NextRequest) {
       price,
       link,
       owner_id,
+      list_id,
       is_gift_card,
       gift_card_target_amount,
       og_title,
@@ -30,9 +87,29 @@ export async function POST(request: NextRequest) {
       og_site_name
     } = await request.json()
 
+    if (!list_id) {
+      return NextResponse.json(
+        { error: 'List ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Verify the list exists and belongs to the owner
+    const [list] = await sql`
+      SELECT id FROM lists
+      WHERE id = ${list_id} AND owner_id = ${owner_id}
+    `
+
+    if (!list) {
+      return NextResponse.json(
+        { error: 'List not found or access denied' },
+        { status: 404 }
+      )
+    }
+
     const data = await sql`
       INSERT INTO gift_items (
-        name, description, price, link, owner_id, is_gift_card, gift_card_target_amount,
+        name, description, price, link, owner_id, list_id, is_gift_card, gift_card_target_amount,
         og_title, og_description, og_image, og_site_name
       )
       VALUES (
@@ -41,6 +118,7 @@ export async function POST(request: NextRequest) {
         ${price || null},
         ${link || null},
         ${owner_id},
+        ${list_id},
         ${is_gift_card || false},
         ${gift_card_target_amount || null},
         ${og_title || null},
