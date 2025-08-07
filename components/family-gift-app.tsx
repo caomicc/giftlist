@@ -399,7 +399,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   }
 
   const handleDeleteList = async (listId: string) => {
-    if (!confirm('Are you sure you want to delete this list? All items in it will be deleted.')) return
+    if (!confirm('Are you sure you want to delete this list? Note: Lists with items cannot be deleted - you must move or delete all items first.')) return
 
     setIsSubmitting(true)
     try {
@@ -409,12 +409,14 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Failed to delete list')
+        alert(error.error || 'Failed to delete list')
+        return
       }
 
       await fetchUserLists()
     } catch (err) {
       console.error("Failed to delete list:", err)
+      alert('Failed to delete list')
     } finally {
       setIsSubmitting(false)
     }
