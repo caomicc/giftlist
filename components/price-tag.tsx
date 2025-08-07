@@ -1,28 +1,18 @@
 import React from 'react';
 import { Badge } from './ui/badge';
+import { formatPrice, getUserLocale, getUserCurrency } from '@/lib/currency';
 
 type PriceTagProps = {
   price: string;
 };
 
 const PriceTag: React.FC<PriceTagProps> = ({ price }) => {
+  const locale = getUserLocale();
+  const currency = getUserCurrency(locale);
+  
   return (
       <Badge variant="price" className="uppercase text-xs tracking-wider">
-        {price
-          ? (() => {
-            // If price is a string, check if it starts with "$"
-            let priceStr = String(price).trim()
-            // Add $ if not present and is a number
-            if (!priceStr.startsWith("$") && /^\d+(\.\d+)?$/.test(priceStr)) {
-              priceStr = `$${priceStr}`
-            }
-            // Add .00 if no cents
-            if (/^\$\d+$/.test(priceStr)) {
-              priceStr = `${priceStr}.00`
-            }
-            return priceStr
-          })()
-      : price}
+        {price ? formatPrice(price, currency, locale) : '—'}
     </Badge>
   )
 };

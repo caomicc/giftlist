@@ -5,6 +5,7 @@ import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive } from 'l
 import Link from 'next/link';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
+import GiftCardDetails from './gift-card-details';
 
 export type GiftItemProps = {
   item: {
@@ -89,10 +90,13 @@ const GiftItem: React.FC<GiftItemProps> = ({
                 <PriceTag price={item.price} />
               )}
               {isGiftCard && (
-                <Badge variant="secondary">
-                  ${giftCardTotal.toFixed(2)}
-                  {giftCardTarget && giftCardTarget > 0 && ` / $${giftCardTarget.toFixed(2)}`}
-                </Badge>
+                <GiftCardDetails
+                  giftItemId={item.id}
+                  currentUserId={currentUserId}
+                  isOwner={isMyGift}
+                  totalPurchased={giftCardTotal}
+                  targetAmount={giftCardTarget}
+                />
               )}
 
               {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
