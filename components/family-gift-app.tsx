@@ -956,50 +956,6 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                 </AccordionItem>
                               ))}
                             </Accordion>
-                                  {/* <AccordionItem key={listId} value={listId}>
-                                    <AccordionTrigger className="hover:no-underline items-center">
-                                      <div className="flex items-center gap-3 w-full">
-                                        <div className="flex-1">
-                                          <h3 className="font-medium text-lg">{listData.name}</h3>
-                                          {listData.description && (
-                                            <p className="text-sm text-muted-foreground">{listData.description}</p>
-                                          )}
-                                          <div className="flex items-center gap-2 mt-1">
-                                            <Badge variant={listData.isPublic ? "default" : "secondary"} className="text-xs">
-                                              {listData.isPublic ? "Can see purchased items" : "Cannot see purchased items"}
-                                            </Badge>
-                                            <span className="text-xs text-muted-foreground">
-                                              {listData.items.length} items
-                                            </span>
-                                            {listData.createdAt && (
-                                              <span className="text-xs text-muted-foreground">
-                                                Created {new Date(listData.createdAt).toLocaleDateString()}
-                                              </span>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                      <div className="space-y-3">
-                                        {listData.items.map((item: any) => (
-                                          <GiftItem
-                                            key={item.id}
-                                            item={item}
-                                            currentUserId={currentUser.id}
-                                            variant="my-gifts"
-                                            onEdit={handleEditGiftItem}
-                                            onDelete={handleRemoveGiftItem}
-                                            onArchive={handleArchiveItem}
-                                          />
-                                        ))}
-                                      </div>
-                                    </AccordionContent>
-                                  </AccordionItem>
-                                ))}
-                              </Accordion> */}
-                            {/* ))} */}
-
                             {/* Archived Items by List */}
                             {Object.keys(archivedByList).length > 0 && (
                               <div className="pt-4 border-t">
