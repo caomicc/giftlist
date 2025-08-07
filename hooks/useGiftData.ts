@@ -189,6 +189,46 @@ export function useGiftData() {
     }
   }
 
+  // Edit gift card purchase
+  const editGiftCardPurchase = async (purchaseId: string, amount: number) => {
+    try {
+      const response = await fetch(`/api/gift-card-purchases?id=${purchaseId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount }),
+      })
+
+      if (!response.ok) throw new Error('Failed to edit gift card purchase')
+      const { purchase, giftItem } = await response.json()
+
+      setGiftItems((prev) => prev.map((item) => (item.id === giftItem.id ? giftItem : item)))
+      return { purchase, giftItem }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to edit gift card purchase")
+      throw err
+    }
+  }
+
+  // Delete gift card purchase
+  const deleteGiftCardPurchase = async (purchaseId: string) => {
+    try {
+      const response = await fetch(`/api/gift-card-purchases?id=${purchaseId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) throw new Error('Failed to delete gift card purchase')
+      const { giftItem } = await response.json()
+
+      setGiftItems((prev) => prev.map((item) => (item.id === giftItem.id ? giftItem : item)))
+      return { giftItem }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete gift card purchase")
+      throw err
+    }
+  }
+
   // Get gift card purchases
   const getGiftCardPurchases = async (giftItemId: string) => {
     try {
@@ -256,6 +296,8 @@ export function useGiftData() {
     togglePurchaseStatus,
     toggleArchiveStatus,
     addGiftCardPurchase,
+    editGiftCardPurchase,
+    deleteGiftCardPurchase,
     getGiftCardPurchases,
     fetchOGData,
     refetch: () => Promise.all([fetchUsers(), fetchGiftItems()]),

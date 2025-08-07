@@ -36,7 +36,7 @@ const GiftCardDetails: React.FC<GiftCardDetailsProps> = ({
 
   const fetchPurchases = async () => {
     if (loading) return;
-    
+
     setLoading(true);
     try {
       const response = await fetch(`/api/gift-card-purchases?gift_item_id=${giftItemId}`);
@@ -58,13 +58,13 @@ const GiftCardDetails: React.FC<GiftCardDetailsProps> = ({
   }, [showDetails]);
 
   // Filter out current user's own purchases if they're the owner
-  const visiblePurchases = isOwner 
+  const visiblePurchases = isOwner
     ? purchases.filter(purchase => purchase.purchaser_id !== currentUserId)
     : purchases;
 
   // Calculate totals
   const visibleTotal = visiblePurchases.reduce((sum, purchase) => sum + parseFloat(purchase.amount), 0);
-  const currentUserTotal = isOwner 
+  const currentUserTotal = isOwner
     ? purchases.filter(purchase => purchase.purchaser_id === currentUserId).reduce((sum, purchase) => sum + parseFloat(purchase.amount), 0)
     : 0;
 

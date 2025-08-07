@@ -8,7 +8,7 @@
  */
 export function formatCurrency(amount: number | string, currency: string = 'USD', locale: string = 'en-US'): string {
   const numericAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
-  
+
   if (isNaN(numericAmount)) {
     return '—';
   }
@@ -29,18 +29,18 @@ export function formatCurrency(amount: number | string, currency: string = 'USD'
  */
 export function formatPrice(price: string | number, currency: string = 'USD', locale: string = 'en-US'): string {
   if (!price) return '—';
-  
+
   let priceStr = String(price).trim();
-  
+
   // Remove existing currency symbols and clean the string
   priceStr = priceStr.replace(/[$€£¥₹]/g, '').replace(/,/g, '');
-  
+
   const numericPrice = parseFloat(priceStr);
-  
+
   if (isNaN(numericPrice)) {
     return price.toString(); // Return original if we can't parse it
   }
-  
+
   return formatCurrency(numericPrice, currency, locale);
 }
 
@@ -59,7 +59,7 @@ export function getUserLocale(): string {
  */
 export function getUserCurrency(locale?: string): string {
   const userLocale = locale || getUserLocale();
-  
+
   // Map common locales to currencies
   const currencyMap: Record<string, string> = {
     'en-US': 'USD',
@@ -77,6 +77,6 @@ export function getUserCurrency(locale?: string): string {
     'pt-BR': 'BRL',
     'in-IN': 'INR',
   };
-  
+
   return currencyMap[userLocale] || 'USD';
 }

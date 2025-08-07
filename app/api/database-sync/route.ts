@@ -10,7 +10,7 @@ export async function GET() {
       WHERE table_schema = 'public' 
       ORDER BY table_name
     `
-    
+
     // Check gift_items table columns
     const giftItemsColumns = await sql`
       SELECT column_name, data_type, is_nullable, column_default
@@ -70,9 +70,9 @@ export async function GET() {
   } catch (error) {
     console.error('Database diagnostic failed:', error)
     return NextResponse.json(
-      { 
+      {
         status: 'error',
-        error: 'Failed to run database diagnostic', 
+        error: 'Failed to run database diagnostic',
         details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()
       },
@@ -185,9 +185,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Migration failed:', error)
     return NextResponse.json(
-      { 
+      {
         status: 'error',
-        error: 'Failed to run migration', 
+        error: 'Failed to run migration',
         details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()
       },

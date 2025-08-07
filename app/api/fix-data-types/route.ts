@@ -77,9 +77,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Fix data types failed:', error)
     return NextResponse.json(
-      { 
+      {
         status: 'error',
-        error: 'Failed to fix data types', 
+        error: 'Failed to fix data types',
         details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()
       },

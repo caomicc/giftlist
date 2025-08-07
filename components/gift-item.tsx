@@ -6,6 +6,7 @@ import Link from 'next/link';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
 import GiftCardDetails from './gift-card-details';
+import GiftCardContributions from './gift-card-contributions';
 
 export type GiftItemProps = {
   item: {
@@ -47,6 +48,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
   onGiftCardPurchase
 }) => {
   const [isGiftCardDialogOpen, setIsGiftCardDialogOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const isMyGift = variant === 'my-gifts';
   const isPurchased = !!item.purchased_by;
@@ -62,6 +64,12 @@ const GiftItem: React.FC<GiftItemProps> = ({
     }
   };
 
+  const handlePurchaseUpdate = () => {
+    setRefreshKey(prev => prev + 1);
+    // This will trigger a refresh of parent component data
+    // You might want to call a parent callback here if needed
+  };
+
   return (
     <>
       <div
@@ -74,54 +82,49 @@ const GiftItem: React.FC<GiftItemProps> = ({
         }`}
       >
         <div className="flex items-center gap-1 absolute right-4 top-4">
-              {isArchived && (
-                <Badge variant="outline" className="text-gray-600 border-gray-400">
-                  <Archive className="w-3 h-3 mr-1" />
-                  Archived
-                </Badge>
-              )}
-              {isGiftCard && (
-                <Badge variant="outline" className="text-purple-600 border-purple-300">
-                  <CreditCard className="w-3 h-3 mr-1" />
-                  Gift Card
-                </Badge>
-              )}
-              {item.price !== undefined && !isGiftCard && (
-                <PriceTag price={item.price} />
-              )}
-              {isGiftCard && (
-                <GiftCardDetails
-                  giftItemId={item.id}
-                  currentUserId={currentUserId}
-                  isOwner={isMyGift}
-                  totalPurchased={giftCardTotal}
-                  targetAmount={giftCardTarget}
-                />
-              )}
-
-              {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
-                <Badge className="bg-green-100 text-green-800">
-                  {isGiftCard ? 'Complete' : `Purchased by ${purchaserName}`}
-                </Badge>
-              )}
-            </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
+            {isArchived && (
+              <Badge variant="outline" className="text-gray-600 border-gray-400">
+                <Archive className="w-3 h-3 mr-1" />
+                Archived
+              </Badge>
+            )}
+            {isGiftCard && (
+              <Badge variant="outline" className="text-purple-600 border-purple-300">
+                <CreditCard className="w-3 h-3 mr-1" />
+                Gift Card
+              </Badge>
+            )}
+            {item.price !== undefined && !isGiftCard && (
+              <PriceTag price={item.price} />
+            )}
+            {isGiftCard && (
+              <GiftCardDetails
+                key={refreshKey}
+                giftItemId={item.id}
+                currentUserId={currentUserId}
+                isOwner={isMyGift}
+                totalPurchased={giftCardTotal}
+                targetAmount={giftCardTarget}
+              />
+            )}
+        </div>
+        <div className="flex-1 w-full">
+          <div className="flex flex-col gap-1 mb-1">
             <h3
-              className={`font-medium ${
+              className={`font-medium truncate text-lg pr-20 ${
                 isArchived ? "line-through text-gray-500" :
                 ((isPurchased && !isMyGift) || (isGiftCard && isGiftCardComplete && !isMyGift)) ? "line-through text-muted-foreground" : ""
               }`}
             >
               {item.name}
             </h3>
-
-          </div>
           {item.description && (
-            <p className="text-sm text-foreground mb-6">
+            <p className="text-sm text-foreground mb-4">
               {item.description}
             </p>
           )}
+
+          </div>
 
           {/* OpenGraph Data Display */}
           {(item.og_title || item.og_description || item.og_image) && (
@@ -230,7 +233,24 @@ const GiftItem: React.FC<GiftItemProps> = ({
             </Button>
           </div>
         )}
+
           </div>
+               {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
+                <Badge className="bg-green-100 text-green-800 mt-4">
+                  {isGiftCard ? 'Complete' : `Purchased by ${purchaserName}`}
+                </Badge>
+              )}
+
+          {/* Gift Card Contributions */}
+          {isGiftCard && (
+            <GiftCardContributions
+              key={`contributions-${refreshKey}`}
+              giftItemId={item.id}
+              currentUserId={currentUserId}
+              isOwner={isMyGift}
+              onPurchaseUpdate={handlePurchaseUpdate}
+            />
+          )}
         </div>
 
         {/* Action Buttons */}

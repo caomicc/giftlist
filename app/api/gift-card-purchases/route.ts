@@ -111,3 +111,56 @@ export async function DELETE(request: NextRequest) {
     )
   }
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const purchaseId = searchParams.get('id')
+    const { amount } = await request.json()
+
+    if (!purchaseId) {
+      return NextResponse.json(
+        { error: 'Purchase ID is required' },
+        { status: 400 }
+      )
+    }
+
+    if (!amount || amount <= 0) {
+      return NextResponse.json(
+        { error: 'Valid amount is required' },
+        { status: 400 }
+      )
+    }
+
+    // Update the purchase amount
+    const updatedPurchase = await sql`
+      UPDATE gift_card_purchases 
+      SET amount = ${amount}
+      WHERE id = ${purchaseId}
+      RETURNING *
+    `
+
+    if (updatedPurchase.length === 0) {
+      return NextResponse.json(
+        { error: 'Purchase not found' },
+        { status: 404 }
+      )
+    }
+
+    // Get the updated gift item
+    const giftItem = await sql`
+      SELECT * FROM gift_items WHERE id = ${updatedPurchase[0].gift_item_id}
+    `
+
+    return NextResponse.json({
+      purchase: updatedPurchase[0],
+      giftItem: giftItem[0]
+    })
+  } catch (error) {
+    console.error('Failed to update gift card purchase:', error)
+    return NextResponse.json(
+      { error: 'Failed to update gift card purchase' },
+      { status: 500 }
+    )
+  }
+}

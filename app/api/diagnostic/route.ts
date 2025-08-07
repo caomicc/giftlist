@@ -10,7 +10,7 @@ export async function GET() {
       WHERE table_schema = 'public' 
       ORDER BY table_name
     `
-    
+
     // Check if gift_card_purchases table exists and its columns
     let giftCardPurchasesInfo = null
     try {

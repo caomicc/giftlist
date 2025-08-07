@@ -452,7 +452,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                           onArchive={handleArchiveItem}
                         />
                       ))}
-                      
+
                       {/* Archived Items */}
                       {archivedMyGifts.length > 0 && (
                         <>
@@ -504,7 +504,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
                     return (
                       <AccordionItem key={member.id} value={member.id}>
-                        <AccordionTrigger className="hover:no-underline">
+                        <AccordionTrigger className="hover:no-underline items-center">
                           <div className="flex items-center justify-between w-full pr-4">
                             <div className="flex items-center gap-3">
                               <Avatar className="size-9">
@@ -519,7 +519,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                 </span>
                               </div>
                             </div>
-                            <Badge variant="secondary">{memberGifts.length}</Badge>
+                            <Badge className="min-w-[3rem]" variant="secondary">{memberGifts.length}</Badge>
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
