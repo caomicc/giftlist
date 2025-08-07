@@ -74,6 +74,7 @@ export function useGiftData() {
     description?: string
     price?: string
     link?: string
+    list_id?: string
     is_gift_card?: boolean
     gift_card_target_amount?: number
     og_title?: string

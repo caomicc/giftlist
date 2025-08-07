@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trash2, Plus, Gift, Users, AlertCircle, Loader2, Database, Edit, CreditCard, Archive } from 'lucide-react'
+import { Trash2, Plus, Gift, Users, AlertCircle, Loader2, Database, Edit, CreditCard, Archive, Settings } from 'lucide-react'
 import { useGiftData } from "@/hooks/useGiftData"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -16,6 +16,8 @@ import { Avatar, AvatarFallback } from "./ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import GiftItem from "./gift-item"
 
 interface User {
@@ -35,7 +37,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     price: "",
     link: "",
     isGiftCard: false,
-    giftCardTargetAmount: ""
+    giftCardTargetAmount: "",
+    selectedListId: ""
   })
   const [newItemOGData, setNewItemOGData] = useState<any>(null)
   const [newItemOGLoading, setNewItemOGLoading] = useState(false)
@@ -47,11 +50,26 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     price: "",
     link: "",
     isGiftCard: false,
-    giftCardTargetAmount: ""
+    giftCardTargetAmount: "",
+    selectedListId: ""
   })
   const [editFormOGData, setEditFormOGData] = useState<any>(null)
   const [editFormOGLoading, setEditFormOGLoading] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false)
+  const [isManageListsDialogOpen, setIsManageListsDialogOpen] = useState(false)
+  const [editingList, setEditingList] = useState<any>(null)
+  const [editListForm, setEditListForm] = useState({
+    name: "",
+    description: "",
+    isPublic: false
+  })
+  const [newListForm, setNewListForm] = useState({
+    name: "",
+    description: "",
+    isPublic: false
+  })
+  const [userLists, setUserLists] = useState<any[]>([])
 
   const {
     users,
@@ -67,8 +85,59 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     fetchOGData
   } = useGiftData()
 
+  // Fetch user's lists
+  const fetchUserLists = async () => {
+    try {
+      const response = await fetch('/api/lists')
+      if (!response.ok) throw new Error('Failed to fetch lists')
+      const lists = await response.json()
+      setUserLists(lists)
+
+      // Set the first list as selected for new items if not already set
+      if (lists.length > 0) {
+        if (!newItem.selectedListId) {
+          setNewItem(prev => ({ ...prev, selectedListId: lists[0].id }))
+        }
+      } else {
+        // Create a default list if none exists
+        await createDefaultList()
+      }
+    } catch (err) {
+      console.error("Failed to fetch lists:", err)
+    }
+  }
+
+  // Create a default list for new users
+  const createDefaultList = async () => {
+    try {
+      const response = await fetch('/api/lists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: `${currentUser.name || 'My'}'s List`,
+          description: 'Default wishlist',
+          is_public: false
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to create default list')
+      const newList = await response.json()
+      setUserLists([newList])
+      setNewItem(prev => ({ ...prev, selectedListId: newList.id }))
+    } catch (err) {
+      console.error("Failed to create default list:", err)
+    }
+  }
+
+  // Initialize lists on component mount
+  useEffect(() => {
+    fetchUserLists()
+  }, [])
+
   const handleAddGiftItem = async () => {
-    if (!newItem.name.trim() || isSubmitting) return
+    if (!newItem.name.trim() || isSubmitting || !newItem.selectedListId) return
 
     setIsSubmitting(true)
     try {
@@ -78,6 +147,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         price: newItem.price || undefined,
         link: newItem.link || undefined,
         owner_id: currentUser.id,
+        list_id: newItem.selectedListId,
         is_gift_card: newItem.isGiftCard,
         gift_card_target_amount: newItem.isGiftCard && newItem.giftCardTargetAmount
           ? parseFloat(newItem.giftCardTargetAmount)
@@ -87,14 +157,15 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         og_image: newItemOGData?.image,
         og_site_name: newItemOGData?.siteName,
       })
-      setNewItem({
+      setNewItem(prev => ({
         name: "",
         description: "",
         price: "",
         link: "",
         isGiftCard: false,
-        giftCardTargetAmount: ""
-      })
+        giftCardTargetAmount: "",
+        selectedListId: prev.selectedListId // Keep the same list selected
+      }))
       setNewItemOGData(null)
     } catch (err) {
       console.error("Failed to add gift item:", err)
@@ -119,7 +190,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       price: item.price || "",
       link: item.link || "",
       isGiftCard: item.is_gift_card || false,
-      giftCardTargetAmount: item.gift_card_target_amount ? item.gift_card_target_amount.toString() : ""
+      giftCardTargetAmount: item.gift_card_target_amount ? item.gift_card_target_amount.toString() : "",
+      selectedListId: item.list_id || ""
     })
     // Set existing OG data if available
     if (item.og_title || item.og_description || item.og_image) {
@@ -136,7 +208,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   }
 
   const handleUpdateGiftItem = async () => {
-    if (!editingItem || !editForm.name.trim() || isSubmitting) return
+    if (!editingItem || !editForm.name.trim() || isSubmitting || !editForm.selectedListId) return
 
     setIsSubmitting(true)
     try {
@@ -145,6 +217,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         description: editForm.description || undefined,
         price: editForm.price || undefined,
         link: editForm.link || undefined,
+        list_id: editForm.selectedListId,
         is_gift_card: editForm.isGiftCard,
         gift_card_target_amount: editForm.isGiftCard && editForm.giftCardTargetAmount
           ? parseFloat(editForm.giftCardTargetAmount)
@@ -162,7 +235,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         price: "",
         link: "",
         isGiftCard: false,
-        giftCardTargetAmount: ""
+        giftCardTargetAmount: "",
+        selectedListId: ""
       })
       setEditFormOGData(null)
     } catch (err) {
@@ -194,6 +268,108 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await toggleArchiveStatus(itemId)
     } catch (err) {
       console.error("Failed to toggle archive status:", err)
+    }
+  }
+
+  const handleCreateList = async () => {
+    if (!newListForm.name.trim() || isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/lists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newListForm.name.trim(),
+          description: newListForm.description.trim() || null,
+          is_public: newListForm.isPublic
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create list')
+      }
+
+      await response.json()
+
+      // Reset form and close dialog
+      setNewListForm({ name: "", description: "", isPublic: false })
+      setIsCreateListDialogOpen(false)
+
+      // Refresh lists to include the new one
+      await fetchUserLists()
+
+    } catch (err) {
+      console.error("Failed to create list:", err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEditList = (list: any) => {
+    setEditingList(list)
+    setEditListForm({
+      name: list.name,
+      description: list.description || "",
+      isPublic: list.is_public
+    })
+  }
+
+  const handleUpdateList = async () => {
+    if (!editingList || !editListForm.name.trim() || isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/lists/${editingList.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: editListForm.name.trim(),
+          description: editListForm.description.trim() || null,
+          is_public: editListForm.isPublic
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update list')
+      }
+
+      // Reset and refresh
+      setEditingList(null)
+      setEditListForm({ name: "", description: "", isPublic: false })
+      await fetchUserLists()
+    } catch (err) {
+      console.error("Failed to update list:", err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteList = async (listId: string) => {
+    if (!confirm('Are you sure you want to delete this list? All items in it will be deleted.')) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/lists/${listId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete list')
+      }
+
+      await fetchUserLists()
+    } catch (err) {
+      console.error("Failed to delete list:", err)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -234,7 +410,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
   const getCurrentMember = () => currentUser
   const getOtherMembers = () => users.filter((u: any) => u.id !== currentUser.id)
-  const getMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id)
+  // const getMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id)
   const getActiveMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id && !item.archived)
   const getArchivedMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id && item.archived)
   const getMemberGifts = (memberId: string) => giftItems.filter((item: any) => item.owner_id === memberId && !item.archived)
@@ -320,9 +496,150 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
           <TabsContent value="my-list" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Gift className="w-5 h-5" />
-                  My Gift Ideas
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Gift className="w-5 h-5" />
+                    My Gift Ideas
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Dialog open={isManageListsDialogOpen} onOpenChange={setIsManageListsDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                          <DialogTitle>Manage Lists</DialogTitle>
+                          <DialogDescription>
+                            Edit or delete your existing gift lists.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="max-h-[400px] overflow-y-auto">
+                          {userLists.length === 0 ? (
+                            <div className="text-center py-8 text-muted-foreground">
+                              <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p>No lists created yet.</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {userLists.map((list) => (
+                                <div key={list.id} className="flex items-center justify-between p-4 border rounded-lg">
+                                  <div className="flex-1">
+                                    <h3 className="font-medium">{list.name}</h3>
+                                    <p className="text-sm text-muted-foreground">
+                                      {list.description || "No description"}
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <Badge variant={list.is_public ? "default" : "secondary"} className="text-xs">
+                                        {list.is_public ? "Public" : "Private"}
+                                      </Badge>
+                                      <span className="text-xs text-muted-foreground">
+                                        {list.item_count || 0} items
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleEditList(list)}
+                                      disabled={isSubmitting}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    {userLists.length > 1 && (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleDeleteList(list.id)}
+                                        disabled={isSubmitting}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <Dialog open={isCreateListDialogOpen} onOpenChange={setIsCreateListDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Create New List</DialogTitle>
+                        <DialogDescription>
+                          Create a new gift list to organize different categories of gifts.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="list-name">List name *</Label>
+                          <Input
+                            id="list-name"
+                            value={newListForm.name}
+                            onChange={(e) => setNewListForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g., Birthday Wishes, Baby Registry"
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="list-description">Description</Label>
+                          <Textarea
+                            id="list-description"
+                            value={newListForm.description}
+                            onChange={(e) => setNewListForm(prev => ({ ...prev, description: e.target.value }))}
+                            placeholder="Optional description for this list"
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                          <div className="space-y-0.5">
+                            <Label htmlFor="list-privacy">Public List</Label>
+                            <p className="text-sm text-muted-foreground">
+                              {newListForm.isPublic
+                                ? "Family members can see which items are purchased"
+                                : "Hide purchase status from list owner"}
+                            </p>
+                          </div>
+                          <Switch
+                            id="list-privacy"
+                            checked={newListForm.isPublic}
+                            onCheckedChange={(checked) => setNewListForm(prev => ({ ...prev, isPublic: checked }))}
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-3">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsCreateListDialogOpen(false)}
+                          disabled={isSubmitting}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleCreateList}
+                          disabled={!newListForm.name.trim() || isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Plus className="w-4 h-4 mr-2" />
+                          )}
+                          {isSubmitting ? "Creating..." : "Create List"}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  </div>
                 </CardTitle>
                 <CardDescription>
                   Add items you'd like to receive. Family members can see this list and mark items as purchased.
@@ -350,6 +667,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     />
                   </div>
                 </div>
+
+
 
                 {/* Gift Card Section */}
                 <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
@@ -421,8 +740,27 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     disabled={isSubmitting}
                   />
                 </div>
-
-                <Button onClick={handleAddGiftItem} disabled={!newItem.name.trim() || isSubmitting}>
+             {/* List Selector */}
+                <div className="flex flex-col w-full gap-3">
+                  <Label>Add to List:</Label>
+                  <Select
+                    value={newItem.selectedListId}
+                    onValueChange={(value) => setNewItem((prev) => ({ ...prev, selectedListId: value }))}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a list..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userLists.map((list) => (
+                        <SelectItem key={list.id} value={list.id}>
+                          {list.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button onClick={handleAddGiftItem} disabled={!newItem.name.trim() || isSubmitting || !newItem.selectedListId}>
                   {isSubmitting ? (
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   ) : (
@@ -501,6 +839,25 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   {getOtherMembers().map((member: any) => {
                     const memberGifts = getMemberGifts(member.id)
                     const purchasedCount = memberGifts.filter((item: any) => item.purchased_by).length
+                    
+                    // Group gifts by list to show privacy indicators
+                    const giftsByList = memberGifts.reduce((acc: any, item: any) => {
+                      const listId = item.list_id
+                      const listName = item.list_name || 'Unnamed List'
+                      const isPublic = item.is_public
+                      
+                      if (!acc[listId]) {
+                        acc[listId] = {
+                          name: listName,
+                          isPublic: isPublic,
+                          items: []
+                        }
+                      }
+                      acc[listId].items.push(item)
+                      return acc
+                    }, {})
+                    
+                    const listCount = Object.keys(giftsByList).length
 
                     return (
                       <AccordionItem key={member.id} value={member.id}>
@@ -513,13 +870,30 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                 </AvatarFallback>
                               </Avatar>
                               <div className="flex flex-col text-left">
-                                <span className="font-medium">{member.name}'s Gift List</span>
-                                <span className="text-xs md:text-sm text-muted-foreground">
-                                  {memberGifts.length} items • {purchasedCount} purchased
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{member.name}'s Gift Lists</span>
+                                  {listCount > 1 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {listCount} lists
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                                  <span>{memberGifts.length} items • {purchasedCount} purchased</span>
+                                  <div className="flex items-center gap-1">
+                                    {Object.values(giftsByList).map((list: any, index: number) => (
+                                      <Badge 
+                                        key={index} 
+                                        variant={list.isPublic ? "default" : "secondary"} 
+                                        className="text-xs"
+                                      >
+                                        {list.isPublic ? "Public" : "Private"}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                            {/* <Badge className="min-w-[3rem]" variant="secondary">{memberGifts.length}</Badge> */}
                           </div>
                         </AccordionTrigger>
                         <AccordionContent>
@@ -530,24 +904,42 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                 <p>{member.name} hasn't added any gift ideas yet.</p>
                               </div>
                             ) : (
-                              <div className="space-y-3">
-                                {memberGifts.map((item: any) => {
-                                  const purchaserName = item.purchased_by
-                                    ? users.find((u: any) => u.id === item.purchased_by)?.name
-                                    : null
+                              <div className="space-y-6">
+                                {Object.entries(giftsByList).map(([listId, listData]: [string, any]) => (
+                                  <div key={listId} className="space-y-3">
+                                    <div className="flex items-center gap-2 pb-2 border-b">
+                                      <h4 className="font-medium text-sm">{listData.name}</h4>
+                                      <Badge 
+                                        variant={listData.isPublic ? "default" : "secondary"} 
+                                        className="text-xs"
+                                      >
+                                        {listData.isPublic ? "Public" : "Private"}
+                                      </Badge>
+                                      <span className="text-xs text-muted-foreground">
+                                        {listData.items.length} items
+                                      </span>
+                                    </div>
+                                    <div className="space-y-3 pl-4">
+                                      {listData.items.map((item: any) => {
+                                        const purchaserName = item.purchased_by
+                                          ? users.find((u: any) => u.id === item.purchased_by)?.name
+                                          : null
 
-                                  return (
-                                    <GiftItem
-                                      key={item.id}
-                                      item={item}
-                                      currentUserId={currentUser.id}
-                                      purchaserName={purchaserName || undefined}
-                                      variant="family-gifts"
-                                      onTogglePurchase={handleTogglePurchase}
-                                      onGiftCardPurchase={handleGiftCardPurchase}
-                                    />
-                                  )
-                                })}
+                                        return (
+                                          <GiftItem
+                                            key={item.id}
+                                            item={item}
+                                            currentUserId={currentUser.id}
+                                            purchaserName={purchaserName || undefined}
+                                            variant="family-gifts"
+                                            onTogglePurchase={handleTogglePurchase}
+                                            onGiftCardPurchase={handleGiftCardPurchase}
+                                          />
+                                        )
+                                      })}
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
                             )}
                           </div>
@@ -590,6 +982,27 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   placeholder="Description (optional)"
                   disabled={isSubmitting}
                 />
+              </div>
+
+              {/* List Selector */}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-list">List</Label>
+                <Select
+                  value={editForm.selectedListId}
+                  onValueChange={(value) => setEditForm((prev) => ({ ...prev, selectedListId: value }))}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a list..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userLists.map((list) => (
+                      <SelectItem key={list.id} value={list.id}>
+                        {list.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid grid-cols-1 gap-4">
                 <div className="grid gap-2">
@@ -678,7 +1091,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
               </Button>
               <Button
                 onClick={handleUpdateGiftItem}
-                disabled={!editForm.name.trim() || isSubmitting}
+                disabled={!editForm.name.trim() || isSubmitting || !editForm.selectedListId}
               >
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -690,6 +1103,78 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Edit List Dialog */}
+        {editingList && (
+          <Dialog open={!!editingList} onOpenChange={() => setEditingList(null)}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Edit List</DialogTitle>
+                <DialogDescription>
+                  Update your list details and privacy settings.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-list-name">List name *</Label>
+                  <Input
+                    id="edit-list-name"
+                    value={editListForm.name}
+                    onChange={(e) => setEditListForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="List name"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-list-description">Description</Label>
+                  <Textarea
+                    id="edit-list-description"
+                    value={editListForm.description}
+                    onChange={(e) => setEditListForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Optional description"
+                    disabled={isSubmitting}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="edit-list-privacy">Public List</Label>
+                    <p className="text-sm text-muted-foreground">
+                      {editListForm.isPublic 
+                        ? "Family members can see which items are purchased" 
+                        : "Hide purchase status from list owner"}
+                    </p>
+                  </div>
+                  <Switch
+                    id="edit-list-privacy"
+                    checked={editListForm.isPublic}
+                    onCheckedChange={(checked) => setEditListForm(prev => ({ ...prev, isPublic: checked }))}
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setEditingList(null)}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleUpdateList}
+                  disabled={!editListForm.name.trim() || isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Edit className="w-4 h-4 mr-2" />
+                  )}
+                  {isSubmitting ? "Updating..." : "Update List"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   )
