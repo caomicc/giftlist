@@ -2,7 +2,7 @@ import { neon } from '@neondatabase/serverless'
 
 function createSQL() {
   if (!process.env.NEON_DATABASE_URL) {
-    throw new Error('NEON_DATABASE_URL is not set')  
+    throw new Error('NEON_DATABASE_URL is not set')
   }
   return neon(process.env.NEON_DATABASE_URL)
 }
@@ -25,6 +25,17 @@ export type GiftItem = {
   link: string | null
   owner_id: string
   purchased_by: string | null
+  is_gift_card: boolean
+  gift_card_target_amount: number | null
+  gift_card_total_purchased: number
   created_at: string
   updated_at: string
+}
+
+export type GiftCardPurchase = {
+  id: string
+  gift_item_id: string
+  purchaser_id: string
+  amount: number
+  created_at: string
 }

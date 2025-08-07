@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Trash2, Plus, Gift, Users, AlertCircle, Loader2, Database, Edit } from 'lucide-react'
+import { Trash2, Plus, Gift, Users, AlertCircle, Loader2, Database, Edit, CreditCard } from 'lucide-react'
 import { useGiftData } from "@/hooks/useGiftData"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "./ui/avatar"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 import GiftItem from "./gift-item"
 
 interface User {
@@ -27,13 +28,37 @@ interface FamilyGiftAppProps {
 }
 
 export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
-  const [newItem, setNewItem] = useState({ name: "", description: "", price: "", link: "" })
+  const [newItem, setNewItem] = useState({ 
+    name: "", 
+    description: "", 
+    price: "", 
+    link: "", 
+    isGiftCard: false, 
+    giftCardTargetAmount: "" 
+  })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
-  const [editForm, setEditForm] = useState({ name: "", description: "", price: "", link: "" })
+  const [editForm, setEditForm] = useState({ 
+    name: "", 
+    description: "", 
+    price: "", 
+    link: "", 
+    isGiftCard: false, 
+    giftCardTargetAmount: "" 
+  })
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  const { users, giftItems, loading, error, addGiftItem, updateGiftItem, removeGiftItem, togglePurchaseStatus } = useGiftData()
+  const { 
+    users, 
+    giftItems, 
+    loading, 
+    error, 
+    addGiftItem, 
+    updateGiftItem, 
+    removeGiftItem, 
+    togglePurchaseStatus,
+    addGiftCardPurchase
+  } = useGiftData()
 
   const handleAddGiftItem = async () => {
     if (!newItem.name.trim() || isSubmitting) return
@@ -46,8 +71,19 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         price: newItem.price || undefined,
         link: newItem.link || undefined,
         owner_id: currentUser.id,
+        is_gift_card: newItem.isGiftCard,
+        gift_card_target_amount: newItem.isGiftCard && newItem.giftCardTargetAmount 
+          ? parseFloat(newItem.giftCardTargetAmount) 
+          : undefined,
       })
-      setNewItem({ name: "", description: "", price: "", link: "" })
+      setNewItem({ 
+        name: "", 
+        description: "", 
+        price: "", 
+        link: "", 
+        isGiftCard: false, 
+        giftCardTargetAmount: "" 
+      })
     } catch (err) {
       console.error("Failed to add gift item:", err)
     } finally {
@@ -69,7 +105,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       name: item.name || "",
       description: item.description || "",
       price: item.price || "",
-      link: item.link || ""
+      link: item.link || "",
+      isGiftCard: item.is_gift_card || false,
+      giftCardTargetAmount: item.gift_card_target_amount ? item.gift_card_target_amount.toString() : ""
     })
     setIsEditDialogOpen(true)
   }
@@ -84,10 +122,21 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         description: editForm.description || undefined,
         price: editForm.price || undefined,
         link: editForm.link || undefined,
+        is_gift_card: editForm.isGiftCard,
+        gift_card_target_amount: editForm.isGiftCard && editForm.giftCardTargetAmount 
+          ? parseFloat(editForm.giftCardTargetAmount) 
+          : undefined,
       })
       setIsEditDialogOpen(false)
       setEditingItem(null)
-      setEditForm({ name: "", description: "", price: "", link: "" })
+      setEditForm({ 
+        name: "", 
+        description: "", 
+        price: "", 
+        link: "", 
+        isGiftCard: false, 
+        giftCardTargetAmount: "" 
+      })
     } catch (err) {
       console.error("Failed to update gift item:", err)
     } finally {
@@ -101,6 +150,14 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await togglePurchaseStatus(itemId, newPurchasedBy)
     } catch (err) {
       console.error("Failed to toggle purchase status:", err)
+    }
+  }
+
+  const handleGiftCardPurchase = async (itemId: string, amount: number) => {
+    try {
+      await addGiftCardPurchase(itemId, currentUser.id, amount)
+    } catch (err) {
+      console.error("Failed to add gift card purchase:", err)
     }
   }
 
@@ -215,9 +272,46 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                       placeholder="Price (optional)"
                       value={newItem.price}
                       onChange={(e) => setNewItem((prev) => ({ ...prev, price: e.target.value }))}
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || newItem.isGiftCard}
                     />
                   </div>
+                </div>
+                
+                {/* Gift Card Section */}
+                <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="isGiftCard"
+                      checked={newItem.isGiftCard}
+                      onCheckedChange={(checked) => setNewItem((prev) => ({ 
+                        ...prev, 
+                        isGiftCard: checked === true,
+                        price: checked === true ? "" : prev.price // Clear price if gift card
+                      }))}
+                      disabled={isSubmitting}
+                    />
+                    <Label htmlFor="isGiftCard" className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" />
+                      This is a gift card
+                    </Label>
+                  </div>
+                  {newItem.isGiftCard && (
+                    <div className="flex flex-col gap-3">
+                      <Label>Target Amount (optional):</Label>
+                      <Input
+                        placeholder="e.g., 100.00"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={newItem.giftCardTargetAmount}
+                        onChange={(e) => setNewItem((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
+                        disabled={isSubmitting}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Family members can purchase amounts toward this gift card. Leave blank for no target.
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-col gap-3">
                   <Label>Link:</Label>
@@ -319,6 +413,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                 purchaserName={purchaserName || undefined}
                                 variant="family-gifts"
                                 onTogglePurchase={handleTogglePurchase}
+                                onGiftCardPurchase={handleGiftCardPurchase}
                               />
                             )
                           })}
@@ -370,7 +465,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     value={editForm.price}
                     onChange={(e) => setEditForm((prev) => ({ ...prev, price: e.target.value }))}
                     placeholder="Price (optional)"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || editForm.isGiftCard}
                   />
                 </div>
                 <div className="grid gap-2">
@@ -383,6 +478,44 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     disabled={isSubmitting}
                   />
                 </div>
+              </div>
+              
+              {/* Gift Card Section */}
+              <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="edit-isGiftCard"
+                    checked={editForm.isGiftCard}
+                    onCheckedChange={(checked) => setEditForm((prev) => ({ 
+                      ...prev, 
+                      isGiftCard: checked === true,
+                      price: checked === true ? "" : prev.price // Clear price if gift card
+                    }))}
+                    disabled={isSubmitting}
+                  />
+                  <Label htmlFor="edit-isGiftCard" className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    This is a gift card
+                  </Label>
+                </div>
+                {editForm.isGiftCard && (
+                  <div className="flex flex-col gap-3">
+                    <Label htmlFor="edit-giftCardTargetAmount">Target Amount (optional):</Label>
+                    <Input
+                      id="edit-giftCardTargetAmount"
+                      placeholder="e.g., 100.00"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={editForm.giftCardTargetAmount}
+                      onChange={(e) => setEditForm((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
+                      disabled={isSubmitting}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Family members can purchase amounts toward this gift card. Leave blank for no target.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex justify-end gap-3">

@@ -40,6 +40,8 @@ export function useGiftData() {
     price?: string
     link?: string
     owner_id: string
+    is_gift_card?: boolean
+    gift_card_target_amount?: number
   }) => {
     try {
       const response = await fetch('/api/gift-items', {
@@ -67,6 +69,8 @@ export function useGiftData() {
     description?: string
     price?: string
     link?: string
+    is_gift_card?: boolean
+    gift_card_target_amount?: number
   }) => {
     try {
       const response = await fetch('/api/gift-items', {
@@ -125,6 +129,45 @@ export function useGiftData() {
     }
   }
 
+  // Add gift card purchase
+  const addGiftCardPurchase = async (giftItemId: string, purchaserId: string, amount: number) => {
+    try {
+      const response = await fetch('/api/gift-card-purchases', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          gift_item_id: giftItemId,
+          purchaser_id: purchaserId,
+          amount
+        }),
+      })
+
+      if (!response.ok) throw new Error('Failed to add gift card purchase')
+      const { purchase, giftItem } = await response.json()
+
+      setGiftItems((prev) => prev.map((item) => (item.id === giftItemId ? giftItem : item)))
+      return { purchase, giftItem }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to add gift card purchase")
+      throw err
+    }
+  }
+
+  // Get gift card purchases
+  const getGiftCardPurchases = async (giftItemId: string) => {
+    try {
+      const response = await fetch(`/api/gift-card-purchases?gift_item_id=${giftItemId}`)
+      if (!response.ok) throw new Error('Failed to fetch gift card purchases')
+      const { purchases } = await response.json()
+      return purchases
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch gift card purchases")
+      throw err
+    }
+  }
+
   // Initial data fetch
   useEffect(() => {
     const fetchData = async () => {
@@ -151,6 +194,8 @@ export function useGiftData() {
     updateGiftItem,
     removeGiftItem,
     togglePurchaseStatus,
+    addGiftCardPurchase,
+    getGiftCardPurchases,
     refetch: () => Promise.all([fetchUsers(), fetchGiftItems()]),
   }
 }

@@ -16,11 +16,11 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, description, price, link, owner_id } = await request.json()
+    const { name, description, price, link, owner_id, is_gift_card, gift_card_target_amount } = await request.json()
 
     const data = await sql`
-      INSERT INTO gift_items (name, description, price, link, owner_id)
-      VALUES (${name}, ${description || null}, ${price || null}, ${link || null}, ${owner_id})
+      INSERT INTO gift_items (name, description, price, link, owner_id, is_gift_card, gift_card_target_amount)
+      VALUES (${name}, ${description || null}, ${price || null}, ${link || null}, ${owner_id}, ${is_gift_card || false}, ${gift_card_target_amount || null})
       RETURNING *
     `
 
@@ -59,10 +59,10 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const { id, purchased_by, name, description, price, link } = await request.json()
+    const { id, purchased_by, name, description, price, link, is_gift_card, gift_card_target_amount } = await request.json()
 
-    // If updating purchase status
-    if (purchased_by !== undefined && !name && !description && !price && !link) {
+    // If updating purchase status (regular items)
+    if (purchased_by !== undefined && !name && !description && !price && !link && !is_gift_card && !gift_card_target_amount) {
       const data = await sql`
         UPDATE gift_items
         SET purchased_by = ${purchased_by}
@@ -73,7 +73,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // If updating gift item details
-    if (name || description || price || link) {
+    if (name || description || price || link || is_gift_card !== undefined || gift_card_target_amount !== undefined) {
       const data = await sql`
         UPDATE gift_items
         SET
@@ -81,6 +81,8 @@ export async function PUT(request: NextRequest) {
           description = ${description || null},
           price = ${price || null},
           link = ${link || null},
+          is_gift_card = ${is_gift_card !== undefined ? is_gift_card : false},
+          gift_card_target_amount = ${gift_card_target_amount || null},
           updated_at = NOW()
         WHERE id = ${id}
         RETURNING *
