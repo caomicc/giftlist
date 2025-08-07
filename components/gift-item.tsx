@@ -17,6 +17,8 @@ export type GiftItemProps = {
     link?: string;
     purchased_by?: string | null;
     owner_id: string;
+    list_id?: string;
+    is_public?: boolean;
     is_gift_card?: boolean;
     gift_card_target_amount?: number | string | null;
     gift_card_total_purchased?: number | string;
@@ -76,7 +78,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
         className={`flex items-center flex-col md:flex-row justify-between p-4 border rounded-lg transition-colors relative ${
           isArchived
             ? "bg-gray-100 border-gray-300 opacity-75"
-            : (isPurchased && !isMyGift) || (isGiftCard && isGiftCardComplete && !isMyGift)
+            : (isPurchased && (!isMyGift || (isMyGift && item.is_public))) || (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))
             ? "bg-green-50 border-green-200"
             : "bg-indigo-50"
         }`}
@@ -113,7 +115,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
             <h3
               className={`font-medium truncate md:text-lg md:pr-20 ${
                 isArchived ? "line-through text-gray-500" :
-                ((isPurchased && !isMyGift) || (isGiftCard && isGiftCardComplete && !isMyGift)) ? "line-through text-muted-foreground" : ""
+                ((isPurchased && (!isMyGift || (isMyGift && item.is_public))) || (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))) ? "line-through text-muted-foreground" : ""
               }`}
             >
               {item.name}
@@ -239,6 +241,13 @@ const GiftItem: React.FC<GiftItemProps> = ({
                {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
                 <Badge className="bg-green-100 text-green-800 mt-4">
                   {isGiftCard ? 'Complete' : `Purchased by ${purchaserName}`}
+                </Badge>
+              )}
+              
+              {/* Show purchase status for owners if list is public */}
+              {isMyGift && item.is_public && ((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && purchaserName && (
+                <Badge className="bg-green-100 text-green-800 mt-4">
+                  {isGiftCard ? 'Gift card complete' : `Purchased by ${purchaserName}`}
                 </Badge>
               )}
 

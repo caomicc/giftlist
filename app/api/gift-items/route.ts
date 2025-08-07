@@ -171,6 +171,7 @@ export async function PUT(request: NextRequest) {
       description,
       price,
       link,
+      list_id,
       is_gift_card,
       gift_card_target_amount,
       og_title,
@@ -181,7 +182,7 @@ export async function PUT(request: NextRequest) {
     } = await request.json()
 
     // If updating archive status only
-    if (archived !== undefined && !name && !description && !price && !link && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && purchased_by === undefined) {
+    if (archived !== undefined && !name && !description && !price && !link && !list_id && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && purchased_by === undefined) {
       const data = await sql`
         UPDATE gift_items
         SET archived = ${archived}, updated_at = NOW()
@@ -192,7 +193,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // If updating purchase status (regular items)
-    if (purchased_by !== undefined && !name && !description && !price && !link && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && archived === undefined) {
+    if (purchased_by !== undefined && !name && !description && !price && !link && !list_id && !is_gift_card && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && archived === undefined) {
       const data = await sql`
         UPDATE gift_items
         SET purchased_by = ${purchased_by}
@@ -203,7 +204,25 @@ export async function PUT(request: NextRequest) {
     }
 
     // If updating gift item details
-    if (name || description || price || link || is_gift_card !== undefined || gift_card_target_amount !== undefined || og_title || og_description || og_image || og_site_name || archived !== undefined) {
+    if (name || description || price || link || list_id || is_gift_card !== undefined || gift_card_target_amount !== undefined || og_title || og_description || og_image || og_site_name || archived !== undefined) {
+      // If list_id is being updated, verify ownership
+      if (list_id) {
+        const [listCheck] = await sql`
+          SELECT owner_id FROM lists WHERE id = ${list_id}
+        `
+        
+        // Get current item owner
+        const [currentItem] = await sql`
+          SELECT owner_id FROM gift_items WHERE id = ${id}
+        `
+        
+        if (!listCheck || !currentItem || listCheck.owner_id !== currentItem.owner_id) {
+          return NextResponse.json(
+            { error: 'Cannot move item to a list you do not own' },
+            { status: 403 }
+          )
+        }
+      }
       const data = await sql`
         UPDATE gift_items
         SET
@@ -211,6 +230,7 @@ export async function PUT(request: NextRequest) {
           description = ${description || null},
           price = ${price || null},
           link = ${link || null},
+          list_id = ${list_id || null},
           is_gift_card = ${is_gift_card !== undefined ? is_gift_card : false},
           gift_card_target_amount = ${gift_card_target_amount || null},
           og_title = ${og_title || null},
