@@ -467,8 +467,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-xl">
+      <div className="flex items-center justify-center p-4 w-full max-w-xl mx-auto">
+        <Card className={'w-full bg-card text-card-foreground flex flex-col gap-6 rounded-none md:rounded-xl border-none md:border py-6 shadow-none md:shadow-sm'}>
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
               <Database className="w-8 h-8 text-blue-600 animate-pulse" />
@@ -491,8 +491,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <Card className="w-full max-w-xl">
+    <div className="container mx-auto max-w-xl w-full">
+        <Card className={'w-full bg-card text-card-foreground flex flex-col gap-6 rounded-none md:rounded-xl border-none md:border py-6 shadow-none md:shadow-sm'}>
           <CardHeader className="text-center">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <CardTitle className="text-2xl text-red-600">Database Connection Error</CardTitle>
@@ -517,429 +517,459 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const archivedMyGifts = getArchivedMyGifts()
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto max-w-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <Users className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-heading">Welcome, {currentMember?.name}!</h1>
-              <p className="text-muted-foreground flex items-center gap-1">
-                <Database className="w-3 h-3" />
-                Manage your family gift lists
-              </p>
-            </div>
+    <div className="container mx-auto max-w-xl w-full ">
+      {/* Header */}
+      <div className="flex items-end justify-between mb-4 md:mb-6 px-4 md:px-0 min-h-[100px] md:min-h-auto">
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-2xl font-heading font-medium tracking-wide">Hi, {currentMember?.name}!</h1>
+            <p>Welcome back 😊</p>
           </div>
         </div>
+      </div>
+      <Card className={'bg-card text-card-foreground flex flex-col gap-6 rounded-t-3xl h-full rounded-b-none md:rounded-b-xl md:rounded-xl border-none md:border py-6 md:py-4 shadow-none md:shadow-sm'}>
 
+        <CardContent className="px-6 md:px-3">
         <Tabs defaultValue="my-list" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="my-list">My Gift List</TabsTrigger>
             <TabsTrigger value="family-lists">Family Lists</TabsTrigger>
           </TabsList>
 
-          {/* My Gift List Tab */}
-          <TabsContent value="my-list" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Gift className="w-5 h-5" />
-                    My Gift Ideas
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Dialog open={isManageListsDialogOpen} onOpenChange={setIsManageListsDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                          <Settings className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[600px]">
-                        <DialogHeader>
-                          <DialogTitle>Manage Lists</DialogTitle>
-                          <DialogDescription>
-                            Edit or delete your existing gift lists.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="max-h-[400px] overflow-y-auto">
-                          {userLists.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">
-                              <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                              <p>No lists created yet.</p>
-                            </div>
-                          ) : (
-                            <div className="space-y-4">
-                              {userLists.map((list) => (
-                                <div key={list.id} className="flex items-center justify-between p-4 border rounded-lg">
-                                  <div className="flex-1">
-                                    <h3 className="font-medium">{list.name}</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                      {list.description || "No description"}
-                                    </p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <Badge variant={list.is_public ? "default" : "secondary"} className="text-xs">
-                                        {list.is_public ? "Public" : "Private"}
-                                      </Badge>
-                                      <span className="text-xs text-muted-foreground">
-                                        {list.item_count || 0} items
-                                      </span>
-                                      <span className="text-xs text-muted-foreground">
-                                        Created {new Date(list.created_at).toLocaleDateString()}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleEditList(list)}
-                                      disabled={isSubmitting}
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-                                    {userLists.length > 1 && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleDeleteList(list.id)}
-                                        disabled={isSubmitting}
-                                      >
-                                        <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                    )}
-                                  </div>
+        {/* My Gift List Tab */}
+          <TabsContent value="my-list" className="space-y-6 mb-0 md:mb-6">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <div className="flex items-center gap-2">
+                <Gift className="w-5 h-5" />
+                My Gift Ideas
+              </div>
+              <div className="flex items-center gap-2">
+                <Dialog open={isManageListsDialogOpen} onOpenChange={setIsManageListsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                      <DialogTitle>Manage Lists</DialogTitle>
+                      <DialogDescription>
+                        Edit or delete your existing gift lists.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="max-h-[400px] overflow-y-auto">
+                      {userLists.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p>No lists created yet.</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {userLists.map((list) => (
+                            <div key={list.id} className="flex items-center justify-between p-4 border rounded-lg">
+                              <div className="flex-1">
+                                <h3 className="font-medium">{list.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {list.description || "No description"}
+                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant={list.is_public ? "default" : "secondary"} className="text-xs">
+                                    {list.is_public ? "Public" : "Private"}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">
+                                    {list.item_count || 0} items
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    Created {new Date(list.created_at).toLocaleDateString()}
+                                  </span>
                                 </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    <Dialog open={isCreateListDialogOpen} onOpenChange={setIsCreateListDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Create New List</DialogTitle>
-                        <DialogDescription>
-                          Create a new gift list to organize different categories of gifts.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="list-name">List name *</Label>
-                          <Input
-                            id="list-name"
-                            value={newListForm.name}
-                            onChange={(e) => setNewListForm(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., Birthday Wishes, Baby Registry"
-                            disabled={isSubmitting}
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="list-description">Description</Label>
-                          <Textarea
-                            id="list-description"
-                            value={newListForm.description}
-                            onChange={(e) => setNewListForm(prev => ({ ...prev, description: e.target.value }))}
-                            placeholder="Optional description for this list"
-                            disabled={isSubmitting}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="space-y-0.5">
-                            <Label htmlFor="list-privacy">Privacy</Label>
-                            <p className="text-sm text-muted-foreground">
-                              {newListForm.isPublic
-                                ? "See purchased items"
-                                : "Can't see purchased items"}
-                            </p>
-                          </div>
-                          <Switch
-                            id="list-privacy"
-                            checked={newListForm.isPublic}
-                            onCheckedChange={(checked) => setNewListForm(prev => ({ ...prev, isPublic: checked }))}
-                            disabled={isSubmitting}
-                          />
-                        </div>
-                        <div className="p-4 border rounded-lg space-y-3">
-                          <Label>Hide from Family Members</Label>
-                          <p className="text-sm text-muted-foreground">
-                            Select family members who should not be able to see this list
-                          </p>
-                          <div className="space-y-2">
-                            {getOtherMembers().map((member: any) => (
-                              <div key={member.id} className="flex items-center space-x-2">
-                                <Checkbox
-                                  id={`hide-from-${member.id}`}
-                                  checked={newListForm.hiddenFromUsers.includes(member.id)}
-                                  onCheckedChange={(checked) => {
-                                    if (checked) {
-                                      setNewListForm(prev => ({
-                                        ...prev,
-                                        hiddenFromUsers: [...prev.hiddenFromUsers, member.id]
-                                      }))
-                                    } else {
-                                      setNewListForm(prev => ({
-                                        ...prev,
-                                        hiddenFromUsers: prev.hiddenFromUsers.filter(id => id !== member.id)
-                                      }))
-                                    }
-                                  }}
-                                  disabled={isSubmitting}
-                                />
-                                <Label htmlFor={`hide-from-${member.id}`} className="text-sm">
-                                  {member.name}
-                                </Label>
                               </div>
-                            ))}
-                          </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditList(list)}
+                                  disabled={isSubmitting}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                {userLists.length > 1 && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleDeleteList(list.id)}
+                                    disabled={isSubmitting}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      </div>
-                      <div className="flex justify-end gap-3">
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsCreateListDialogOpen(false)}
-                          disabled={isSubmitting}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={handleCreateList}
-                          disabled={!newListForm.name.trim() || isSubmitting}
-                        >
-                          {isSubmitting ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Plus className="w-4 h-4 mr-2" />
-                          )}
-                          {isSubmitting ? "Creating..." : "Create List"}
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  </div>
-                </CardTitle>
-                <CardDescription>
-                  Add items you'd like to receive. Family members can see this list and mark items as purchased.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="px-6 flex flex-col gap-6">
-                {/* Add New Item Form */}
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="flex flex-col gap-3">
-                    <Label>Gift:</Label>
-                    <Input
-                      placeholder="Gift item name *"
-                      value={newItem.name}
-                      onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <Label>Price:</Label>
-                    <Input
-                      placeholder="Price (optional)"
-                      value={newItem.price}
-                      onChange={(e) => setNewItem((prev) => ({ ...prev, price: e.target.value }))}
-                      disabled={isSubmitting || newItem.isGiftCard}
-                    />
-                  </div>
-                </div>
-
-                {/* Gift Card Section */}
-                <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="isGiftCard"
-                      checked={newItem.isGiftCard}
-                      onCheckedChange={(checked) => setNewItem((prev) => ({
-                        ...prev,
-                        isGiftCard: checked === true,
-                        price: checked === true ? "" : prev.price // Clear price if gift card
-                      }))}
-                      disabled={isSubmitting}
-                    />
-                    <Label htmlFor="isGiftCard" className="flex items-center gap-2">
-                      <CreditCard className="w-4 h-4" />
-                      This is a gift card
-                    </Label>
-                  </div>
-                  {newItem.isGiftCard && (
-                    <div className="flex flex-col gap-3">
-                      <Label>Target Amount (optional):</Label>
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={isCreateListDialogOpen} onOpenChange={setIsCreateListDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Create New List</DialogTitle>
+                    <DialogDescription>
+                      Create a new gift list to organize different categories of gifts.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="list-name">List name *</Label>
                       <Input
-                        placeholder="e.g., 100.00"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={newItem.giftCardTargetAmount}
-                        onChange={(e) => setNewItem((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
+                        id="list-name"
+                        value={newListForm.name}
+                        onChange={(e) => setNewListForm(prev => ({ ...prev, name: e.target.value }))}
+                        placeholder="e.g., Birthday Wishes, Baby Registry"
                         disabled={isSubmitting}
                       />
-                      <p className="text-xs text-muted-foreground">
-                        Family members can purchase amounts toward this gift card. Leave blank for no target.
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="list-description">Description</Label>
+                      <Textarea
+                        id="list-description"
+                        value={newListForm.description}
+                        onChange={(e) => setNewListForm(prev => ({ ...prev, description: e.target.value }))}
+                        placeholder="Optional description for this list"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="list-privacy">Privacy</Label>
+                        <p className="text-sm text-muted-foreground">
+                          {newListForm.isPublic
+                            ? "See purchased items"
+                            : "Can't see purchased items"}
+                        </p>
+                      </div>
+                      <Switch
+                        id="list-privacy"
+                        checked={newListForm.isPublic}
+                        onCheckedChange={(checked) => setNewListForm(prev => ({ ...prev, isPublic: checked }))}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    <div className="p-4 border rounded-lg space-y-3">
+                      <Label>Hide from Family Members</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Select family members who should not be able to see this list
                       </p>
+                      <div className="space-y-2">
+                        {getOtherMembers().map((member: any) => (
+                          <div key={member.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`hide-from-${member.id}`}
+                              checked={newListForm.hiddenFromUsers.includes(member.id)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setNewListForm(prev => ({
+                                    ...prev,
+                                    hiddenFromUsers: [...prev.hiddenFromUsers, member.id]
+                                  }))
+                                } else {
+                                  setNewListForm(prev => ({
+                                    ...prev,
+                                    hiddenFromUsers: prev.hiddenFromUsers.filter(id => id !== member.id)
+                                  }))
+                                }
+                              }}
+                              disabled={isSubmitting}
+                            />
+                            <Label htmlFor={`hide-from-${member.id}`} className="text-sm">
+                              {member.name}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCreateListDialogOpen(false)}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleCreateList}
+                      disabled={!newListForm.name.trim() || isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4 mr-2" />
+                      )}
+                      {isSubmitting ? "Creating..." : "Create List"}
+                    </Button>
+                  </div>
+                </DialogContent>
+                </Dialog>
+              </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Add items you'd like to receive. Family members can see this list and mark items as purchased.
+              </p>
+
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-3">
-                  <Label>Link:</Label>
+                  <Label>Gift:</Label>
                   <Input
-                    placeholder="Link (optional)"
-                    value={newItem.link}
-                    onChange={(e) => handleNewItemLinkChange(e.target.value)}
+                    placeholder="Gift item name *"
+                    value={newItem.name}
+                    onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
                     disabled={isSubmitting}
                   />
-                  {newItemOGLoading && (
-                    <div className="text-xs text-blue-600 flex items-center gap-1">
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                      Loading link preview...
-                    </div>
-                  )}
-                  {!newItemOGLoading && newItemOGData && (
-                    <div className="text-xs text-green-600 flex items-center gap-1">
-                      ✓ Link preview loaded: {newItemOGData.title || 'Data found'}
-                    </div>
-                  )}
-                  {!newItemOGLoading && newItem.link && newItem.link.startsWith('http') && !newItemOGData && (
-                    <div className="text-xs text-orange-600 flex items-center gap-1">
-                      ⚠ Couldn't load preview (some sites block automated requests)
-                    </div>
-                  )}
                 </div>
                 <div className="flex flex-col gap-3">
-                  <Label>Image URL:</Label>
+                  <Label>Price:</Label>
                   <Input
-                    placeholder="Image URL (optional)"
-                    value={newItem.imageUrl}
-                    onChange={(e) => setNewItem((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                    disabled={isSubmitting}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Provide an image URL if no preview is loaded from the link above
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <Label>Description:</Label>
-                  <Textarea
-                    placeholder="Description (optional)"
-                    value={newItem.description}
-                    onChange={(e) => setNewItem((prev) => ({ ...prev, description: e.target.value }))}
-                    disabled={isSubmitting}
+                    placeholder="Price (optional)"
+                    value={newItem.price}
+                    onChange={(e) => setNewItem((prev) => ({ ...prev, price: e.target.value }))}
+                    disabled={isSubmitting || newItem.isGiftCard}
                   />
                 </div>
-             {/* List Selector */}
-                <div className="flex flex-col w-full gap-3">
-                  <Label>Add to List:</Label>
-                  <Select
-                    value={newItem.selectedListId}
-                    onValueChange={(value) => setNewItem((prev) => ({ ...prev, selectedListId: value }))}
+              </div>
+
+              {/* Gift Card Section */}
+              <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="isGiftCard"
+                    checked={newItem.isGiftCard}
+                    onCheckedChange={(checked) => setNewItem((prev) => ({
+                      ...prev,
+                      isGiftCard: checked === true,
+                      price: checked === true ? "" : prev.price // Clear price if gift card
+                    }))}
                     disabled={isSubmitting}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a list..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {userLists.map((list) => (
-                        <SelectItem key={list.id} value={list.id}>
-                          {list.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  />
+                  <Label htmlFor="isGiftCard" className="flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    This is a gift card
+                  </Label>
                 </div>
-                <Button onClick={handleAddGiftItem} disabled={!newItem.name.trim() || isSubmitting || !newItem.selectedListId}>
-                  {isSubmitting ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Plus className="w-4 h-4 mr-2" />
-                  )}
-                  {isSubmitting ? "Adding..." : "Add Gift Idea"}
-                </Button>
+                {newItem.isGiftCard && (
+                  <div className="flex flex-col gap-3">
+                    <Label>Target Amount (optional):</Label>
+                    <Input
+                      placeholder="e.g., 100.00"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={newItem.giftCardTargetAmount}
+                      onChange={(e) => setNewItem((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
+                      disabled={isSubmitting}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Family members can purchase amounts toward this gift card. Leave blank for no target.
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-3">
+                <Label>Link:</Label>
+                <Input
+                  placeholder="Link (optional)"
+                  value={newItem.link}
+                  onChange={(e) => handleNewItemLinkChange(e.target.value)}
+                  disabled={isSubmitting}
+                />
+                {newItemOGLoading && (
+                  <div className="text-xs text-blue-600 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Loading link preview...
+                  </div>
+                )}
+                {!newItemOGLoading && newItemOGData && (
+                  <div className="text-xs text-green-600 flex items-center gap-1">
+                    ✓ Link preview loaded: {newItemOGData.title || 'Data found'}
+                  </div>
+                )}
+                {!newItemOGLoading && newItem.link && newItem.link.startsWith('http') && !newItemOGData && (
+                  <div className="text-xs text-orange-600 flex items-center gap-1">
+                    ⚠ Couldn't load preview (some sites block automated requests)
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-3">
+                <Label>Image URL:</Label>
+                <Input
+                  placeholder="Image URL (optional)"
+                  value={newItem.imageUrl}
+                  onChange={(e) => setNewItem((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Provide an image URL if no preview is loaded from the link above
+                </p>
+              </div>
+              <div className="flex flex-col gap-3">
+                <Label>Description:</Label>
+                <Textarea
+                  placeholder="Description (optional)"
+                  value={newItem.description}
+                  onChange={(e) => setNewItem((prev) => ({ ...prev, description: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+              </div>
+            {/* List Selector */}
+              <div className="flex flex-col w-full gap-3">
+                <Label>Add to List:</Label>
+                <Select
+                  value={newItem.selectedListId}
+                  onValueChange={(value) => setNewItem((prev) => ({ ...prev, selectedListId: value }))}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a list..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userLists.map((list) => (
+                      <SelectItem key={list.id} value={list.id}>
+                        {list.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleAddGiftItem} disabled={!newItem.name.trim() || isSubmitting || !newItem.selectedListId}>
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4 mr-2" />
+                )}
+                {isSubmitting ? "Adding..." : "Add Gift Idea"}
+              </Button>
 
-                {/* My Gift Items - Organized by List */}
-                <div className="space-y-6">
-                  {activeMyGifts.length === 0 && archivedMyGifts.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Gift className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p>No gift ideas yet. Add some items above!</p>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Group items by list */}
-                      {(() => {
-                        // Group active items by list
-                        const itemsByList = activeMyGifts.reduce((acc: any, item: any) => {
-                          const listId = item.list_id || 'unknown'
-                          if (!acc[listId]) {
-                            const listInfo = userLists.find(l => l.id === listId)
-                            acc[listId] = {
-                              name: listInfo?.name || 'Unknown List',
-                              description: listInfo?.description || '',
-                              isPublic: listInfo?.is_public || false,
-                              createdAt: listInfo?.created_at || null,
-                              items: []
-                            }
+              {/* My Gift Items - Organized by List */}
+              <div className="space-y-6">
+                {activeMyGifts.length === 0 && archivedMyGifts.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Gift className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No gift ideas yet. Add some items above!</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Group items by list */}
+                    {(() => {
+                      // Group active items by list
+                      const itemsByList = activeMyGifts.reduce((acc: any, item: any) => {
+                        const listId = item.list_id || 'unknown'
+                        if (!acc[listId]) {
+                          const listInfo = userLists.find(l => l.id === listId)
+                          acc[listId] = {
+                            name: listInfo?.name || 'Unknown List',
+                            description: listInfo?.description || '',
+                            isPublic: listInfo?.is_public || false,
+                            createdAt: listInfo?.created_at || null,
+                            items: []
                           }
-                          acc[listId].items.push(item)
-                          return acc
-                        }, {})
+                        }
+                        acc[listId].items.push(item)
+                        return acc
+                      }, {})
 
-                        // Group archived items by list
-                        const archivedByList = archivedMyGifts.reduce((acc: any, item: any) => {
-                          const listId = item.list_id || 'unknown'
-                          if (!acc[listId]) {
-                            const listInfo = userLists.find(l => l.id === listId)
-                            acc[listId] = {
-                              name: listInfo?.name || 'Unknown List',
-                              description: listInfo?.description || '',
-                              isPublic: listInfo?.is_public || false,
-                              createdAt: listInfo?.created_at || null,
-                              items: []
-                            }
+                      // Group archived items by list
+                      const archivedByList = archivedMyGifts.reduce((acc: any, item: any) => {
+                        const listId = item.list_id || 'unknown'
+                        if (!acc[listId]) {
+                          const listInfo = userLists.find(l => l.id === listId)
+                          acc[listId] = {
+                            name: listInfo?.name || 'Unknown List',
+                            description: listInfo?.description || '',
+                            isPublic: listInfo?.is_public || false,
+                            createdAt: listInfo?.created_at || null,
+                            items: []
                           }
-                          acc[listId].items.push(item)
-                          return acc
-                        }, {})
+                        }
+                        acc[listId].items.push(item)
+                        return acc
+                      }, {})
 
-                        return (
-                          <div className="space-y-6">
-                            {/* Active Lists and Items */}
-                            <Accordion type="single" collapsible className="w-full">
-                              {Object.entries(itemsByList).map(([listId, listData]: [string, any]) => (
-                                <AccordionItem key={listId} value={listId}>
-                                  <AccordionTrigger className="hover:no-underline items-center">
-                                    <div className="flex items-center gap-3 w-full">
-                                      <div className="flex-1">
-                                        <h3 className="font-medium text-lg">{listData.name}</h3>
-                                        {listData.description && (
-                                          <p className="text-sm text-muted-foreground">{listData.description}</p>
-                                        )}
-                                        <div className="flex items-center gap-2 mt-1">
-                                          <Badge variant={listData.isPublic ? "default" : "secondary"} className="text-xs">
-                                            {listData.isPublic ? "Can see purchased items" : "Cannot see purchased items"}
-                                          </Badge>
+                      return (
+                        <div className="space-y-6">
+                          {/* Active Lists and Items */}
+                          <Accordion type="single" collapsible className="w-full">
+                            {Object.entries(itemsByList).map(([listId, listData]: [string, any]) => (
+                              <AccordionItem key={listId} value={listId}>
+                                <AccordionTrigger className="hover:no-underline items-center relative">
+                                  <div className="flex items-center gap-3 w-full">
+                                    <div className="flex-1">
+                                      <h3 className="font-medium text-lg">{listData.name}</h3>
+                                      {listData.description && (
+                                        <p className="text-sm text-muted-foreground">{listData.description}</p>
+                                      )}
+                                      <Badge variant={listData.isPublic ? "default" : "secondary"} className="text-xs absolute top-5 right-5">
+                                        {listData.isPublic ? "Can see purchased items" : "Cannot see purchased items"}
+                                      </Badge>
+                                      <div className="flex items-center gap-2 mt-1">
+
+                                        <span className="text-xs text-muted-foreground">
+                                          {listData.items.length} items
+                                        </span>
+                                        {listData.createdAt && (
                                           <span className="text-xs text-muted-foreground">
-                                            {listData.items.length} items
+                                            Created {new Date(listData.createdAt).toLocaleDateString()}
                                           </span>
-                                          {listData.createdAt && (
-                                            <span className="text-xs text-muted-foreground">
-                                              Created {new Date(listData.createdAt).toLocaleDateString()}
-                                            </span>
-                                          )}
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                  <div className="divide divide-indigo-500">
+                                    {listData.items.map((item: any, idx: number) => (
+                                      <div key={item.id}>
+                                        <GiftItem
+                                          item={item}
+                                          currentUserId={currentUser.id}
+                                          variant="my-gifts"
+                                          onEdit={handleEditGiftItem}
+                                          onDelete={handleRemoveGiftItem}
+                                          onArchive={handleArchiveItem}
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </AccordionContent>
+                              </AccordionItem>
+                            ))}
+                          </Accordion>
+                          {/* Archived Items by List */}
+                          {Object.keys(archivedByList).length > 0 && (
+                            <div className="pt-4 border-t">
+                              <h4 className="text-lg font-medium text-muted-foreground mb-4 flex items-center gap-2">
+                                <Archive className="w-5 h-5" />
+                                Archived Items
+                              </h4>
+                              <div className="space-y-6">
+                                {Object.entries(archivedByList).map(([listId, listData]: [string, any]) => (
+                                  <div key={`archived-${listId}`} className="space-y-3">
+                                    <div className="flex items-center gap-3 pb-2 border-b border-dashed">
+                                      <div className="flex-1">
+                                        <h4 className="font-medium text-sm opacity-75">{listData.name} (Archived)</h4>
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <Badge variant="outline" className="text-xs opacity-60">
+                                            {listData.items.length} archived items
+                                          </Badge>
                                         </div>
                                       </div>
                                     </div>
-                                  </AccordionTrigger>
-                                  <AccordionContent>
-                                    <div className="space-y-3">
+                                    <div className="divide divide-indigo-500">
                                       {listData.items.map((item: any) => (
                                         <GiftItem
                                           key={item.id}
@@ -952,459 +982,426 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                         />
                                       ))}
                                     </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })()}
+                  </>
+                )}
+              </div>
+        </TabsContent>
+
+        {/* Family Lists Tab */}
+        <TabsContent value="family-lists" className="space-y-6 mb-0 md:mb-6">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <div className="flex items-center gap-2 h-8">
+              <Gift className="w-5 h-5" />
+              Family Gift Lists
+            </div>
+          </div>
+              <p className="text-sm text-muted-foreground">
+                Click on a family member to view and purchase their gift items.
+              </p>
+
+
+              <Accordion type="single" collapsible className="w-full flex flex-col group">
+                {getOtherMembers().map((member: any) => {
+                  const memberGifts = getMemberGifts(member.id)
+                  const purchasedCount = memberGifts.filter((item: any) => item.purchased_by).length
+
+                  // Group gifts by list to show privacy indicators
+                  const giftsByList = memberGifts.reduce((acc: any, item: any) => {
+                    const listId = item.list_id
+                    const listName = item.list_name || 'Unnamed List'
+                    const isPublic = item.is_public
+
+                    if (!acc[listId]) {
+                      acc[listId] = {
+                        name: listName,
+                        isPublic: isPublic,
+                        items: []
+                      }
+                    }
+                    acc[listId].items.push(item)
+                    return acc
+                  }, {})
+
+                  const listCount = Object.keys(giftsByList).length
+
+                  return (
+                    <AccordionItem key={member.id} value={member.id} className="">
+                      <AccordionTrigger className="hover:no-underline items-center py-3">
+                        <div className="flex items-center justify-between w-full pr-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="size-9">
+                              <AvatarFallback className="bg-blue-100 text-blue-600">
+                                {member.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col text-left">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{member.name}'s Gift Lists</span>
+                                {listCount > 1 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    {listCount} lists
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                                <span>{memberGifts.length} item(s) • {purchasedCount} purchased</span>
+                                {/* <div className="flex items-center gap-1">
+                                  {Object.values(giftsByList).map((list: any, index: number) => (
+                                    <Badge
+                                      key={index}
+                                      variant={list.isPublic ? "default" : "secondary"}
+                                      className="text-xs"
+                                    >
+                                      {list.isPublic ? "Public" : "Private"}
+                                    </Badge>
+                                  ))}
+                                </div> */}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div className="pt-4">
+                          {memberGifts.length === 0 ? (
+                            <div className="text-center py-6 text-muted-foreground">
+                              <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                              <p>{member.name} hasn't added any gift ideas yet.</p>
+                            </div>
+                          ) : (
+                              <Accordion type="single" collapsible className="w-full md:px-3">
+                              {Object.entries(giftsByList).map(([listId, listData]: [string, any]) => (
+                                <AccordionItem key={listId} value={listId} className="w-full border-purple-200">
+                                  <AccordionTrigger className="hover:no-underline items-center py-2">
+                                    <div className="flex items-start gap-1 flex-col">
+                                      <h4 className="font-medium text-sm">{listData.name}</h4>
+                                      <div className="flex flex-row items-center gap-2">
+                                        <Badge
+                                          variant={listData.isPublic ? "default" : "secondary"}
+                                          className="text-xs"
+                                        >
+                                          {listData.isPublic ? "Public" : "Private"}
+                                        </Badge>
+                                        <span className="text-xs text-muted-foreground">
+                                          {listData.items.length} item(s)
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </AccordionTrigger>
+                                  <AccordionContent className="pb-0">
+                                    <div className="px-1 md:px-2 border-purple-200 divide divide-y divide-purple-300">
+                                    {/* <div className="space-y-3"> */}
+                                    {listData.items.map((item: any) => {
+                                      const purchaserName = item.purchased_by
+                                        ? users.find((u: any) => u.id === item.purchased_by)?.name
+                                        : null
+
+                                      return (
+                                        <GiftItem
+                                          key={item.id}
+                                          item={item}
+                                          currentUserId={currentUser.id}
+                                          purchaserName={purchaserName || undefined}
+                                          variant="family-gifts"
+                                          onTogglePurchase={handleTogglePurchase}
+                                          onGiftCardPurchase={handleGiftCardPurchase}
+                                        />
+                                      )
+                                    })}
+                                  </div>
                                   </AccordionContent>
                                 </AccordionItem>
                               ))}
                             </Accordion>
-                            {/* Archived Items by List */}
-                            {Object.keys(archivedByList).length > 0 && (
-                              <div className="pt-4 border-t">
-                                <h4 className="text-lg font-medium text-muted-foreground mb-4 flex items-center gap-2">
-                                  <Archive className="w-5 h-5" />
-                                  Archived Items
-                                </h4>
-                                <div className="space-y-6">
-                                  {Object.entries(archivedByList).map(([listId, listData]: [string, any]) => (
-                                    <div key={`archived-${listId}`} className="space-y-3">
-                                      <div className="flex items-center gap-3 pb-2 border-b border-dashed">
-                                        <div className="flex-1">
-                                          <h4 className="font-medium text-sm opacity-75">{listData.name} (Archived)</h4>
-                                          <div className="flex items-center gap-2 mt-1">
-                                            <Badge variant="outline" className="text-xs opacity-60">
-                                              {listData.items.length} archived items
-                                            </Badge>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div className="space-y-3">
-                                        {listData.items.map((item: any) => (
-                                          <GiftItem
-                                            key={item.id}
-                                            item={item}
-                                            currentUserId={currentUser.id}
-                                            variant="my-gifts"
-                                            onEdit={handleEditGiftItem}
-                                            onDelete={handleRemoveGiftItem}
-                                            onArchive={handleArchiveItem}
-                                          />
-                                        ))}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })()}
-                    </>
-                  )}
+                          )}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  )
+                })}
+              </Accordion>
+
+        </TabsContent>
+      </Tabs>
+            </CardContent>
+    </Card>
+      {/* Edit Gift Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Gift Item</DialogTitle>
+            <DialogDescription>
+              Update your gift item details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-name">Gift item name *</Label>
+              <Input
+                id="edit-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+                placeholder="Gift item name"
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                placeholder="Description (optional)"
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* List Selector */}
+            <div className="grid gap-2">
+              <Label htmlFor="edit-list">List</Label>
+              <Select
+                value={editForm.selectedListId}
+                onValueChange={(value) => setEditForm((prev) => ({ ...prev, selectedListId: value }))}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a list..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {userLists.map((list) => (
+                    <SelectItem key={list.id} value={list.id}>
+                      {list.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-price">Price</Label>
+                <Input
+                  id="edit-price"
+                  value={editForm.price}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, price: e.target.value }))}
+                  placeholder="Price (optional)"
+                  disabled={isSubmitting || editForm.isGiftCard}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-link">Link</Label>
+                <Input
+                  id="edit-link"
+                  value={editForm.link}
+                  onChange={(e) => handleEditFormLinkChange(e.target.value)}
+                  placeholder="Link (optional)"
+                  disabled={isSubmitting}
+                />
+                {editFormOGLoading && (
+                  <div className="text-xs text-blue-600 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Loading link preview...
+                  </div>
+                )}
+                {!editFormOGLoading && editFormOGData && (
+                  <div className="text-xs text-green-600 flex items-center gap-1">
+                    ✓ Link preview loaded: {editFormOGData.title || 'Data found'}
+                  </div>
+                )}
+                {!editFormOGLoading && editForm.link && editForm.link.startsWith('http') && !editFormOGData && (
+                  <div className="text-xs text-orange-600 flex items-center gap-1">
+                    ⚠ Couldn't load preview (some sites block automated requests)
+                  </div>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="edit-imageUrl">Image URL (optional):</Label>
+                <Input
+                  id="edit-imageUrl"
+                  placeholder="https://example.com/image.jpg"
+                  value={editForm.imageUrl}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Provide a custom image URL if no preview is available
+                </p>
+              </div>
+            </div>
+
+            {/* Gift Card Section */}
+            <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="edit-isGiftCard"
+                  checked={editForm.isGiftCard}
+                  onCheckedChange={(checked) => setEditForm((prev) => ({
+                    ...prev,
+                    isGiftCard: checked === true,
+                    price: checked === true ? "" : prev.price // Clear price if gift card
+                  }))}
+                  disabled={isSubmitting}
+                />
+                <Label htmlFor="edit-isGiftCard" className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4" />
+                  This is a gift card
+                </Label>
+              </div>
+              {editForm.isGiftCard && (
+                <div className="flex flex-col gap-3">
+                  <Label htmlFor="edit-giftCardTargetAmount">Target Amount (optional):</Label>
+                  <Input
+                    id="edit-giftCardTargetAmount"
+                    placeholder="e.g., 100.00"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={editForm.giftCardTargetAmount}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
+                    disabled={isSubmitting}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Family members can purchase amounts toward this gift card. Leave blank for no target.
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdateGiftItem}
+              disabled={!editForm.name.trim() || isSubmitting || !editForm.selectedListId}
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Edit className="w-4 h-4 mr-2" />
+              )}
+              {isSubmitting ? "Updating..." : "Update Gift"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-          {/* Family Lists Tab */}
-          <TabsContent value="family-lists" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Family Gift Lists
-                </CardTitle>
-                <CardDescription>
-                  Click on a family member to view and purchase their gift items.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Accordion type="single" collapsible className="w-full">
-                  {getOtherMembers().map((member: any) => {
-                    const memberGifts = getMemberGifts(member.id)
-                    const purchasedCount = memberGifts.filter((item: any) => item.purchased_by).length
-
-                    // Group gifts by list to show privacy indicators
-                    const giftsByList = memberGifts.reduce((acc: any, item: any) => {
-                      const listId = item.list_id
-                      const listName = item.list_name || 'Unnamed List'
-                      const isPublic = item.is_public
-
-                      if (!acc[listId]) {
-                        acc[listId] = {
-                          name: listName,
-                          isPublic: isPublic,
-                          items: []
-                        }
-                      }
-                      acc[listId].items.push(item)
-                      return acc
-                    }, {})
-
-                    const listCount = Object.keys(giftsByList).length
-
-                    return (
-                      <AccordionItem key={member.id} value={member.id}>
-                        <AccordionTrigger className="hover:no-underline items-center">
-                          <div className="flex items-center justify-between w-full pr-4">
-                            <div className="flex items-center gap-3">
-                              <Avatar className="size-9">
-                                <AvatarFallback className="bg-blue-100 text-blue-600">
-                                  {member.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex flex-col text-left">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">{member.name}'s Gift Lists</span>
-                                  {listCount > 1 && (
-                                    <Badge variant="outline" className="text-xs">
-                                      {listCount} lists
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                                  <span>{memberGifts.length} item(s) • {purchasedCount} purchased</span>
-                                  {/* <div className="flex items-center gap-1">
-                                    {Object.values(giftsByList).map((list: any, index: number) => (
-                                      <Badge
-                                        key={index}
-                                        variant={list.isPublic ? "default" : "secondary"}
-                                        className="text-xs"
-                                      >
-                                        {list.isPublic ? "Public" : "Private"}
-                                      </Badge>
-                                    ))}
-                                  </div> */}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </AccordionTrigger>
-                        <AccordionContent>
-                          <div className="pt-4">
-                            {memberGifts.length === 0 ? (
-                              <div className="text-center py-6 text-muted-foreground">
-                                <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                <p>{member.name} hasn't added any gift ideas yet.</p>
-                              </div>
-                            ) : (
-                              <div className="space-y-6">
-                                {Object.entries(giftsByList).map(([listId, listData]: [string, any]) => (
-                                  <div key={listId} className="space-y-3">
-                                    <div className="flex items-center gap-2 pb-2 border-b">
-                                      <h4 className="font-medium text-sm">{listData.name}</h4>
-                                      <Badge
-                                        variant={listData.isPublic ? "default" : "secondary"}
-                                        className="text-xs"
-                                      >
-                                        {listData.isPublic ? "Public" : "Private"}
-                                      </Badge>
-                                      <span className="text-xs text-muted-foreground">
-                                        {listData.items.length} item(s)
-                                      </span>
-                                    </div>
-                                    <div className="space-y-3">
-                                      {listData.items.map((item: any) => {
-                                        const purchaserName = item.purchased_by
-                                          ? users.find((u: any) => u.id === item.purchased_by)?.name
-                                          : null
-
-                                        return (
-                                          <GiftItem
-                                            key={item.id}
-                                            item={item}
-                                            currentUserId={currentUser.id}
-                                            purchaserName={purchaserName || undefined}
-                                            variant="family-gifts"
-                                            onTogglePurchase={handleTogglePurchase}
-                                            onGiftCardPurchase={handleGiftCardPurchase}
-                                          />
-                                        )
-                                      })}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    )
-                  })}
-                </Accordion>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Edit Gift Dialog */}
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      {/* Edit List Dialog */}
+      {editingList && (
+        <Dialog open={!!editingList} onOpenChange={() => setEditingList(null)}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Edit Gift Item</DialogTitle>
+              <DialogTitle>Edit List</DialogTitle>
               <DialogDescription>
-                Update your gift item details below.
+                Update your list details and privacy settings.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="edit-name">Gift item name *</Label>
+                <Label htmlFor="edit-list-name">List name *</Label>
                 <Input
-                  id="edit-name"
-                  value={editForm.name}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
-                  placeholder="Gift item name"
+                  id="edit-list-name"
+                  value={editListForm.name}
+                  onChange={(e) => setEditListForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="List name"
                   disabled={isSubmitting}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-description">Description</Label>
+                <Label htmlFor="edit-list-description">Description</Label>
                 <Textarea
-                  id="edit-description"
-                  value={editForm.description}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
-                  placeholder="Description (optional)"
+                  id="edit-list-description"
+                  value={editListForm.description}
+                  onChange={(e) => setEditListForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Optional description"
                   disabled={isSubmitting}
                 />
               </div>
-
-              {/* List Selector */}
-              <div className="grid gap-2">
-                <Label htmlFor="edit-list">List</Label>
-                <Select
-                  value={editForm.selectedListId}
-                  onValueChange={(value) => setEditForm((prev) => ({ ...prev, selectedListId: value }))}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a list..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {userLists.map((list) => (
-                      <SelectItem key={list.id} value={list.id}>
-                        {list.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-1 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-price">Price</Label>
-                  <Input
-                    id="edit-price"
-                    value={editForm.price}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, price: e.target.value }))}
-                    placeholder="Price (optional)"
-                    disabled={isSubmitting || editForm.isGiftCard}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-link">Link</Label>
-                  <Input
-                    id="edit-link"
-                    value={editForm.link}
-                    onChange={(e) => handleEditFormLinkChange(e.target.value)}
-                    placeholder="Link (optional)"
-                    disabled={isSubmitting}
-                  />
-                  {editFormOGLoading && (
-                    <div className="text-xs text-blue-600 flex items-center gap-1">
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                      Loading link preview...
-                    </div>
-                  )}
-                  {!editFormOGLoading && editFormOGData && (
-                    <div className="text-xs text-green-600 flex items-center gap-1">
-                      ✓ Link preview loaded: {editFormOGData.title || 'Data found'}
-                    </div>
-                  )}
-                  {!editFormOGLoading && editForm.link && editForm.link.startsWith('http') && !editFormOGData && (
-                    <div className="text-xs text-orange-600 flex items-center gap-1">
-                      ⚠ Couldn't load preview (some sites block automated requests)
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-imageUrl">Image URL (optional):</Label>
-                  <Input
-                    id="edit-imageUrl"
-                    placeholder="https://example.com/image.jpg"
-                    value={editForm.imageUrl}
-                    onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                    disabled={isSubmitting}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Provide a custom image URL if no preview is available
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-0.5">
+                  <Label htmlFor="edit-list-privacy">Privacy</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {editListForm.isPublic
+                      ? "See purchased items"
+                      : "Can't see purchased items"}
                   </p>
                 </div>
+                <Switch
+                  id="edit-list-privacy"
+                  checked={editListForm.isPublic}
+                  onCheckedChange={(checked) => setEditListForm(prev => ({ ...prev, isPublic: checked }))}
+                  disabled={isSubmitting}
+                />
               </div>
-
-              {/* Gift Card Section */}
-              <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="edit-isGiftCard"
-                    checked={editForm.isGiftCard}
-                    onCheckedChange={(checked) => setEditForm((prev) => ({
-                      ...prev,
-                      isGiftCard: checked === true,
-                      price: checked === true ? "" : prev.price // Clear price if gift card
-                    }))}
-                    disabled={isSubmitting}
-                  />
-                  <Label htmlFor="edit-isGiftCard" className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" />
-                    This is a gift card
-                  </Label>
+              <div className="p-4 border rounded-lg space-y-3">
+                <Label>Hide from Family Members</Label>
+                <p className="text-sm text-muted-foreground">
+                  Select family members who should not be able to see this list
+                </p>
+                <div className="space-y-2">
+                  {getOtherMembers().map((member: any) => (
+                    <div key={member.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`edit-hide-from-${member.id}`}
+                        checked={editListForm.hiddenFromUsers.includes(member.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setEditListForm(prev => ({
+                              ...prev,
+                              hiddenFromUsers: [...prev.hiddenFromUsers, member.id]
+                            }))
+                          } else {
+                            setEditListForm(prev => ({
+                              ...prev,
+                              hiddenFromUsers: prev.hiddenFromUsers.filter(id => id !== member.id)
+                            }))
+                          }
+                        }}
+                        disabled={isSubmitting}
+                      />
+                      <Label htmlFor={`edit-hide-from-${member.id}`} className="text-sm">
+                        {member.name}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
-                {editForm.isGiftCard && (
-                  <div className="flex flex-col gap-3">
-                    <Label htmlFor="edit-giftCardTargetAmount">Target Amount (optional):</Label>
-                    <Input
-                      id="edit-giftCardTargetAmount"
-                      placeholder="e.g., 100.00"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={editForm.giftCardTargetAmount}
-                      onChange={(e) => setEditForm((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
-                      disabled={isSubmitting}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Family members can purchase amounts toward this gift card. Leave blank for no target.
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
             <div className="flex justify-end gap-3">
               <Button
                 variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
+                onClick={() => setEditingList(null)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button
-                onClick={handleUpdateGiftItem}
-                disabled={!editForm.name.trim() || isSubmitting || !editForm.selectedListId}
+                onClick={handleUpdateList}
+                disabled={!editListForm.name.trim() || isSubmitting}
               >
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
                   <Edit className="w-4 h-4 mr-2" />
                 )}
-                {isSubmitting ? "Updating..." : "Update Gift"}
+                {isSubmitting ? "Updating..." : "Update List"}
               </Button>
             </div>
           </DialogContent>
         </Dialog>
-
-        {/* Edit List Dialog */}
-        {editingList && (
-          <Dialog open={!!editingList} onOpenChange={() => setEditingList(null)}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Edit List</DialogTitle>
-                <DialogDescription>
-                  Update your list details and privacy settings.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-list-name">List name *</Label>
-                  <Input
-                    id="edit-list-name"
-                    value={editListForm.name}
-                    onChange={(e) => setEditListForm(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="List name"
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-list-description">Description</Label>
-                  <Textarea
-                    id="edit-list-description"
-                    value={editListForm.description}
-                    onChange={(e) => setEditListForm(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Optional description"
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="edit-list-privacy">Privacy</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {editListForm.isPublic
-                        ? "See purchased items"
-                        : "Can't see purchased items"}
-                    </p>
-                  </div>
-                  <Switch
-                    id="edit-list-privacy"
-                    checked={editListForm.isPublic}
-                    onCheckedChange={(checked) => setEditListForm(prev => ({ ...prev, isPublic: checked }))}
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div className="p-4 border rounded-lg space-y-3">
-                  <Label>Hide from Family Members</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Select family members who should not be able to see this list
-                  </p>
-                  <div className="space-y-2">
-                    {getOtherMembers().map((member: any) => (
-                      <div key={member.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`edit-hide-from-${member.id}`}
-                          checked={editListForm.hiddenFromUsers.includes(member.id)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setEditListForm(prev => ({
-                                ...prev,
-                                hiddenFromUsers: [...prev.hiddenFromUsers, member.id]
-                              }))
-                            } else {
-                              setEditListForm(prev => ({
-                                ...prev,
-                                hiddenFromUsers: prev.hiddenFromUsers.filter(id => id !== member.id)
-                              }))
-                            }
-                          }}
-                          disabled={isSubmitting}
-                        />
-                        <Label htmlFor={`edit-hide-from-${member.id}`} className="text-sm">
-                          {member.name}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end gap-3">
-                <Button
-                  variant="outline"
-                  onClick={() => setEditingList(null)}
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleUpdateList}
-                  disabled={!editListForm.name.trim() || isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Edit className="w-4 h-4 mr-2" />
-                  )}
-                  {isSubmitting ? "Updating..." : "Update List"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
+      )}
     </div>
   )
 }

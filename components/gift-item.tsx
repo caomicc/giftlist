@@ -7,6 +7,7 @@ import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
 import GiftCardDetails from './gift-card-details';
 import GiftCardContributions from './gift-card-contributions';
+import { cn } from '@/lib/utils';
 
 export type GiftItemProps = {
   item: {
@@ -75,12 +76,12 @@ const GiftItem: React.FC<GiftItemProps> = ({
   return (
     <>
       <div
-        className={`flex items-center flex-col md:flex-row justify-between p-4 border rounded-lg transition-colors relative ${
+        className={`flex items-center flex-col md:flex-row justify-between transition-colors relative py-4 md:py-2 ${
           isArchived
             ? "bg-gray-100 border-gray-300 opacity-75"
-            : (isPurchased && (!isMyGift || (isMyGift && item.is_public))) || (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))
-            ? "bg-green-50 border-green-200"
-            : "bg-indigo-50"
+            // : (isPurchased && (!isMyGift || (isMyGift && item.is_public))) || (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))
+            // ? "bg-green-50 border-green-200"
+            : "bg-transparent"
         }`}
       >
         <div className="flex items-start md:items-center gap-1 md:absolute w-full md:w-auto md:right-4 md:top-4 mb-2">
@@ -121,7 +122,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
               {item.name}
             </h3>
           {item.description && (
-            <p className="text-sm text-foreground mb-4">
+            <p className="text-sm text-foreground mb-2 md:mb-4">
               {item.description}
             </p>
           )}
@@ -131,47 +132,54 @@ const GiftItem: React.FC<GiftItemProps> = ({
           {/* OpenGraph Data Display */}
           {(item.og_title || item.og_description || item.og_image) && (
             <div className="mb-6">
-              <div className="flex gap-3 flex-col md:flex-row">
-                {item.og_image && (
-                  <div className="flex-shrink-0">
-                    <img
-                      src={item.og_image}
-                      alt={item.og_title || item.name}
-                      className="size-20 md:size-16 object-cover rounded"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none'
-                      }}
-                    />
+              {item.link && (
+                <Link
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                <div className="flex gap-3 flex-row">
+                  {item.og_image && (
+                    <div className="flex-shrink-0">
+                      <img
+                        src={item.og_image}
+                        alt={item.og_title || item.name}
+                        className="size-16 md:size-16 object-cover rounded"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none'
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    {item.og_title && (
+                      <h4 className="text-sm font-medium text-gray-900 truncate sr-only">
+                        {item.og_title}
+                      </h4>
+                    )}
+                    {item.og_description && (
+                      <p className="text-xs text-gray-600 line-clamp-2 mt-1">
+                        {item.og_description}
+                      </p>
+                    )}
+                    {item.og_site_name && (
+                      <p className="text-xs text-foreground mt-1 font-medium">
+                        {item.og_site_name} <ExternalLink className="inline size-3 -mt-1" />
+                      </p>
+                    )}
                   </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  {item.og_title && (
-                    <h4 className="text-sm font-medium text-gray-900 truncate tracking-wider">
-                      {item.og_title}
-                    </h4>
-                  )}
-                  {item.og_description && (
-                    <p className="text-xs text-gray-600 line-clamp-2 mt-1">
-                      {item.og_description}
-                    </p>
-                  )}
-                  {item.og_site_name && (
-                    <p className="text-xs text-foreground mt-1 font-medium tracking-wider">
-                      {item.og_site_name}
-                    </p>
-                  )}
                 </div>
-              </div>
+              </Link>)}
             </div>
           )}
 
-          <div className='flex md:items-center gap-2  flex-col md:flex-row'>
+          <div className='flex md:items-center gap-2 flex-row'>
             {item.link && (
               <Link
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className='w-full md:w-auto'
+                className='w-1/2 md:w-auto'
                 passHref
               >
                 <Button variant="default" size="sm" className="w-full md:w-auto">
@@ -186,7 +194,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                     variant={isGiftCardComplete ? "default" : "secondary"}
                     size="sm"
                     onClick={() => setIsGiftCardDialogOpen(true)}
-                    className={isGiftCardComplete ? "bg-green-600 hover:bg-green-700" : ""}
+                    className={cn(isGiftCardComplete ? "bg-green-600 hover:bg-green-700" : "", 'w-1/2 md:w-auto')}
                     disabled={isGiftCardComplete}
                   >
                     <CreditCard className="size-3" />
@@ -197,59 +205,58 @@ const GiftItem: React.FC<GiftItemProps> = ({
                     variant={isPurchased ? "default" : "secondary"}
                     size="sm"
                     onClick={() => onTogglePurchase?.(item.id, item.purchased_by || null)}
-                    className={isPurchased ? "bg-green-600 hover:bg-green-700" : ""}
+                    className={cn(isPurchased ? "bg-green-600 hover:bg-green-700" : "", 'w-1/2 md:w-auto')}
                   >
                     <ShoppingCart className="size-3" />
-                    {isPurchased ? "Purchased" : "Mark as Purchased"}
+                    {isPurchased ? "Purchased" : "Purchase"}
                   </Button>
                 )}
               </>
             )}
             {isMyGift && (
           // My Gifts - Edit/Delete/Archive buttons
-          <div className="flex md:flex-row gap-2 ml-auto">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEdit?.(item)}
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-              disabled={isArchived}
-            >
-              <Edit className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onArchive?.(item.id)}
-              className={isArchived ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50" : "text-orange-600 hover:text-orange-700 hover:bg-orange-50"}
-              title={isArchived ? "Unarchive item" : "Archive item"}
-            >
-              <Archive className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onDelete?.(item.id)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
+              <div className="flex md:flex-row gap-2 ml-auto">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit?.(item)}
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  disabled={isArchived}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onArchive?.(item.id)}
+                  className={isArchived ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50" : "text-orange-600 hover:text-orange-700 hover:bg-orange-50"}
+                  title={isArchived ? "Unarchive item" : "Archive item"}
+                >
+                  <Archive className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete?.(item.id)}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
-        )}
+            {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
+            <Badge className="bg-green-100 text-green-800 mt-4">
+              {isGiftCard ? 'Complete' : `Purchased by ${purchaserName}`}
+            </Badge>
+          )}
 
-          </div>
-               {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
-                <Badge className="bg-green-100 text-green-800 mt-4">
-                  {isGiftCard ? 'Complete' : `Purchased by ${purchaserName}`}
-                </Badge>
-              )}
-              
-              {/* Show purchase status for owners if list is public */}
-              {isMyGift && item.is_public && ((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && purchaserName && (
-                <Badge className="bg-green-100 text-green-800 mt-4">
-                  {isGiftCard ? 'Gift card complete' : `Purchased by ${purchaserName}`}
-                </Badge>
-              )}
+          {/* Show purchase status for owners if list is public */}
+          {isMyGift && item.is_public && ((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && purchaserName && (
+            <Badge className="bg-green-100 text-green-800 mt-4">
+              {isGiftCard ? 'Gift card complete' : `Purchased by ${purchaserName}`}
+            </Badge>
+          )}
 
           {/* Gift Card Contributions */}
             {isGiftCard && !isMyGift && (

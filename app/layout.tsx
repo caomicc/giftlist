@@ -26,9 +26,12 @@ html {
 }
         `}</style>
       </head>
-      <body className={'bg-gradient-to-br from-red-100 to-violet-300'}>
+      <body className={'bg-gradient-to-br from-red-100 to-violet-300 min-h-screen'}>
         <UserMenuWrapper />
+        <div className="relative z-10">
         {children}
+        </div>
+        <div className={"absolute h-[50vh] bg-white block md:hidden bottom-0 left-0 right-0 z-1 w-full"}></div>
       </body>
     </html>
   )

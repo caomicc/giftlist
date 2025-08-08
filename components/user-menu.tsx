@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { User, Lock, LogOut, Settings } from 'lucide-react'
+import { User, Lock, LogOut, Settings, ChevronDownIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 
@@ -60,13 +60,14 @@ export function UserMenu({ user }: UserMenuProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center space-x-2">
+          <span>My Profile</span>
+          <ChevronDownIcon className="h-4 w-4" />
           <Avatar className="size-12 bg-violet-200 no-underline group-hover:no-underline!">
             <AvatarFallback className=''>{initials}</AvatarFallback>
           </Avatar>
-          <span>My Profile</span>
         </div>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 ml-10" align="start" forceMount>
+      <DropdownMenuContent className="w-56 ml-10" align="end" forceMount>
         <div className="flex flex-col space-y-1 p-2">
           <p className="text-sm font-medium leading-none">{user.name || 'User'}</p>
           <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
