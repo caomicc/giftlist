@@ -1039,7 +1039,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                           <div className="flex items-center gap-3">
                             <Avatar className="size-9">
                               <AvatarFallback className="bg-blue-100 text-blue-600">
-                                {member.name.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
+                                {member.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col text-left">
