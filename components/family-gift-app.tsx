@@ -546,9 +546,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
               <div className="flex items-center gap-2">
                 <Dialog open={isManageListsDialogOpen} onOpenChange={setIsManageListsDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                      <Settings className="h-4 w-4" />
-                    </Button>
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                          <Settings className="h-4 w-4" />
+                        </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
@@ -613,9 +613,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                 </Dialog>
                 <Dialog open={isCreateListDialogOpen} onOpenChange={setIsCreateListDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                          <Plus className="h-4 w-4" />
+                        </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                   <DialogHeader>
@@ -1334,8 +1334,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   <Label htmlFor="edit-list-privacy">Privacy</Label>
                   <p className="text-sm text-muted-foreground">
                     {editListForm.isPublic
-                      ? "See purchased items"
-                      : "Can't see purchased items"}
+                      ? "You can see purchased items"
+                      : "You can't see purchased items"}
                   </p>
                 </div>
                 <Switch

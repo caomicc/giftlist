@@ -28,6 +28,7 @@ export type GiftItemProps = {
     og_image?: string | null;
     og_site_name?: string | null;
     archived?: boolean;
+    image_url?: string | null;
   };
   currentUserId: string;
   purchaserName?: string;
@@ -121,17 +122,34 @@ const GiftItem: React.FC<GiftItemProps> = ({
             >
               {item.name}
             </h3>
+          <div className="flex gap-3 flex-row">  {item.image_url && !item.og_image && (
+              <div className="flex-shrink-0">
+                <div
+                              className="size-16 md:size-16 object-cover rounded overflow-hidden bg-gray-100 flex items-center justify-center"
+>
+                <img
+              src={item.image_url}
+              alt={item.og_title || item.name}
+              className="size-16 md:size-16 object-cover rounded"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = 'none'
+              }}
+            />
+            </div>
+              </div>)}
           {item.description && (
-            <p className="text-sm text-foreground mb-2 md:mb-4">
-              {item.description}
-            </p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-foreground mb-2 md:mb-4 mt-1">
+                {item.description}
+              </p>
+            </div>
           )}
-
+          </div>
           </div>
 
           {/* OpenGraph Data Display */}
           {(item.og_title || item.og_description || item.og_image) && (
-            <div className="mb-6">
+            <div className="">
               {item.link && (
                 <Link
                   href={item.link}
@@ -173,7 +191,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
             </div>
           )}
 
-          <div className='flex md:items-center gap-2 flex-row'>
+          <div className='flex md:items-center gap-2 flex-row mt-6'>
             {item.link && (
               <Link
                 href={item.link}
