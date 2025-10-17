@@ -144,6 +144,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const handleAddGiftItem = async () => {
     if (!newItem.name.trim() || isSubmitting || !newItem.selectedListId) return
 
+    console.log('Adding gift item:', newItem, newItemOGData)
+
     setIsSubmitting(true)
     try {
       await addGiftItem({
@@ -217,7 +219,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
   const handleUpdateGiftItem = async () => {
     if (!editingItem || !editForm.name.trim() || isSubmitting || !editForm.selectedListId) return
-
+    console.log('Updating gift item:', editForm, editFormOGData)
     setIsSubmitting(true)
     try {
       await updateGiftItem(editingItem.id, {
@@ -722,7 +724,31 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
               <p className="text-sm text-muted-foreground">
                 Add items you'd like to receive. Family members can see this list and mark items as purchased.
               </p>
-
+              <div className="flex flex-col gap-3">
+                <Label>Link:</Label>
+                <Input
+                  placeholder="Link (optional)"
+                  value={newItem.link}
+                  onChange={(e) => handleNewItemLinkChange(e.target.value)}
+                  disabled={isSubmitting}
+                />
+                {newItemOGLoading && (
+                  <div className="text-xs text-blue-600 flex items-center gap-1">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Loading link preview...
+                  </div>
+                )}
+                {!newItemOGLoading && newItemOGData && (
+                  <div className="text-xs text-green-600 flex items-center gap-1">
+                    ✓ Link preview loaded: {newItemOGData.title || 'Data found'}
+                  </div>
+                )}
+                {!newItemOGLoading && newItem.link && newItem.link.startsWith('http') && !newItemOGData && (
+                  <div className="text-xs text-orange-600 flex items-center gap-1">
+                    ⚠ Couldn't load preview (some sites block automated requests)
+                  </div>
+                )}
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-3">
                   <Label>Gift:</Label>
@@ -780,31 +806,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col gap-3">
-                <Label>Link:</Label>
-                <Input
-                  placeholder="Link (optional)"
-                  value={newItem.link}
-                  onChange={(e) => handleNewItemLinkChange(e.target.value)}
-                  disabled={isSubmitting}
-                />
-                {newItemOGLoading && (
-                  <div className="text-xs text-blue-600 flex items-center gap-1">
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    Loading link preview...
-                  </div>
-                )}
-                {!newItemOGLoading && newItemOGData && (
-                  <div className="text-xs text-green-600 flex items-center gap-1">
-                    ✓ Link preview loaded: {newItemOGData.title || 'Data found'}
-                  </div>
-                )}
-                {!newItemOGLoading && newItem.link && newItem.link.startsWith('http') && !newItemOGData && (
-                  <div className="text-xs text-orange-600 flex items-center gap-1">
-                    ⚠ Couldn't load preview (some sites block automated requests)
-                  </div>
-                )}
-              </div>
+
               <div className="flex flex-col gap-3">
                 <Label>Image URL:</Label>
                 <Input

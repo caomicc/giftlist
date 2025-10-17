@@ -68,10 +68,14 @@ lib/
 - Automatic metadata fetching for gift links via `/api/og-data`
 - Stores title, description, image, and site name for rich link previews
 - Used in gift item display for enhanced UX
+- **Etsy API Integration**: Uses Etsy REST API v3 for fetching listing data (title, description, images, price)
+  - Falls back to URL parsing if API key is not configured or API fails
+  - Requires `ETSY_API_KEY` environment variable for full functionality
 
 ## Environment Variables Required
 - `NEON_DATABASE_URL`: PostgreSQL connection string
 - `NEXTAUTH_URL`: Base URL for magic link generation
+- `ETSY_API_KEY` (optional): Etsy API v3 key for fetching rich listing metadata. Get one at https://www.etsy.com/developers/register
 - Email service configuration (check `lib/email.ts` for specifics)
 
 ## Database Migration
