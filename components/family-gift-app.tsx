@@ -434,9 +434,14 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       setNewItemOGData(ogData)
       setNewItemOGLoading(false)
 
-      // Auto-fill name if empty and OG title exists
-      if (!newItem.name && ogData?.title) {
-        setNewItem((prev) => ({ ...prev, name: ogData.title }))
+      // Auto-fill fields if empty and OG data exists
+      if (ogData) {
+        setNewItem((prev) => ({
+          ...prev,
+          name: !prev.name && ogData.title ? ogData.title : prev.name,
+          price: !prev.price && ogData.price ? ogData.price : prev.price,
+          imageUrl: !prev.imageUrl && ogData.image ? ogData.image : prev.imageUrl,
+        }))
       }
     } else {
       setNewItemOGData(null)
@@ -934,7 +939,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                                 </AccordionTrigger>
                                 <AccordionContent>
                                   <div className="divide divide-indigo-500">
-                                    {listData.items.map((item: any, idx: number) => (
+                                    {listData.items.map((item: any) => (
                                       <div key={item.id}>
                                         <GiftItem
                                           item={item}

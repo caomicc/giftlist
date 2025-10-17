@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as cheerio from 'cheerio'
+import { fetchAmazonProduct } from '@/lib/amazon'
 
 // Helper function to extract basic info from URLs when direct fetching fails
 function extractBasicDataFromUrl(url: URL) {
@@ -59,14 +60,39 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if this is a known problematic domain
+    // Check if this is Amazon and use the Amazon API
     const hostname = validUrl.hostname.toLowerCase()
-    const isBlockedDomain = [
-      'amazon.com',
-      'amazon.co.uk',
-      'amazon.ca',
-      'etsy.com'
-    ].some(domain => hostname.includes(domain))
+    const isAmazon = hostname.includes('amazon.com') ||
+      hostname.includes('amazon.co.uk') ||
+      hostname.includes('amazon.ca')
+
+    if (isAmazon) {
+      try {
+        const amazonData = await fetchAmazonProduct(url)
+
+        // Check if amazonData has the required properties
+        if ('title' in amazonData) {
+          // Convert Amazon API response to OG data format
+          return NextResponse.json({
+            ogData: {
+              title: amazonData.title,
+              description: amazonData.description,
+              image: amazonData.image_url,
+              siteName: 'Amazon',
+              type: 'product',
+              url: amazonData.url || url,
+              price: amazonData.price ? `${amazonData.price} ${amazonData.currency}` : null,
+            }
+          })
+        }
+      } catch (error) {
+        console.log('Amazon API failed, falling back to URL parsing:', error)
+        // Fall through to try scraping or URL parsing
+      }
+    }
+
+    // Check if this is Etsy (blocked from scraping)
+    const isBlockedDomain = hostname.includes('etsy.com')
 
     if (isBlockedDomain) {
       // For blocked domains, try to extract basic info from URL
@@ -81,9 +107,6 @@ export async function POST(request: NextRequest) {
     const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
 
     // Try different approaches based on the domain
-    const isEtsy = validUrl.hostname.includes('etsy.com')
-    const isAmazon = validUrl.hostname.includes('amazon.com')
-
     let headers: Record<string, string> = {
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -102,7 +125,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Special handling for Etsy
-    if (isEtsy) {
+    if (isBlockedDomain) {
       headers = {
         ...headers,
         'User-Agent': 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)',

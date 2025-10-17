@@ -65,3 +65,14 @@ export type GiftCardPurchase = {
   amount: number
   created_at: string
 }
+
+export type AmazonProduct = {
+  asin: string
+  url: string
+  title: string | null
+  description: string | null
+  image_url: string | null
+  price: string | null
+  currency: string | null
+  updated_at: string
+}

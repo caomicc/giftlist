@@ -68,14 +68,18 @@ lib/
 - Automatic metadata fetching for gift links via `/api/og-data`
 - Stores title, description, image, and site name for rich link previews
 - Used in gift item display for enhanced UX
-- **Etsy API Integration**: Uses Etsy REST API v3 for fetching listing data (title, description, images, price)
+- **Amazon API Integration**: Uses RapidAPI's Amazon API Scraping service for fetching product information
+  - Caches results in `amazon_products` table (24-hour TTL)
+  - Requires `RAPID_API_KEY` environment variable
+  - Extracts ASIN from Amazon URLs (supports .com, .co.uk, .ca)
   - Falls back to URL parsing if API key is not configured or API fails
-  - Requires `ETSY_API_KEY` environment variable for full functionality
+- **Etsy Support**: Uses URL parsing to extract title from listing URLs
+  - Etsy blocks automated scraping, so only basic metadata is available
 
 ## Environment Variables Required
 - `NEON_DATABASE_URL`: PostgreSQL connection string
 - `NEXTAUTH_URL`: Base URL for magic link generation
-- `ETSY_API_KEY` (optional): Etsy API v3 key for fetching rich listing metadata. Get one at https://www.etsy.com/developers/register
+- `RAPID_API_KEY` (required for Amazon products): RapidAPI key for Amazon API Scraping service. Get one at https://rapidapi.com/letscrape-6bRBa3QguO5/api/amazon-api-scraping
 - Email service configuration (check `lib/email.ts` for specifics)
 
 ## Database Migration
