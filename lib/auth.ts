@@ -160,6 +160,12 @@ export async function verifyMagicLink(token: string, email: string) {
       tokenLength: token.length
     })
 
+    // Validate inputs
+    if (!token || !email) {
+      console.log('❌ Missing token or email');
+      return null;
+    }
+
     // Check if token is valid and not expired
     const [verification] = await sql`
       SELECT * FROM verification_tokens
@@ -177,14 +183,7 @@ export async function verifyMagicLink(token: string, email: string) {
       return null
     }
 
-    // Delete the used token
-    await sql`
-      DELETE FROM verification_tokens
-      WHERE identifier = ${email} AND token = ${token}
-    `
-    console.log('🗑️ Used token deleted')
-
-    // Get or create user
+    // Get or create user FIRST (before deleting token)
     let user: Record<string, any> | undefined;
     {
       const [foundUser] = await sql`
@@ -194,18 +193,33 @@ export async function verifyMagicLink(token: string, email: string) {
     }
 
     if (!user) {
-      console.log('👤 Creating new user');
-      const [newUser] = await sql`
-        INSERT INTO users (email, email_verified)
-        VALUES (${email}, NOW())
-        RETURNING *
-      `;
-      user = newUser;
+      console.log('👤 Creating new user for email:', email);
+      try {
+        const result = await sql`
+          INSERT INTO users (email, email_verified)
+          VALUES (${email}, NOW())
+          RETURNING *
+        `;
+        user = result[0];
+        if (!user) {
+          throw new Error('User creation returned no results');
+        }
+        console.log('✅ New user created with id:', user.id);
+      } catch (userCreationError) {
+        console.error('❌ Failed to create user:', userCreationError);
+        throw userCreationError;
+      }
     } else {
-      console.log('👤 Updating existing user');
+      console.log('👤 Updating existing user:', user.id);
       await sql`
         UPDATE users SET email_verified = NOW() WHERE email = ${email}
       `;
+    }
+
+    // Verify user object is valid
+    if (!user || !user.id) {
+      console.error('❌ Invalid user object:', user);
+      throw new Error('User object is invalid or missing ID');
     }
 
     // Create session
@@ -217,6 +231,14 @@ export async function verifyMagicLink(token: string, email: string) {
       INSERT INTO sessions (session_token, user_id, expires)
       VALUES (${sessionToken}, ${user.id}, ${expires})
     `
+    console.log('✅ Session created successfully')
+
+    // Only delete the token AFTER everything else succeeds
+    await sql`
+      DELETE FROM verification_tokens
+      WHERE identifier = ${email} AND token = ${token}
+    `
+    console.log('🗑️ Used token deleted')
 
     // Set cookie
     const cookieStore = await cookies()
