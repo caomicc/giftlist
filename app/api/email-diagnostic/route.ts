@@ -15,19 +15,19 @@ export async function GET(request: NextRequest) {
 
     // Check if user exists
     const user = await sql`
-      SELECT id, email, name, email_verified, created_at 
-      FROM users 
+      SELECT id, email, name, email_verified, created_at
+      FROM users
       WHERE email = ${email}
     `
 
     // Check tokens for this email
     const tokens = await sql`
       SELECT token, expires, created_at,
-        CASE 
+        CASE
           WHEN expires < NOW() THEN 'expired'
           ELSE 'valid'
         END as status
-      FROM verification_tokens 
+      FROM verification_tokens
       WHERE identifier = ${email}
       ORDER BY created_at DESC
     `
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Email diagnostic failed:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to run email diagnostic',
         details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()

@@ -69,6 +69,14 @@ export async function sendMagicLink(email: string, magicLink: string) {
     console.log('Magic link sent to:', email)
   } catch (error) {
     console.error('Failed to send magic link:', error)
+    
+    // Fallback: Log the magic link for debugging in production
+    console.log('🚨 EMAIL FAILED - FALLBACK MAGIC LINK:')
+    console.log('📧 To:', email)
+    console.log('🔗 Link:', magicLink)
+    console.log('👆 Use this link to sign in manually')
+    
+    // Still throw error so the user knows email failed
     throw new Error('Failed to send magic link')
   }
 }
