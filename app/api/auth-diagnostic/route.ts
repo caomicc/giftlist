@@ -14,7 +14,7 @@ export async function GET() {
 
     // Check if users table exists and has data
     const userCount = await sql`SELECT COUNT(*) as count FROM users`
-    
+
     // Check verification_tokens table
     const tokenTableInfo = await sql`
       SELECT column_name, data_type, is_nullable, column_default
@@ -55,7 +55,7 @@ export async function GET() {
   } catch (error) {
     console.error('Auth diagnostic failed:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to run auth diagnostic',
         details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()

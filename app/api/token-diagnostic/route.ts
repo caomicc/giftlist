@@ -40,7 +40,7 @@ export async function GET() {
   } catch (error) {
     console.error('Token diagnostic failed:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to run token diagnostic',
         details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Token cleanup failed:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to cleanup tokens',
         details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()

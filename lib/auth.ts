@@ -202,23 +202,23 @@ export async function verifyMagicLink(token: string, email: string) {
           RETURNING *
         `;
         console.log('🔧 INSERT query executed, result:', result);
-        
+
         if (!result || result.length === 0) {
           console.error('❌ User creation returned empty result array');
           throw new Error('User creation returned no results');
         }
-        
+
         user = result[0];
         if (!user) {
           console.error('❌ User creation returned null/undefined user');
           throw new Error('User creation returned null user');
         }
-        
+
         if (!user.id) {
           console.error('❌ User creation returned user without ID:', user);
           throw new Error('User creation returned user without ID');
         }
-        
+
         console.log('✅ New user created successfully:', {
           id: user.id,
           email: user.email,

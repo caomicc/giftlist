@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Magic link generation failed:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to generate magic link',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

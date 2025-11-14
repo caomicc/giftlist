@@ -5,7 +5,7 @@ import nodemailer from 'nodemailer'
 export async function sendMagicLink(email: string, magicLink: string) {
   // Development mode - just log the magic link
   if (process.env.NODE_ENV === 'development' &&
-      (!process.env.EMAIL_SERVER_USER || process.env.EMAIL_SERVER_USER === 'your-email@gmail.com')) {
+    (!process.env.EMAIL_SERVER_USER || process.env.EMAIL_SERVER_USER === 'your-email@gmail.com')) {
     console.log('🪄 MAGIC LINK (Development Mode)')
     console.log('📧 To:', email)
     console.log('🔗 Link:', magicLink)
@@ -69,13 +69,13 @@ export async function sendMagicLink(email: string, magicLink: string) {
     console.log('Magic link sent to:', email)
   } catch (error) {
     console.error('Failed to send magic link:', error)
-    
+
     // Fallback: Log the magic link for debugging in production
     console.log('🚨 EMAIL FAILED - FALLBACK MAGIC LINK:')
     console.log('📧 To:', email)
     console.log('🔗 Link:', magicLink)
     console.log('👆 Use this link to sign in manually')
-    
+
     // Still throw error so the user knows email failed
     throw new Error('Failed to send magic link')
   }

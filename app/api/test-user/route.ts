@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Test user endpoint failed:', error)
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to process request',
         details: error instanceof Error ? error.message : 'Unknown error',
         timestamp: new Date().toISOString()
