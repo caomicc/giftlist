@@ -99,13 +99,13 @@ export default function MyGiftsList({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Badge variant={listData.isPublic ? "default" : "secondary"} className="text-xs absolute top-5 right-5 cursor-help">
-                        {listData.isPublic ? "Can see purchased items" : "Cannot see purchased items"}
+                        {listData.isPublic ? "Track Purchases" : "Keep Surprise"}
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{listData.isPublic 
-                        ? "Public: You can see which items family members have purchased from this list" 
-                        : "Private: You cannot see which items family members have purchased from this list"}</p>
+                      <p>{listData.isPublic
+                        ? "Track Purchases: You can see which items family members have purchased from this list"
+                        : "Keep Surprise: You cannot see which items family members have purchased from this list"}</p>
                     </TooltipContent>
                   </Tooltip>
                   <div className="flex items-center gap-2 mt-1">
@@ -140,7 +140,7 @@ export default function MyGiftsList({
           </AccordionItem>
         ))}
       </Accordion>
-      
+
       {/* Archived Items by List */}
       {Object.keys(archivedByList).length > 0 && (
         <div className="pt-4 border-t">

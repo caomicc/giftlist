@@ -103,13 +103,13 @@ export default function FamilyGiftsList({
                                     variant={listData.isPublic ? "default" : "secondary"}
                                     className="text-xs cursor-help"
                                   >
-                                    {listData.isPublic ? "Public" : "Private"}
+                                    {listData.isPublic ? "Tracked" : "Surprise"}
                                   </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>{listData.isPublic
-                                    ? "Public: The list owner can see which items you've purchased"
-                                    : "Private: The list owner cannot see which items you've purchased"}</p>
+                                    ? "Track Purchases: The list owner can see which items you've purchased"
+                                    : "Keep Surprise: The list owner cannot see which items you've purchased"}</p>
                                 </TooltipContent>
                               </Tooltip>
                               <span className="text-xs text-muted-foreground">

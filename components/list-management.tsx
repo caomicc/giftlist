@@ -49,7 +49,7 @@ export default function ListManagement({
   const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false)
   const [isManageListsDialogOpen, setIsManageListsDialogOpen] = useState(false)
   const [editingList, setEditingList] = useState<any>(null)
-  
+
   const [newListForm, setNewListForm] = useState({
     name: "",
     description: "",
@@ -57,7 +57,7 @@ export default function ListManagement({
     visibilityMode: "all" as "all" | "hidden_from" | "visible_to",
     selectedUsers: [] as string[]
   })
-  
+
   const [editListForm, setEditListForm] = useState({
     name: "",
     description: "",
@@ -95,14 +95,14 @@ export default function ListManagement({
 
     try {
       const { permissions } = await fetchListPermissions(list.id)
-      
+
       // Determine visibility mode based on permissions
       const hiddenUsers = permissions.filter((p: any) => !p.can_view).map((p: any) => p.user_id)
       const visibleUsers = permissions.filter((p: any) => p.can_view).map((p: any) => p.user_id)
-      
+
       let visibilityMode: "all" | "hidden_from" | "visible_to" = "all"
       let selectedUsers: string[] = []
-      
+
       if (hiddenUsers.length > 0 && hiddenUsers.length < permissions.length) {
         visibilityMode = "hidden_from"
         selectedUsers = hiddenUsers
@@ -142,13 +142,13 @@ export default function ListManagement({
     // Calculate permissions based on visibility mode
     const permissions = otherMembers.map(member => {
       let canView = true
-      
+
       if (editListForm.visibilityMode === "hidden_from") {
         canView = !editListForm.selectedUsers.includes(member.id)
       } else if (editListForm.visibilityMode === "visible_to") {
         canView = editListForm.selectedUsers.includes(member.id)
       }
-      
+
       return {
         user_id: member.id,
         can_view: canView
@@ -195,13 +195,13 @@ export default function ListManagement({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Badge variant={list.is_public ? "default" : "secondary"} className="text-xs cursor-help">
-                              {list.is_public ? "Public" : "Private"}
+                              {list.is_public ? "Tracked" : "Surprise"}
                             </Badge>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{list.is_public 
-                              ? "Public: You can see which items family members have purchased from this list" 
-                              : "Private: You cannot see which items family members have purchased from this list"}</p>
+                            <p>{list.is_public
+                              ? "Track Purchases: You can see which items family members have purchased from this list"
+                              : "Keep Surprise: You cannot see which items family members have purchased from this list"}</p>
                           </TooltipContent>
                         </Tooltip>
                         <span className="text-xs text-muted-foreground">
@@ -277,11 +277,11 @@ export default function ListManagement({
             </div>
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div className="space-y-0.5">
-                <Label htmlFor="list-privacy">Privacy</Label>
+                <Label htmlFor="list-privacy">Purchase Visibility</Label>
                 <p className="text-sm text-muted-foreground">
                   {newListForm.isPublic
-                    ? "See purchased items"
-                    : "Can't see purchased items"}
+                    ? "Track Purchases"
+                    : "Keep Surprise"}
                 </p>
               </div>
               <Switch
@@ -298,7 +298,7 @@ export default function ListManagement({
                   Choose who can see this list
                 </p>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Checkbox
@@ -315,7 +315,7 @@ export default function ListManagement({
                     Visible to all family members
                   </Label>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="visibility-hidden"
@@ -331,7 +331,7 @@ export default function ListManagement({
                     Hidden from specific members
                   </Label>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="visibility-visible"
@@ -352,8 +352,8 @@ export default function ListManagement({
               {newListForm.visibilityMode !== "all" && (
                 <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
                   <Label className="text-sm font-medium">
-                    {newListForm.visibilityMode === "hidden_from" 
-                      ? "Select members to hide from:" 
+                    {newListForm.visibilityMode === "hidden_from"
+                      ? "Select members to hide from:"
                       : "Select members who can view:"}
                   </Label>
                   <div className="space-y-2 mt-2">
@@ -443,11 +443,11 @@ export default function ListManagement({
               </div>
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="space-y-0.5">
-                  <Label htmlFor="edit-list-privacy">Privacy</Label>
+                  <Label htmlFor="edit-list-privacy">Purchase Visibility</Label>
                   <p className="text-sm text-muted-foreground">
                     {editListForm.isPublic
-                      ? "You can see purchased items"
-                      : "You can't see purchased items"}
+                      ? "Track Purchases"
+                      : "Keep Surprise"}
                   </p>
                 </div>
                 <Switch
@@ -464,7 +464,7 @@ export default function ListManagement({
                     Choose who can see this list
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -481,7 +481,7 @@ export default function ListManagement({
                       Visible to all family members
                     </Label>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="edit-visibility-hidden"
@@ -497,7 +497,7 @@ export default function ListManagement({
                       Hidden from specific members
                     </Label>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="edit-visibility-visible"
@@ -518,8 +518,8 @@ export default function ListManagement({
                 {editListForm.visibilityMode !== "all" && (
                   <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
                     <Label className="text-sm font-medium">
-                      {editListForm.visibilityMode === "hidden_from" 
-                        ? "Select members to hide from:" 
+                      {editListForm.visibilityMode === "hidden_from"
+                        ? "Select members to hide from:"
                         : "Select members who can view:"}
                     </Label>
                     <div className="space-y-2 mt-2">
