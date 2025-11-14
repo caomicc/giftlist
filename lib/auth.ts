@@ -195,18 +195,43 @@ export async function verifyMagicLink(token: string, email: string) {
     if (!user) {
       console.log('👤 Creating new user for email:', email);
       try {
+        console.log('🔧 About to execute INSERT INTO users...');
         const result = await sql`
           INSERT INTO users (email, email_verified)
           VALUES (${email}, NOW())
           RETURNING *
         `;
-        user = result[0];
-        if (!user) {
+        console.log('🔧 INSERT query executed, result:', result);
+        
+        if (!result || result.length === 0) {
+          console.error('❌ User creation returned empty result array');
           throw new Error('User creation returned no results');
         }
-        console.log('✅ New user created with id:', user.id);
+        
+        user = result[0];
+        if (!user) {
+          console.error('❌ User creation returned null/undefined user');
+          throw new Error('User creation returned null user');
+        }
+        
+        if (!user.id) {
+          console.error('❌ User creation returned user without ID:', user);
+          throw new Error('User creation returned user without ID');
+        }
+        
+        console.log('✅ New user created successfully:', {
+          id: user.id,
+          email: user.email,
+          email_verified: user.email_verified,
+          created_at: user.created_at
+        });
       } catch (userCreationError) {
-        console.error('❌ Failed to create user:', userCreationError);
+        console.error('❌ Failed to create user - Full error:', {
+          error: userCreationError,
+          message: userCreationError instanceof Error ? userCreationError.message : 'Unknown error',
+          stack: userCreationError instanceof Error ? userCreationError.stack : undefined,
+          email: email
+        });
         throw userCreationError;
       }
     } else {
@@ -253,7 +278,13 @@ export async function verifyMagicLink(token: string, email: string) {
     console.log('✅ Magic link verification successful')
     return user
   } catch (error) {
-    console.error('❌ Error verifying magic link:', error)
+    console.error('❌ Error verifying magic link - Full details:', {
+      error: error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      email: email,
+      token: token ? token.substring(0, 10) + '...' : 'undefined'
+    });
     return null
   }
 }
