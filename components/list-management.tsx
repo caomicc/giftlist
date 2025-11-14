@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
@@ -299,55 +300,35 @@ export default function ListManagement({
                 </p>
               </div>
 
-              <div className="space-y-2">
+              <RadioGroup
+                value={newListForm.visibilityMode}
+                onValueChange={(value: "all" | "hidden_from" | "visible_to") =>
+                  setNewListForm(prev => ({ ...prev, visibilityMode: value, selectedUsers: [] }))
+                }
+                disabled={isSubmitting}
+                className="space-y-2"
+              >
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="visibility-all"
-                    checked={newListForm.visibilityMode === "all"}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setNewListForm(prev => ({ ...prev, visibilityMode: "all", selectedUsers: [] }))
-                      }
-                    }}
-                    disabled={isSubmitting}
-                  />
+                  <RadioGroupItem value="all" id="visibility-all" />
                   <Label htmlFor="visibility-all" className="text-sm font-normal cursor-pointer">
                     Visible to all family members
                   </Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="visibility-hidden"
-                    checked={newListForm.visibilityMode === "hidden_from"}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setNewListForm(prev => ({ ...prev, visibilityMode: "hidden_from", selectedUsers: [] }))
-                      }
-                    }}
-                    disabled={isSubmitting}
-                  />
+                  <RadioGroupItem value="hidden_from" id="visibility-hidden" />
                   <Label htmlFor="visibility-hidden" className="text-sm font-normal cursor-pointer">
                     Hidden from specific members
                   </Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="visibility-visible"
-                    checked={newListForm.visibilityMode === "visible_to"}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setNewListForm(prev => ({ ...prev, visibilityMode: "visible_to", selectedUsers: [] }))
-                      }
-                    }}
-                    disabled={isSubmitting}
-                  />
+                  <RadioGroupItem value="visible_to" id="visibility-visible" />
                   <Label htmlFor="visibility-visible" className="text-sm font-normal cursor-pointer">
                     Visible only to specific members
                   </Label>
                 </div>
-              </div>
+              </RadioGroup>
 
               {newListForm.visibilityMode !== "all" && (
                 <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
@@ -465,55 +446,35 @@ export default function ListManagement({
                   </p>
                 </div>
 
-                <div className="space-y-2">
+                <RadioGroup
+                  value={editListForm.visibilityMode}
+                  onValueChange={(value: "all" | "hidden_from" | "visible_to") =>
+                    setEditListForm(prev => ({ ...prev, visibilityMode: value, selectedUsers: [] }))
+                  }
+                  disabled={isSubmitting}
+                  className="space-y-2"
+                >
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="edit-visibility-all"
-                      checked={editListForm.visibilityMode === "all"}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setEditListForm(prev => ({ ...prev, visibilityMode: "all", selectedUsers: [] }))
-                        }
-                      }}
-                      disabled={isSubmitting}
-                    />
+                    <RadioGroupItem value="all" id="edit-visibility-all" />
                     <Label htmlFor="edit-visibility-all" className="text-sm font-normal cursor-pointer">
                       Visible to all family members
                     </Label>
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="edit-visibility-hidden"
-                      checked={editListForm.visibilityMode === "hidden_from"}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setEditListForm(prev => ({ ...prev, visibilityMode: "hidden_from", selectedUsers: [] }))
-                        }
-                      }}
-                      disabled={isSubmitting}
-                    />
+                    <RadioGroupItem value="hidden_from" id="edit-visibility-hidden" />
                     <Label htmlFor="edit-visibility-hidden" className="text-sm font-normal cursor-pointer">
                       Hidden from specific members
                     </Label>
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="edit-visibility-visible"
-                      checked={editListForm.visibilityMode === "visible_to"}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setEditListForm(prev => ({ ...prev, visibilityMode: "visible_to", selectedUsers: [] }))
-                        }
-                      }}
-                      disabled={isSubmitting}
-                    />
+                    <RadioGroupItem value="visible_to" id="edit-visibility-visible" />
                     <Label htmlFor="edit-visibility-visible" className="text-sm font-normal cursor-pointer">
                       Visible only to specific members
                     </Label>
                   </div>
-                </div>
+                </RadioGroup>
 
                 {editListForm.visibilityMode !== "all" && (
                   <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
