@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive } from 'lucide-react';
+import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive, Users } from 'lucide-react';
 import Link from 'next/link';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
 import GiftCardDetails from './gift-card-details';
 import GiftCardContributions from './gift-card-contributions';
+import GroupGiftInterest from './group-gift-interest';
 import { cn } from '@/lib/utils';
 
 export type GiftItemProps = {
@@ -21,6 +22,7 @@ export type GiftItemProps = {
     list_id?: string;
     is_public?: boolean;
     is_gift_card?: boolean;
+    is_group_gift?: boolean;
     gift_card_target_amount?: number | string | null;
     gift_card_total_purchased?: number | string;
     og_title?: string | null;
@@ -57,6 +59,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
   const isMyGift = variant === 'my-gifts';
   const isPurchased = !!item.purchased_by;
   const isGiftCard = item.is_gift_card;
+  const isGroupGift = item.is_group_gift;
   const isArchived = item.archived;
   const giftCardTotal = parseFloat(item.gift_card_total_purchased?.toString() || '0') || 0;
   const giftCardTarget = parseFloat(item.gift_card_target_amount?.toString() || '0') || null;
@@ -90,6 +93,12 @@ const GiftItem: React.FC<GiftItemProps> = ({
               <Badge variant="outline" className="text-gray-600 border-gray-400">
                 <Archive className="w-3 h-3 mr-1" />
                 Archived
+              </Badge>
+            )}
+            {isGroupGift && (
+              <Badge variant="outline" className="text-purple-600 border-purple-400">
+                <Users className="w-3 h-3 mr-1" />
+                Group Gift
               </Badge>
             )}
             {isGiftCard && (
@@ -286,6 +295,16 @@ const GiftItem: React.FC<GiftItemProps> = ({
               onPurchaseUpdate={handlePurchaseUpdate}
             />
             )}
+
+          {/* Group Gift Interest */}
+          {isGroupGift && (
+            <GroupGiftInterest
+              giftItemId={item.id}
+              currentUserId={currentUserId}
+              isOwner={isMyGift}
+              onInterestChange={handlePurchaseUpdate}
+            />
+          )}
         </div>
 
         {/* Action Buttons */}

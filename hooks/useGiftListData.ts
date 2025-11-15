@@ -8,7 +8,7 @@ interface ExtendedGiftItem extends GiftItem {
   list_name?: string
   list_owner_id?: string
   owner_name?: string
-  purchaser_name?: string
+  purchaser_name?: string | null
 }
 
 interface ListWithStats extends List {
@@ -54,7 +54,7 @@ export function useGiftListData(currentUserId?: string) {
       const response = await fetch(url)
       if (!response.ok) throw new Error('Failed to fetch gift items')
       const { giftItems } = await response.json()
-      
+
       // Apply privacy logic: if list is private and current user is the owner,
       // hide purchase information from the owner
       const processedItems = (giftItems as ExtendedGiftItem[]).map(item => {
@@ -68,7 +68,7 @@ export function useGiftListData(currentUserId?: string) {
         }
         return item
       })
-      
+
       setGiftItems(processedItems)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch gift items")
@@ -126,12 +126,12 @@ export function useGiftListData(currentUserId?: string) {
       const updatedList = await response.json()
 
       setLists((prev) => prev.map((list) => (list.id === listId ? { ...list, ...updatedList } : list)))
-      
+
       // If privacy setting changed, refetch gift items to apply new privacy logic
       if (updates.is_public !== undefined) {
         await fetchGiftItems()
       }
-      
+
       return updatedList as List
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update list")
@@ -150,7 +150,7 @@ export function useGiftListData(currentUserId?: string) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Failed to remove list')
       }
-      
+
       setLists((prev) => prev.filter((list) => list.id !== listId))
       setGiftItems((prev) => prev.filter((item) => item.list_id !== listId))
     } catch (err) {
@@ -168,6 +168,7 @@ export function useGiftListData(currentUserId?: string) {
     owner_id: string
     list_id: string
     is_gift_card?: boolean
+    is_group_gift?: boolean
     gift_card_target_amount?: number
     og_title?: string
     og_description?: string
@@ -187,14 +188,14 @@ export function useGiftListData(currentUserId?: string) {
       const { giftItem } = await response.json()
 
       setGiftItems((prev) => [giftItem, ...prev])
-      
+
       // Update list stats
-      setLists((prev) => prev.map((list) => 
-        list.id === item.list_id 
+      setLists((prev) => prev.map((list) =>
+        list.id === item.list_id
           ? { ...list, item_count: (list.item_count || 0) + 1 }
           : list
       ))
-      
+
       return giftItem as GiftItem
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add gift item")
@@ -239,21 +240,21 @@ export function useGiftListData(currentUserId?: string) {
       })
 
       if (!response.ok) throw new Error('Failed to remove gift item')
-      
+
       const removedItem = giftItems.find(item => item.id === itemId)
       setGiftItems((prev) => prev.filter((item) => item.id !== itemId))
-      
+
       // Update list stats
       if (removedItem) {
-        setLists((prev) => prev.map((list) => 
-          list.id === removedItem.list_id 
-            ? { 
-                ...list, 
-                item_count: Math.max((list.item_count || 1) - 1, 0),
-                purchased_count: removedItem.purchased_by 
-                  ? Math.max((list.purchased_count || 1) - 1, 0)
-                  : list.purchased_count
-              }
+        setLists((prev) => prev.map((list) =>
+          list.id === removedItem.list_id
+            ? {
+              ...list,
+              item_count: Math.max((list.item_count || 1) - 1, 0),
+              purchased_count: removedItem.purchased_by
+                ? Math.max((list.purchased_count || 1) - 1, 0)
+                : list.purchased_count
+            }
             : list
         ))
       }
@@ -277,10 +278,10 @@ export function useGiftListData(currentUserId?: string) {
   const canSeePurchaseStatus = (item: ExtendedGiftItem) => {
     // If list is public, everyone can see purchase status
     if (item.is_public !== false) return true
-    
+
     // If list is private and current user is not the owner, they can see purchase status
     if (item.owner_id !== currentUserId) return true
-    
+
     // If list is private and current user is the owner, they cannot see purchase status
     return false
   }

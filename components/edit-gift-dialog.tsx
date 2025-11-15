@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Edit, Loader2, CreditCard } from 'lucide-react'
+import { Edit, Loader2, CreditCard, Users } from 'lucide-react'
 
 interface User {
   id: string
@@ -51,6 +51,7 @@ export default function EditGiftDialog({
     link: "",
     imageUrl: "",
     isGiftCard: false,
+    isGroupGift: false,
     giftCardTargetAmount: "",
     selectedListId: ""
   })
@@ -67,6 +68,7 @@ export default function EditGiftDialog({
         link: editingItem.link || "",
         imageUrl: editingItem.image_url || "",
         isGiftCard: editingItem.is_gift_card || false,
+        isGroupGift: editingItem.is_group_gift || false,
         giftCardTargetAmount: editingItem.gift_card_target_amount ? editingItem.gift_card_target_amount.toString() : "",
         selectedListId: editingItem.list_id || ""
       })
@@ -111,6 +113,7 @@ export default function EditGiftDialog({
       image_url: editForm.imageUrl || undefined,
       list_id: editForm.selectedListId,
       is_gift_card: editForm.isGiftCard,
+      is_group_gift: editForm.isGroupGift,
       gift_card_target_amount: editForm.isGiftCard && editForm.giftCardTargetAmount
         ? parseFloat(editForm.giftCardTargetAmount)
         : undefined,
@@ -263,6 +266,30 @@ export default function EditGiftDialog({
                   Family members can purchase amounts toward this gift card. Leave blank for no target.
                 </p>
               </div>
+            )}
+          </div>
+
+          {/* Group Gift Section */}
+          <div className="flex flex-col gap-4 p-4 border rounded-lg bg-purple-50">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="edit-isGroupGift"
+                checked={editForm.isGroupGift}
+                onCheckedChange={(checked) => setEditForm((prev) => ({
+                  ...prev,
+                  isGroupGift: checked === true
+                }))}
+                disabled={isSubmitting}
+              />
+              <Label htmlFor="edit-isGroupGift" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                This is a group gift
+              </Label>
+            </div>
+            {editForm.isGroupGift && (
+              <p className="text-xs text-muted-foreground">
+                Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate.
+              </p>
             )}
           </div>
         </div>

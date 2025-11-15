@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Loader2, CreditCard } from 'lucide-react'
+import { Plus, Loader2, CreditCard, Users } from 'lucide-react'
 
 interface User {
   id: string
@@ -46,6 +46,7 @@ export default function AddGiftForm({
     link: "",
     imageUrl: "",
     isGiftCard: false,
+    isGroupGift: false,
     giftCardTargetAmount: "",
     selectedListId: userLists.length > 0 ? userLists[0].id : ""
   })
@@ -89,6 +90,7 @@ export default function AddGiftForm({
       owner_id: currentUser.id,
       list_id: newItem.selectedListId,
       is_gift_card: newItem.isGiftCard,
+      is_group_gift: newItem.isGroupGift,
       gift_card_target_amount: newItem.isGiftCard && newItem.giftCardTargetAmount
         ? parseFloat(newItem.giftCardTargetAmount)
         : undefined,
@@ -108,6 +110,7 @@ export default function AddGiftForm({
       link: "",
       imageUrl: "",
       isGiftCard: false,
+      isGroupGift: false,
       giftCardTargetAmount: "",
       selectedListId: prev.selectedListId
     }))
@@ -197,6 +200,30 @@ export default function AddGiftForm({
               Family members can purchase amounts toward this gift card. Leave blank for no target.
             </p>
           </div>
+        )}
+      </div>
+
+      {/* Group Gift Section */}
+      <div className="flex flex-col gap-4 p-4 border rounded-lg bg-purple-50">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="isGroupGift"
+            checked={newItem.isGroupGift}
+            onCheckedChange={(checked) => setNewItem((prev) => ({
+              ...prev,
+              isGroupGift: checked === true
+            }))}
+            disabled={isSubmitting}
+          />
+          <Label htmlFor="isGroupGift" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            This is a group gift
+          </Label>
+        </div>
+        {newItem.isGroupGift && (
+          <p className="text-xs text-muted-foreground">
+            Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate.
+          </p>
         )}
       </div>
 

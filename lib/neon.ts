@@ -47,6 +47,7 @@ export type GiftItem = {
   purchased_by: string | null
   list_id: string
   is_gift_card: boolean
+  is_group_gift: boolean
   gift_card_target_amount: number | null
   gift_card_total_purchased: number
   og_title: string | null
@@ -63,6 +64,13 @@ export type GiftCardPurchase = {
   gift_item_id: string
   purchaser_id: string
   amount: number
+  created_at: string
+}
+
+export type GiftInterest = {
+  id: string
+  gift_item_id: string
+  user_id: string
   created_at: string
 }
 
