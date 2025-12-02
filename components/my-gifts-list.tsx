@@ -108,13 +108,13 @@ export default function MyGiftsList({
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>{listData.isPublic
-                        ? (t.myGifts?.trackPurchasesHelp || "Track Purchases: You can see which items family members have purchased from this list")
-                        : (t.myGifts?.keepSurpriseHelp || "Keep Surprise: You cannot see which items family members have purchased from this list")}</p>
+                        ? (t.familyGifts?.purchaseTracking?.trackedDescription || "Track Purchases: You can see which items family members have purchased from this list")
+                        : (t.familyGifts?.purchaseTracking?.surpriseDescription || "Keep Surprise: You cannot see which items family members have purchased from this list")}</p>
                     </TooltipContent>
                   </Tooltip>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs text-muted-foreground">
-                      {formatMessage(tCommon.counts?.items || '{{count}} items', { count: listData.items.length })}
+                      {formatMessage(listData.items.length > 1 ? tCommon.counts?.itemsPlural : tCommon.counts?.items || '{{count}} items', { count: listData.items.length })}
                     </span>
                     {listData.createdAt && (
                       <span className="text-xs text-muted-foreground">

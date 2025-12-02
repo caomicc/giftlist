@@ -409,12 +409,12 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                 <div className="flex items-center justify-between mb-2 px-1">
                   <div className="flex items-center gap-2 h-8">
                     <Gift className="w-5 h-5" />
-                    Family Gift Lists
+                    {tGifts.familyGifts?.title || "Family Gift Lists"}
                   </div>
                 </div>
                 
                 <p className="text-sm text-muted-foreground">
-                  Click on a family member to view and purchase their gift items.
+                  {tGifts.familyGifts?.description || "Click on a family member to view and purchase their gifts."}
                 </p>
 
                 <FamilyGiftsList

@@ -42,12 +42,12 @@
     "updated": "Обновлено {{date}}"
   },
   "counts": {
-    "items": "{{count}} элемент",
-    "items_plural": "{{count}} элементов",
+    "items": "{{count}} подарок",
+    "itemsPlural": "{{count}} подарков",
     "lists": "{{count}} список",
-    "lists_plural": "{{count}} списков",
+    "listsPlural": "{{count}} списка",
     "purchased": "{{count}} куплено",
-    "archived": "{{count}} архивный элемент",
-    "archived_plural": "{{count}} архивных элементов"
+    "archived": "{{count}} архивный подарок",
+    "archivedPlural": "{{count}} архивных подарков"
   }
 }

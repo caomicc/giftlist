@@ -43,11 +43,11 @@
   },
   "counts": {
     "items": "{{count}} item",
-    "items_plural": "{{count}} items",
+    "itemsPlural": "{{count}} items",
     "lists": "{{count}} list",
-    "lists_plural": "{{count}} lists",
+    "listsPlural": "{{count}} lists",
     "purchased": "{{count}} purchased",
     "archived": "{{count}} archived item",
-    "archived_plural": "{{count}} archived items"
+    "archivedPlural": "{{count}} archived items"
   }
 }

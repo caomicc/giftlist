@@ -96,19 +96,19 @@ const GiftItem: React.FC<GiftItemProps> = ({
             {isArchived && (
               <Badge variant="outline" className="text-gray-600 border-gray-400">
                 <Archive className="w-3 h-3 mr-1" />
-                Archived
+                {t.giftItem.status.archived || 'Archived'}
               </Badge>
             )}
             {isGroupGift && (
               <Badge variant="outline" className="text-purple-600 border-purple-400">
                 <Users className="w-3 h-3 mr-1" />
-                Group Gift
+                {t.giftItem.badges.groupGift || 'Group Gift'}
               </Badge>
             )}
             {isGiftCard && (
               <Badge variant="giftcard" className="">
                 <CreditCard className="w-3 h-3 mr-1" />
-                Gift Card
+                {t.giftItem.badges.giftCard || 'Gift Card'}
               </Badge>
             )}
             {item.price !== undefined && !isGiftCard && (
@@ -214,7 +214,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                 passHref
               >
                 <Button variant="default" size="sm" className="w-full md:w-auto">
-                  View Link <ExternalLink className="size-3" />
+                  {t.giftItem.buttons.viewLink ?? 'View Link'}<ExternalLink className="size-3" />
                 </Button>
               </Link>
             )}
@@ -229,7 +229,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                     disabled={isGiftCardComplete}
                   >
                     <CreditCard className="size-3" />
-                    {isGiftCardComplete ? "Complete" : "Add Amount"}
+                    {isGiftCardComplete ? t.giftItem.buttons.complete : t.giftItem.buttons.addAmount}
                   </Button>
                 ) : (
                   <Button
@@ -239,7 +239,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                     className={cn(isPurchased ? "bg-green-600 hover:bg-green-700" : "", 'w-1/2 md:w-auto')}
                   >
                     <ShoppingCart className="size-3" />
-                    {isPurchased ? "Purchased" : "Purchase"}
+                    {t.giftItem.buttons[isPurchased ? "purchased" : "purchase"]}
                   </Button>
                 )}
               </>
@@ -278,14 +278,14 @@ const GiftItem: React.FC<GiftItemProps> = ({
           </div>
             {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
             <Badge className="bg-green-100 text-green-800 mt-4">
-              {isGiftCard ? 'Complete' : `Purchased by ${purchaserName}`}
+              {formatMessage(isGiftCard ? t.giftItem.status.giftCardComplete ?? "Gift Card Complete" : t.giftItem.status.purchasedBy ?? `Purchased by ${purchaserName}`, {name: purchaserName})}
             </Badge>
           )}
 
           {/* Show purchase status for owners if list is public */}
           {isMyGift && item.is_public && ((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && purchaserName && (
             <Badge className="bg-green-100 text-green-800 mt-4">
-              {isGiftCard ? 'Gift card complete' : `Purchased by ${purchaserName}`}
+              {formatMessage(isGiftCard ? t.giftItem.status.giftCardComplete ?? "Gift Card Complete" : t.giftItem.status.purchasedBy ?? `Purchased by ${purchaserName}`, {name: purchaserName})}
             </Badge>
           )}
 

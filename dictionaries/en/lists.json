@@ -45,7 +45,8 @@
       "surprise": "Surprise",
       "archived": "Archived"
     },
-    "itemCount": "{{count}} items",
+    "itemCount": "{{count}} item",
+    "itemCountPlural": "{{count}} items",
     "created": "Created {{date}}"
   },
   "deleteConfirm": {

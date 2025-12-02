@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Plus, Settings, Edit, Trash2, Gift, Loader2 } from 'lucide-react'
+import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
   id: string
@@ -47,6 +48,9 @@ export default function ListManagement({
   fetchListPermissions,
   isSubmitting
 }: ListManagementProps) {
+  const { t } = useTranslation('lists')
+  const { t: tCommon } = useTranslation('common')
+  
   const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false)
   const [isManageListsDialogOpen, setIsManageListsDialogOpen] = useState(false)
   const [editingList, setEditingList] = useState<any>(null)
@@ -161,6 +165,12 @@ export default function ListManagement({
     resetEditListForm()
   }
 
+  const itemCount = (count: number) => {
+    return count === 1
+      ? formatMessage(t.listItem?.itemCount || '{{count}} item', { count })
+      : formatMessage(t.listItem?.itemCountPlural || '{{count}} items', { count })
+  }
+
   return (
     <div className="flex items-center gap-2">
       {/* Manage Lists Dialog */}
@@ -172,16 +182,16 @@ export default function ListManagement({
         </DialogTrigger>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Manage Lists</DialogTitle>
+            <DialogTitle>{t.management?.title}</DialogTitle>
             <DialogDescription>
-              Edit or delete your existing gift lists.
+              {t.management?.description}
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[400px] overflow-y-auto">
             {userLists.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>No lists created yet.</p>
+                <p>{t.management?.empty || 'No lists created yet.'}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -190,26 +200,26 @@ export default function ListManagement({
                     <div className="flex-1">
                       <h3 className="font-medium">{list.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {list.description || "No description"}
+                        {list.description || (t.form?.descriptionPlaceholder || "No description")}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Badge variant={list.is_public ? "default" : "secondary"} className="text-xs cursor-help">
-                              {list.is_public ? "Tracked" : "Surprise"}
+                              {list.is_public ? (t.listItem?.badges?.tracked || "Tracked") : (t.listItem?.badges?.surprise || "Surprise")}
                             </Badge>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>{list.is_public
-                              ? "Track Purchases: You can see which items family members have purchased from this list"
-                              : "Keep Surprise: You cannot see which items family members have purchased from this list"}</p>
+                              ? (t.form?.trackPurchasesHelp || "Track Purchases: You can see which items family members have purchased from this list")
+                              : (t.form?.keepSurpriseHelp || "Keep Surprise: You cannot see which items family members have purchased from this list")}</p>
                           </TooltipContent>
                         </Tooltip>
                         <span className="text-xs text-muted-foreground">
-                          {list.item_count || 0} items
+                          {itemCount(list.item_count || 0)}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          Created {new Date(list.created_at).toLocaleDateString()}
+                          {formatMessage(t.listItem?.created || 'Created {{date}}', { date: new Date(list.created_at).toLocaleDateString() })}
                         </span>
                       </div>
                     </div>
@@ -250,39 +260,39 @@ export default function ListManagement({
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Create New List</DialogTitle>
+            <DialogTitle>{t.createDialog?.title}</DialogTitle>
             <DialogDescription>
-              Create a new gift list to organize different categories of gifts.
+              {t.createDialog?.description}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="list-name">List name *</Label>
+              <Label htmlFor="list-name">{t.form?.listName}</Label>
               <Input
                 id="list-name"
                 value={newListForm.name}
                 onChange={(e) => setNewListForm(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g., Birthday Wishes, Baby Registry"
+                placeholder={t.form?.listNamePlaceholder || ""}
                 disabled={isSubmitting}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="list-description">Description</Label>
+              <Label htmlFor="list-description">{t.form?.description}</Label>
               <Textarea
                 id="list-description"
                 value={newListForm.description}
                 onChange={(e) => setNewListForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Optional description for this list"
+                placeholder={t.form?.descriptionPlaceholder || ""}
                 disabled={isSubmitting}
               />
             </div>
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div className="space-y-0.5">
-                <Label htmlFor="list-privacy">Purchase Visibility</Label>
+                <Label htmlFor="list-privacy">{t.form?.purchaseVisibility}</Label>
                 <p className="text-sm text-muted-foreground">
                   {newListForm.isPublic
-                    ? "Track Purchases"
-                    : "Keep Surprise"}
+                    ? (t.form?.trackPurchases || "Track Purchases")
+                    : (t.form?.keepSurprise || "Keep Surprise")}
                 </p>
               </div>
               <Switch
@@ -294,9 +304,9 @@ export default function ListManagement({
             </div>
             <div className="p-4 border rounded-lg space-y-4">
               <div>
-                <Label>List Visibility</Label>
+                <Label>{t.form?.listVisibility}</Label>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Choose who can see this list
+                  {t.form?.listVisibilityDescription}
                 </p>
               </div>
 
@@ -311,21 +321,21 @@ export default function ListManagement({
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="all" id="visibility-all" />
                   <Label htmlFor="visibility-all" className="text-sm font-normal cursor-pointer">
-                    Visible to all family members
+                    {t.visibility?.visibleToAll}
                   </Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="hidden_from" id="visibility-hidden" />
                   <Label htmlFor="visibility-hidden" className="text-sm font-normal cursor-pointer">
-                    Hidden from specific members
+                    {t.visibility?.hiddenFromSpecific}
                   </Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="visible_to" id="visibility-visible" />
                   <Label htmlFor="visibility-visible" className="text-sm font-normal cursor-pointer">
-                    Visible only to specific members
+                    {t.visibility?.visibleOnlyToSpecific}
                   </Label>
                 </div>
               </RadioGroup>
@@ -334,8 +344,8 @@ export default function ListManagement({
                 <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
                   <Label className="text-sm font-medium">
                     {newListForm.visibilityMode === "hidden_from"
-                      ? "Select members to hide from"
-                      : "Select members who can view"}
+                      ? (t.visibility?.selectToHide || "Select members to hide from")
+                      : (t.visibility?.selectToShow || "Select members who can view")}
                   </Label>
                   <div className="space-y-2 mt-2">
                     {otherMembers.map((member) => (
@@ -374,7 +384,7 @@ export default function ListManagement({
               onClick={() => setIsCreateListDialogOpen(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              {t.createDialog?.cancelButton || tCommon.cancel}
             </Button>
             <Button
               onClick={handleCreateList}
@@ -385,7 +395,7 @@ export default function ListManagement({
               ) : (
                 <Plus className="w-4 h-4 mr-2" />
               )}
-              {isSubmitting ? "Creating..." : "Create List"}
+              {isSubmitting ? (t.createDialog?.submittingButton || "Creating...") : (t.createDialog?.submitButton || "Create List")}
             </Button>
           </div>
         </DialogContent>
@@ -396,39 +406,39 @@ export default function ListManagement({
         <Dialog open={!!editingList} onOpenChange={() => setEditingList(null)}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>Edit List</DialogTitle>
+              <DialogTitle>{t.editDialog?.title}</DialogTitle>
               <DialogDescription>
-                Update your list details and privacy settings.
+                {t.editDialog?.description}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="edit-list-name">List name *</Label>
+                <Label htmlFor="edit-list-name">{t.form?.listName}</Label>
                 <Input
                   id="edit-list-name"
                   value={editListForm.name}
                   onChange={(e) => setEditListForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="List name"
+                  placeholder={t.form?.listName || "List name"}
                   disabled={isSubmitting}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-list-description">Description</Label>
+                <Label htmlFor="edit-list-description">{t.form?.description}</Label>
                 <Textarea
                   id="edit-list-description"
                   value={editListForm.description}
                   onChange={(e) => setEditListForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Optional description"
+                  placeholder={t.form?.descriptionPlaceholder || "Optional description"}
                   disabled={isSubmitting}
                 />
               </div>
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="space-y-0.5">
-                  <Label htmlFor="edit-list-privacy">Purchase Visibility</Label>
+                  <Label htmlFor="edit-list-privacy">{t.form?.purchaseVisibility}</Label>
                   <p className="text-sm text-muted-foreground">
                     {editListForm.isPublic
-                      ? "Track Purchases"
-                      : "Keep Surprise"}
+                      ? (t.form?.trackPurchases || "Track Purchases")
+                      : (t.form?.keepSurprise || "Keep Surprise")}
                   </p>
                 </div>
                 <Switch
@@ -440,9 +450,9 @@ export default function ListManagement({
               </div>
               <div className="p-4 border rounded-lg space-y-4">
                 <div>
-                  <Label>List Visibility</Label>
+                  <Label>{t.form?.listVisibility}</Label>
                   <p className="text-sm text-muted-foreground mb-3">
-                    Choose who can see this list
+                    {t.form?.listVisibilityDescription}
                   </p>
                 </div>
 
@@ -457,21 +467,21 @@ export default function ListManagement({
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="all" id="edit-visibility-all" />
                     <Label htmlFor="edit-visibility-all" className="text-sm font-normal cursor-pointer">
-                      Visible to all family members
+                      {t.visibility?.visibleToAll}
                     </Label>
                   </div>
 
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="hidden_from" id="edit-visibility-hidden" />
                     <Label htmlFor="edit-visibility-hidden" className="text-sm font-normal cursor-pointer">
-                      Hidden from specific members
+                      {t.visibility?.hiddenFromSpecific}
                     </Label>
                   </div>
 
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="visible_to" id="edit-visibility-visible" />
                     <Label htmlFor="edit-visibility-visible" className="text-sm font-normal cursor-pointer">
-                      Visible only to specific members
+                      {t.visibility?.visibleOnlyToSpecific}
                     </Label>
                   </div>
                 </RadioGroup>
@@ -480,8 +490,8 @@ export default function ListManagement({
                   <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
                     <Label className="text-sm font-medium">
                       {editListForm.visibilityMode === "hidden_from"
-                        ? "Select members to hide from"
-                        : "Select members who can view"}
+                        ? (t.visibility?.selectToHide || "Select members to hide from")
+                        : (t.visibility?.selectToShow || "Select members who can view")}
                     </Label>
                     <div className="space-y-2 mt-2">
                       {otherMembers.map((member) => (
@@ -520,7 +530,7 @@ export default function ListManagement({
                 onClick={() => setEditingList(null)}
                 disabled={isSubmitting}
               >
-                Cancel
+                {t.editDialog?.cancelButton || tCommon.cancel}
               </Button>
               <Button
                 onClick={handleUpdateList}
@@ -531,7 +541,7 @@ export default function ListManagement({
                 ) : (
                   <Edit className="w-4 h-4 mr-2" />
                 )}
-                {isSubmitting ? "Updating..." : "Update List"}
+                {isSubmitting ? (t.editDialog?.submittingButton || "Updating...") : (t.editDialog?.submitButton || "Update List")}
               </Button>
             </div>
           </DialogContent>

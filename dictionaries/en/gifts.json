@@ -3,17 +3,22 @@
     "title": "My Gift Ideas",
     "description": "Add items you'd like to receive. Family members can see this list and mark items as purchased.",
     "empty": "No gift ideas yet. Add some items above!",
-    "archivedItems": "Archived Items"
+    "archivedItems": "Archived Items",
+    "trackPurchases": "Track Purchases",
+    "keepSurprise": "Keep Surprise"
   },
   "familyGifts": {
     "title": "Family Gift Lists",
     "description": "Click on a family member to view and purchase their gift items.",
     "listTitle": "{{name}}'s Gift Lists",
     "empty": "{{name}} hasn't added any gift ideas yet.",
-    "summary": "{{itemCount}} item(s) • {{purchasedCount}} purchased",
+    "summary": "{{itemCount}} item • {{purchasedCount}} purchased",
+    "summaryPlural": "{{itemCount}} items • {{purchasedCount}} purchased",
     "purchaseTracking": {
-      "tracked": "Track Purchases: The list owner can see which items you've purchased",
-      "surprise": "Keep Surprise: The list owner cannot see which items you've purchased"
+      "tracked": "Tracked",
+      "surprise": "Surprise",
+      "trackedDescription": "Track Purchases: The list owner can see which items you've purchased",
+      "surpriseDescription": "Keep Surprise: The list owner cannot see which items you've purchased"
     }
   },
   "addForm": {
@@ -103,10 +108,13 @@
   "groupGift": {
     "title": "Group Gift Interest",
     "interested": "{{count}} person interested",
-    "interested_plural": "{{count}} people interested",
+    "interestedPlural": "{{count}} people interested",
     "interestedList": "Interested",
+    "interestedIn": "Interested in group gift:",
     "noInterest": "No one has expressed interest yet",
-    "expressInterest": "I'm Interested",
-    "removeInterest": "Not Interested"
+    "expressInterest": "Interested in Group Gift?",
+    "alreadyInterested": "Interested",
+    "removeInterest": "Not Interested",
+    "hiddenFromOthers": "Your interest is hidden from others"
   }
 }

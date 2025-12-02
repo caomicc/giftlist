@@ -4,6 +4,8 @@ import { locales } from "@/lib/i18n-config";
 import { UserMenuWrapper } from "@/components/user-menu-wrapper";
 import { I18nProvider } from "@/components/i18n-provider";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { GeistSans } from 'geist/font/sans'
+import { GeistMono } from 'geist/font/mono'
 
 export const metadata: Metadata = {
   title: "Meep Family Wishlist",
@@ -26,6 +28,17 @@ export default async function LangLayout({
 
   return (
     <html lang={lang}>
+      <head>
+        <style>{`
+          html {
+            font-family: ${GeistSans.style.fontFamily};
+            --font-sans: ${GeistSans.variable};
+            --font-mono: ${GeistMono.variable};
+          }
+        `}
+        </style>
+      </head>
+
       <body className={"bg-gradient-to-br from-red-100 to-violet-300 min-h-screen"}>
         <I18nProvider locale={lang} translations={translations}>
           <div className="absolute top-4 left-4 z-50">

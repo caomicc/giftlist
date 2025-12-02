@@ -45,7 +45,8 @@
       "surprise": "Сюрприз",
       "archived": "Архив"
     },
-    "itemCount": "{{count}} элементов",
+    "itemCount": "{{count}} подарок",
+    "itemCountPlural": "{{count}} подарков",
     "created": "Создано {{date}}"
   },
   "deleteConfirm": {

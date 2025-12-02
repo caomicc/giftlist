@@ -60,6 +60,14 @@ export default function FamilyGiftsList({
 
         const listCount = Object.keys(giftsByList).length
 
+        const summaryItemCount = memberGifts.length
+        const summaryTranslationKey = summaryItemCount === 1 ? 'summary' : 'summaryPlural'
+
+        const itemsTranslation = (count: number) => {
+          const message = count === 1 ? (tCommon.counts?.items || '{{count}} item') : (tCommon.counts?.itemsPlural || '{{count}} items')
+          return formatMessage(message, { count })
+        }
+
         return (
           <AccordionItem key={member.id} value={member.id} className="">
             <AccordionTrigger className="hover:no-underline items-center py-3">
@@ -75,12 +83,12 @@ export default function FamilyGiftsList({
                       <span className="font-medium">{formatMessage(t.familyGifts?.listTitle || "{{name}}'s Gift Lists", { name: member.name })}</span>
                       {listCount > 1 && (
                         <Badge variant="outline" className="text-xs">
-                          {formatMessage(tCommon.counts?.lists || '{{count}} lists', { count: listCount })}
+                          {formatMessage(tCommon.counts?.listsPlural || '{{count}} lists', { count: listCount })}
                         </Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                      <span>{formatMessage(t.familyGifts?.summary || '{{itemCount}} item(s) • {{purchasedCount}} purchased', { itemCount: memberGifts.length, purchasedCount })}</span>
+                      <span>{formatMessage(t.familyGifts?.[summaryTranslationKey] || '{{itemCount}} item(s) • {{purchasedCount}} purchased', { itemCount: summaryItemCount, purchasedCount })}</span>
                     </div>
                   </div>
                 </div>
@@ -107,17 +115,17 @@ export default function FamilyGiftsList({
                                     variant={listData.isPublic ? "default" : "secondary"}
                                     className="text-xs cursor-help"
                                   >
-                                    {listData.isPublic ? (t.familyGifts?.tracked || "Tracked") : (t.familyGifts?.surprise || "Surprise")}
+                                    {listData.isPublic ? (t.familyGifts.purchaseTracking?.tracked || "Tracked") : (t.familyGifts.purchaseTracking?.surprise || "Surprise")}
                                   </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>{listData.isPublic
-                                    ? (t.familyGifts?.purchaseTracking?.tracked || "Track Purchases: The list owner can see which items you've purchased")
-                                    : (t.familyGifts?.purchaseTracking?.surprise || "Keep Surprise: The list owner cannot see which items you've purchased")}</p>
+                                    ? (t.familyGifts?.purchaseTracking?.trackedDescription || "Track Purchases: The list owner can see which items you've purchased")
+                                    : (t.familyGifts?.purchaseTracking?.surpriseDescription || "Keep Surprise: The list owner cannot see which items you've purchased")}</p>
                                 </TooltipContent>
                               </Tooltip>
                               <span className="text-xs text-muted-foreground">
-                                {formatMessage(tCommon.counts?.items || '{{count}} item(s)', { count: listData.items.length })}
+                                {itemsTranslation(listData.items.length)}
                               </span>
                             </div>
                           </div>

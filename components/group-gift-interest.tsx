@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Users, UserPlus, UserMinus } from 'lucide-react';
+import { useTranslation, formatMessage } from './i18n-provider';
 
 interface GiftInterest {
   id: string;
@@ -24,6 +25,7 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
   isOwner,
   onInterestChange
 }) => {
+  const { t } = useTranslation('gifts');
   const [interests, setInterests] = useState<GiftInterest[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -103,12 +105,12 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
           {isUserInterested ? (
             <>
               <UserMinus className="size-3" />
-              Interested
+              {t.groupGift?.alreadyInterested || 'Interested'}
             </>
           ) : (
             <>
               <UserPlus className="size-3" />
-              Interested in Group Gift?
+              {t.groupGift?.expressInterest || 'Interested in Group Gift?'}
             </>
           )}
         </Button>
@@ -123,7 +125,12 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
             onClick={() => setShowDetails(!showDetails)}
           >
             <Users className="w-3 h-3" />
-            {visibleInterests.length} {visibleInterests.length === 1 ? 'person' : 'people'} interested
+            {formatMessage(
+              visibleInterests.length === 1 
+                ? (t.groupGift?.interested || '{{count}} person interested')
+                : (t.groupGift?.interestedPlural || '{{count}} people interested'),
+              { count: visibleInterests.length }
+            )}
           </Badge>
         </div>
       )}
@@ -133,7 +140,7 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
         <div className="mt-2 p-2 bg-gray-50 rounded text-xs space-y-1">
           <div className="flex items-center gap-1 font-medium text-gray-700 mb-2">
             <Users className="w-3 h-3" />
-            Interested in group gift:
+            {t.groupGift?.interestedIn || 'Interested in group gift:'}
           </div>
           {visibleInterests.map((interest) => (
             <div key={interest.id} className="flex justify-between items-center">
@@ -146,7 +153,7 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
       {/* Message for owner if they are interested (hidden from count) */}
       {isOwner && interests.some(interest => interest.user_id === currentUserId) && (
         <Badge variant="outline" className="text-xs text-gray-500">
-          Your interest is hidden from others
+          {t.groupGift?.hiddenFromOthers || 'Your interest is hidden from others'}
         </Badge>
       )}
     </div>

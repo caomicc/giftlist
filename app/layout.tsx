@@ -1,33 +1,19 @@
 import type { Metadata } from 'next'
-import { GeistSans } from 'geist/font/sans'
-import { GeistMono } from 'geist/font/mono'
 import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Meep Family Wishlist',
-  description: 'Hi',
-  generator: 'v0.dev',
+  description: 'Welcome!',
 }
 
+// Root layout just renders children and sets base metadata.
+// The lang-specific layout handles other concerns,
+// since the language needs to be set at the `html` level,
+// and all other JSX needs to be within that.
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return (
-    <html>
-      <head>
-        <style>{`
-html {
-  font-family: ${GeistSans.style.fontFamily};
-  --font-sans: ${GeistSans.variable};
-  --font-mono: ${GeistMono.variable};
-}
-        `}</style>
-      </head>
-      <body>
-        {children}
-      </body>
-    </html>
-  )
+  return children;
 }
