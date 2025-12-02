@@ -120,7 +120,7 @@ export default function ListManagement({
         selectedUsers: selectedUsers
       })
     } catch (err) {
-      console.error("Failed to fetch list permissions:", err)
+      console.error("Failed to fetch list permissions", err)
       setEditListForm({
         name: list.name,
         description: list.description || "",
@@ -334,8 +334,8 @@ export default function ListManagement({
                 <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
                   <Label className="text-sm font-medium">
                     {newListForm.visibilityMode === "hidden_from"
-                      ? "Select members to hide from:"
-                      : "Select members who can view:"}
+                      ? "Select members to hide from"
+                      : "Select members who can view"}
                   </Label>
                   <div className="space-y-2 mt-2">
                     {otherMembers.map((member) => (
@@ -480,8 +480,8 @@ export default function ListManagement({
                   <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
                     <Label className="text-sm font-medium">
                       {editListForm.visibilityMode === "hidden_from"
-                        ? "Select members to hide from:"
-                        : "Select members who can view:"}
+                        ? "Select members to hide from"
+                        : "Select members who can view"}
                     </Label>
                     <div className="space-y-2 mt-2">
                       {otherMembers.map((member) => (

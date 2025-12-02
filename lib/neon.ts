@@ -15,6 +15,7 @@ export type User = {
   name: string
   email: string
   created_at: string
+  preferred_locale?: string
 }
 
 export type List = {

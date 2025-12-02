@@ -1,0 +1,112 @@
+{
+  "myGifts": {
+    "title": "My Gift Ideas",
+    "description": "Add items you'd like to receive. Family members can see this list and mark items as purchased.",
+    "empty": "No gift ideas yet. Add some items above!",
+    "archivedItems": "Archived Items"
+  },
+  "familyGifts": {
+    "title": "Family Gift Lists",
+    "description": "Click on a family member to view and purchase their gift items.",
+    "listTitle": "{{name}}'s Gift Lists",
+    "empty": "{{name}} hasn't added any gift ideas yet.",
+    "summary": "{{itemCount}} item(s) • {{purchasedCount}} purchased",
+    "purchaseTracking": {
+      "tracked": "Track Purchases: The list owner can see which items you've purchased",
+      "surprise": "Keep Surprise: The list owner cannot see which items you've purchased"
+    }
+  },
+  "addForm": {
+    "labels": {
+      "link": "Link",
+      "gift": "Gift",
+      "price": "Price",
+      "imageUrl": "Image URL",
+      "description": "Description",
+      "addToList": "Add to List",
+      "targetAmount": "Target Amount (optional)",
+      "isGiftCard": "This is a gift card",
+      "isGroupGift": "This is a group gift"
+    },
+    "placeholders": {
+      "link": "Link (optional)",
+      "gift": "Gift item name *",
+      "price": "Price (optional)",
+      "priceExample": "e.g., 100.00",
+      "imageUrl": "Image URL (optional)",
+      "description": "Description (optional)",
+      "selectList": "Select a list..."
+    },
+    "messages": {
+      "loadingPreview": "Loading link preview...",
+      "previewLoaded": "✓ Link preview loaded: {{title}}",
+      "previewFailed": "⚠ Couldn't load preview (some sites block automated requests)",
+      "giftCardHelp": "Family members can purchase amounts toward this gift card. Leave blank for no target.",
+      "groupGiftHelp": "Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate.",
+      "imageUrlHelp": "Provide an image URL if no preview is loaded from the link above"
+    },
+    "buttons": {
+      "submit": "Add Gift Idea",
+      "submitting": "Adding..."
+    }
+  },
+  "editDialog": {
+    "title": "Edit Gift Item",
+    "description": "Update your gift item details.",
+    "moveToList": "Move to List",
+    "buttons": {
+      "update": "Update Gift Item",
+      "updating": "Updating...",
+      "cancel": "Cancel"
+    }
+  },
+  "giftItem": {
+    "badges": {
+      "archived": "Archived",
+      "groupGift": "Group Gift",
+      "giftCard": "Gift Card"
+    },
+    "buttons": {
+      "viewLink": "View Link",
+      "addAmount": "Add Amount",
+      "complete": "Complete",
+      "purchase": "Purchase",
+      "purchased": "Purchased",
+      "edit": "Edit",
+      "archive": "Archive item",
+      "unarchive": "Unarchive item",
+      "delete": "Delete"
+    },
+    "status": {
+      "purchasedBy": "Purchased by {{name}}",
+      "giftCardComplete": "Gift card complete"
+    },
+    "unknownList": "Unknown List"
+  },
+  "giftCard": {
+    "title": "Gift Card Contributions",
+    "targetAmount": "Target: {{amount}}",
+    "contributed": "Contributed: {{amount}} ({{percentage}}%)",
+    "remaining": "Remaining: {{amount}}",
+    "contributions": "Contributions",
+    "noContributions": "No contributions yet",
+    "contributionItem": "{{name}}: {{amount}}",
+    "purchaseDialog": {
+      "title": "Contribute to Gift Card",
+      "amountLabel": "Amount",
+      "amountPlaceholder": "e.g., 25.00",
+      "submitButton": "Contribute",
+      "submittingButton": "Contributing...",
+      "cancelButton": "Cancel"
+    }
+  },
+  "groupGift": {
+    "title": "Group Gift Interest",
+    "interested": "{{count}} person interested",
+    "interested_plural": "{{count}} people interested",
+    "interestedList": "Interested",
+    "noInterest": "No one has expressed interest yet",
+    "expressInterest": "I'm Interested",
+    "removeInterest": "Not Interested"
+  }
+}

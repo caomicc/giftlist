@@ -1,0 +1,52 @@
+{
+  "title": "Настройки профиля",
+  "subtitle": "Управление настройками аккаунта",
+  "tabs": {
+    "account": "Аккаунт",
+    "password": "Пароль"
+  },
+  "account": {
+    "title": "Личная информация",
+    "description": "Обновите информацию вашего аккаунта",
+    "form": {
+      "name": "Имя",
+      "namePlaceholder": "Ваше имя",
+      "email": "Email",
+      "emailPlaceholder": "Ваш email адрес",
+      "locale": "Язык",
+      "localeDescription": "Выберите предпочитаемый язык для интерфейса и писем",
+      "joined": "Присоединился",
+      "submitButton": "Обновить профиль",
+      "submittingButton": "Обновление..."
+    },
+    "success": "Профиль успешно обновлен!",
+    "error": "Не удалось обновить профиль",
+    "loadError": "Не удалось загрузить профиль"
+  },
+  "password": {
+    "title": "Изменить пароль",
+    "description": "Обновите ваш пароль",
+    "form": {
+      "currentPassword": "Текущий пароль",
+      "currentPasswordPlaceholder": "Введите ваш текущий пароль",
+      "newPassword": "Новый пароль",
+      "newPasswordPlaceholder": "Введите новый пароль",
+      "confirmPassword": "Подтвердите новый пароль",
+      "confirmPasswordPlaceholder": "Подтвердите ваш новый пароль",
+      "submitButton": "Изменить пароль",
+      "submittingButton": "Изменение..."
+    },
+    "validation": {
+      "passwordsDoNotMatch": "Новые пароли не совпадают",
+      "passwordTooShort": "Новый пароль должен содержать не менее 6 символов",
+      "currentPasswordRequired": "Требуется текущий пароль",
+      "currentPasswordIncorrect": "Неверный текущий пароль"
+    },
+    "success": "Пароль успешно изменен!",
+    "error": "Не удалось изменить пароль"
+  },
+  "locales": {
+    "en": "English (Английский)",
+    "ru": "Русский"
+  }
+}

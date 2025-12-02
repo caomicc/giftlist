@@ -1,0 +1,44 @@
+{
+  "api": {
+    "unauthorized": "Неавторизован",
+    "userNotFound": "Пользователь не найден",
+    "internalError": "Внутренняя ошибка сервера",
+    "invalidRequest": "Неверный запрос",
+    "missingParameter": "Требуется {{parameter}}",
+    "notFound": "{{resource}} не найден"
+  },
+  "auth": {
+    "emailRequired": "Требуется параметр email",
+    "passwordTooShort": "Новый пароль должен содержать не менее 6 символов",
+    "currentPasswordRequired": "Требуется текущий пароль",
+    "currentPasswordIncorrect": "Неверный текущий пароль",
+    "magicLinkFailed": "Не удалось отправить волшебную ссылку",
+    "diagnosticFailed": "Не удалось запустить диагностику авторизации"
+  },
+  "lists": {
+    "fetchFailed": "Не удалось загрузить списки",
+    "nameRequired": "Требуется название списка",
+    "duplicateName": "Список с таким названием уже существует",
+    "createFailed": "Не удалось создать список",
+    "notFoundOrDenied": "Список не найден или доступ запрещен",
+    "updateFailed": "Не удалось обновить список",
+    "deleteFailed": "Не удалось удалить список"
+  },
+  "gifts": {
+    "addFailed": "Не удалось добавить подарок",
+    "idRequired": "Требуется ID элемента",
+    "deleteFailed": "Не удалось удалить подарок",
+    "cannotMoveToOtherList": "Невозможно переместить элемент в список, которым вы не владеете",
+    "noFieldsToUpdate": "Нет действительных полей для обновления",
+    "updateFailed": "Не удалось обновить подарок"
+  },
+  "database": {
+    "connectionFailed": "Не удалось подключиться к базе данных",
+    "queryFailed": "Не удалось выполнить запрос к базе данных",
+    "diagnosticFailed": "Не удалось запустить диагностику базы данных"
+  },
+  "email": {
+    "sendFailed": "Не удалось отправить email",
+    "diagnosticFailed": "Не удалось запустить диагностику email"
+  }
+}

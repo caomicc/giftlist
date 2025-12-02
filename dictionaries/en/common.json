@@ -1,0 +1,53 @@
+{
+  "appName": "My Giftlist",
+  "welcome": "Hi, {{name}}!",
+  "welcomeBack": "Welcome back 😊",
+  "loading": "Loading...",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "save": "Save",
+  "update": "Update",
+  "create": "Create",
+  "close": "Close",
+  "retry": "Try Again",
+  "yes": "Yes",
+  "no": "No",
+  "optional": "optional",
+  "required": "*",
+  "nav": {
+    "myGiftlist": "My Giftlist",
+    "familyGiftlists": "Family Giftlists",
+    "myProfile": "My Profile"
+  },
+  "userMenu": {
+    "profileSettings": "Profile Settings",
+    "setPassword": "Set Password",
+    "signOut": "Sign out"
+  },
+  "tabs": {
+    "myGiftList": "My Gift List",
+    "familyLists": "Family Lists"
+  },
+  "errors": {
+    "databaseConnection": "Database Connection Error",
+    "unableToConnect": "Unable to connect to Neon database",
+    "somethingWentWrong": "Something went wrong",
+    "failedToLoad": "Failed to load",
+    "tryAgain": "Try Again"
+  },
+  "dates": {
+    "created": "Created {{date}}",
+    "joined": "Joined",
+    "updated": "Updated {{date}}"
+  },
+  "counts": {
+    "items": "{{count}} item",
+    "items_plural": "{{count}} items",
+    "lists": "{{count}} list",
+    "lists_plural": "{{count}} lists",
+    "purchased": "{{count}} purchased",
+    "archived": "{{count}} archived item",
+    "archived_plural": "{{count}} archived items"
+  }
+}

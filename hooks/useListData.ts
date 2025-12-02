@@ -118,7 +118,7 @@ export function useListData() {
       try {
         await Promise.all([fetchUsers(), fetchLists()])
       } catch (err) {
-        console.error("Failed to fetch data:", err)
+        console.error("Failed to fetch data", err)
       } finally {
         setLoading(false)
       }

@@ -1,0 +1,56 @@
+{
+  "management": {
+    "title": "Manage Lists",
+    "description": "Edit or delete your existing gift lists.",
+    "createButton": "Create New List",
+    "count": "{{count}} lists"
+  },
+  "createDialog": {
+    "title": "Create New List",
+    "description": "Create a new gift list to organize different categories of gifts.",
+    "submitButton": "Create List",
+    "submittingButton": "Creating...",
+    "cancelButton": "Cancel"
+  },
+  "editDialog": {
+    "title": "Edit List",
+    "description": "Update your list details and privacy settings.",
+    "submitButton": "Update List",
+    "submittingButton": "Updating...",
+    "cancelButton": "Cancel"
+  },
+  "form": {
+    "listName": "List name *",
+    "listNamePlaceholder": "e.g., Birthday Wishes, Baby Registry",
+    "description": "Description",
+    "descriptionPlaceholder": "Optional description for this list",
+    "purchaseVisibility": "Purchase Visibility",
+    "trackPurchases": "Track Purchases",
+    "keepSurprise": "Keep Surprise",
+    "trackPurchasesHelp": "Track Purchases: You can see which items family members have purchased from this list",
+    "keepSurpriseHelp": "Keep Surprise: You cannot see which items family members have purchased from this list",
+    "listVisibility": "List Visibility",
+    "listVisibilityDescription": "Choose who can see this list"
+  },
+  "visibility": {
+    "visibleToAll": "Visible to all family members",
+    "hiddenFromSpecific": "Hidden from specific members",
+    "visibleOnlyToSpecific": "Visible only to specific members",
+    "selectToHide": "Select members to hide from",
+    "selectToShow": "Select members who can view"
+  },
+  "listItem": {
+    "badges": {
+      "tracked": "Tracked",
+      "surprise": "Surprise",
+      "archived": "Archived"
+    },
+    "itemCount": "{{count}} items",
+    "created": "Created {{date}}"
+  },
+  "deleteConfirm": {
+    "title": "Delete List",
+    "message": "Are you sure you want to delete this list? Note: Lists with items cannot be deleted - you must move or delete all items first.",
+    "error": "Failed to delete list"
+  }
+}

@@ -6,11 +6,13 @@
 
 **Core Pattern**: Server Components by default, Client Components marked with `"use client"`. Authentication and data layer use direct SQL queries via Neon's serverless driver - no ORM.
 
+**Internationalization**: Built-in i18n with locale-based routing (`/[lang]/*`), supporting English and Russian. Translations loaded server-side, accessed client-side via React Context.
+
 ## Authentication & Session Management
 
 - **Auth Implementation**: Custom session-based auth in `lib/auth.ts` with magic links + password support
 - **Session Pattern**: HTTP-only cookies with 30-day expiration, validated via `requireAuth()` or `getSession()`
-- **Route Protection**: `middleware.ts` (lines 4-24) redirects unauthenticated users to `/auth/signin`
+- **Route Protection**: `middleware.ts` handles both locale detection AND auth - redirects unauthenticated users to `/{locale}/auth/signin`
 - **API Routes**: Always call `requireAuth()` first - returns user or redirects. See `app/api/gift-items/route.ts:12`
 
 ```typescript
@@ -74,6 +76,95 @@ const currentUser = await requireAuth(); // Redirects if not authenticated
 - Located in `components/ui/` - all are client components
 - Import and use directly, customize via `components.json` config
 - Styling via Tailwind + CSS variables (see `app/globals.css`)
+
+## Internationalization (i18n)
+
+### Architecture
+
+- **Routing**: Locale-based paths via `app/[lang]/` - all pages under locale prefix (e.g., `/en/auth/signin`, `/ru/profile`)
+- **Supported Locales**: `en` (default), `ru` - defined in `lib/i18n-config.ts`
+- **Translation Files**: JSON dictionaries in `dictionaries/[locale]/[namespace].json`
+- **Namespaces**: `common`, `auth`, `gifts`, `lists`, `profile`, `emails`, `errors`
+
+### Server-Side Usage (Pages & Layouts)
+
+```typescript
+import { type Locale, getAllDictionaries } from "@/lib/i18n";
+
+// In layouts - load all namespaces at once
+export default async function LangLayout({
+  params,
+}: {
+  params: Promise<{ lang: Locale }>;
+}) {
+  const { lang } = await params;
+  const translations = await getAllDictionaries(lang);
+
+  return (
+    <I18nProvider locale={lang} translations={translations}>
+      {children}
+    </I18nProvider>
+  );
+}
+
+// In pages - access locale for logic
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ lang: Locale }>;
+}) {
+  const { lang } = await params;
+  // Use lang for server-side operations
+}
+```
+
+### Client-Side Usage (Components)
+
+```typescript
+import { useTranslation, formatMessage } from "@/components/i18n-provider";
+
+function MyComponent() {
+  const { t } = useTranslation("gifts"); // Load specific namespace
+  const { t: tCommon } = useTranslation("common"); // Load multiple namespaces
+
+  // Simple translation
+  return <h1>{t.myGifts?.title}</h1>;
+
+  // With placeholders
+  const message = formatMessage(t.familyGifts?.listTitle || "", {
+    name: userName,
+  });
+}
+```
+
+### Locale Detection & Switching
+
+- **Middleware** (`middleware.ts`): Auto-detects locale from Accept-Language header or `NEXT_LOCALE` cookie
+- **No locale in path**: Automatically redirects to `/{detected-locale}/path`
+- **Locale persistence**: Stored in cookie (1 year expiration)
+- **Manual switch**: Use `<LocaleSwitcher />` component (dropdown in top-left)
+- **Cookie + Navigation**: `LocaleSwitcher` sets cookie and redirects to preserve path
+
+### Adding New Translations
+
+1. Add key to `dictionaries/en/[namespace].json`
+2. Add corresponding translation to `dictionaries/ru/[namespace].json`
+3. Use in component via `useTranslation('[namespace]')` hook
+4. For placeholders: Use `{{variable}}` syntax and `formatMessage()` helper
+
+### Translation File Structure
+
+```json
+{
+  "section": {
+    "subsection": {
+      "key": "Value with {{placeholder}}"
+    }
+  }
+}
+```
+
+Access as: `t.section?.subsection?.key`
 
 ## Development Workflow
 

@@ -14,6 +14,8 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { UserMenu } from "./user-menu"
+import { LocaleSwitcher } from "./locale-switcher"
+import { useI18n } from "./i18n-provider"
 
 interface User {
   id: string
@@ -61,20 +63,28 @@ const components: { title: string; href: string; description: string }[] = [
 ]
 
 export function NavigationBar({ user }: { user: User }) {
+  const { locale } = useI18n()
+  const { translations } = useI18n()
+  const t = translations.common || {}
+
   return (
     <NavigationMenu viewport={false} className="border-b border-border px-4 py-1 rounded-md bg-background top-4 left-1/2 -translate-x-1/2 fixed">
       <NavigationMenuList>
 
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-            <Link href="/">My Giftlist</Link>
+            <Link href={`/${locale}`}>{t.nav?.myGiftlist || 'My Giftlist'}</Link>
           </NavigationMenuLink>
         </NavigationMenuItem>
 
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-            <Link href="/">Family Giftlists</Link>
+            <Link href={`/${locale}`}>{t.nav?.familyGiftlists || 'Family Giftlists'}</Link>
           </NavigationMenuLink>
+        </NavigationMenuItem>
+
+        <NavigationMenuItem>
+          <LocaleSwitcher />
         </NavigationMenuItem>
 
         <UserMenu user={user} />

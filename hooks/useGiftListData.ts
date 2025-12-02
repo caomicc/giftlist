@@ -294,7 +294,7 @@ export function useGiftListData(currentUserId?: string) {
       try {
         await Promise.all([fetchUsers(), fetchLists(), fetchGiftItems()])
       } catch (err) {
-        console.error("Failed to fetch data:", err)
+        console.error("Failed to fetch data", err)
       } finally {
         setLoading(false)
       }

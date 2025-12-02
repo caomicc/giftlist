@@ -6,6 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Gift } from 'lucide-react'
 import GiftItem from "./gift-item"
+import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
   id: string
@@ -28,6 +29,9 @@ export default function FamilyGiftsList({
   onTogglePurchase,
   onGiftCardPurchase
 }: FamilyGiftsListProps) {
+  const { t } = useTranslation('gifts')
+  const { t: tCommon } = useTranslation('common')
+  
   const getOtherMembers = () => users.filter((u: any) => u.id !== currentUser.id)
   const getMemberGifts = (memberId: string) => giftItems.filter((item: any) => item.owner_id === memberId && !item.archived)
 
@@ -68,15 +72,15 @@ export default function FamilyGiftsList({
                   </Avatar>
                   <div className="flex flex-col text-left">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{member.name}'s Gift Lists</span>
+                      <span className="font-medium">{formatMessage(t.familyGifts?.listTitle || "{{name}}'s Gift Lists", { name: member.name })}</span>
                       {listCount > 1 && (
                         <Badge variant="outline" className="text-xs">
-                          {listCount} lists
+                          {formatMessage(tCommon.counts?.lists || '{{count}} lists', { count: listCount })}
                         </Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                      <span>{memberGifts.length} item(s) • {purchasedCount} purchased</span>
+                      <span>{formatMessage(t.familyGifts?.summary || '{{itemCount}} item(s) • {{purchasedCount}} purchased', { itemCount: memberGifts.length, purchasedCount })}</span>
                     </div>
                   </div>
                 </div>
@@ -87,7 +91,7 @@ export default function FamilyGiftsList({
                 {memberGifts.length === 0 ? (
                   <div className="text-center py-6 text-muted-foreground">
                     <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p>{member.name} hasn't added any gift ideas yet.</p>
+                    <p>{formatMessage(t.familyGifts?.empty || "{{name}} hasn't added any gift ideas yet.", { name: member.name })}</p>
                   </div>
                 ) : (
                   <Accordion type="single" collapsible className="w-full md:px-3">
@@ -103,17 +107,17 @@ export default function FamilyGiftsList({
                                     variant={listData.isPublic ? "default" : "secondary"}
                                     className="text-xs cursor-help"
                                   >
-                                    {listData.isPublic ? "Tracked" : "Surprise"}
+                                    {listData.isPublic ? (t.familyGifts?.tracked || "Tracked") : (t.familyGifts?.surprise || "Surprise")}
                                   </Badge>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>{listData.isPublic
-                                    ? "Track Purchases: The list owner can see which items you've purchased"
-                                    : "Keep Surprise: The list owner cannot see which items you've purchased"}</p>
+                                    ? (t.familyGifts?.purchaseTracking?.tracked || "Track Purchases: The list owner can see which items you've purchased")
+                                    : (t.familyGifts?.purchaseTracking?.surprise || "Keep Surprise: The list owner cannot see which items you've purchased")}</p>
                                 </TooltipContent>
                               </Tooltip>
                               <span className="text-xs text-muted-foreground">
-                                {listData.items.length} item(s)
+                                {formatMessage(tCommon.counts?.items || '{{count}} item(s)', { count: listData.items.length })}
                               </span>
                             </div>
                           </div>

@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 import './globals.css'
-import { UserMenuWrapper } from '@/components/user-menu-wrapper'
 
 export const metadata: Metadata = {
   title: 'Meep Family Wishlist',
@@ -16,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html>
       <head>
         <style>{`
 html {
@@ -26,12 +25,8 @@ html {
 }
         `}</style>
       </head>
-      <body className={'bg-gradient-to-br from-red-100 to-violet-300 min-h-screen'}>
-        <UserMenuWrapper />
-        <div className="relative z-10">
+      <body>
         {children}
-        </div>
-        <div className={"absolute h-[50vh] bg-white block md:hidden bottom-0 left-0 right-0 z-1 w-full"}></div>
       </body>
     </html>
   )

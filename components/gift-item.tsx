@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +11,7 @@ import GiftCardDetails from './gift-card-details';
 import GiftCardContributions from './gift-card-contributions';
 import GroupGiftInterest from './group-gift-interest';
 import { cn } from '@/lib/utils';
+import { useTranslation, formatMessage } from './i18n-provider';
 
 export type GiftItemProps = {
   item: {
@@ -53,6 +56,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
   onTogglePurchase,
   onGiftCardPurchase
 }) => {
+  const { t } = useTranslation('gifts')
   const [isGiftCardDialogOpen, setIsGiftCardDialogOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 

@@ -1,0 +1,44 @@
+{
+  "api": {
+    "unauthorized": "Unauthorized",
+    "userNotFound": "User not found",
+    "internalError": "Internal server error",
+    "invalidRequest": "Invalid request",
+    "missingParameter": "{{parameter}} is required",
+    "notFound": "{{resource}} not found"
+  },
+  "auth": {
+    "emailRequired": "Email parameter required",
+    "passwordTooShort": "New password must be at least 6 characters long",
+    "currentPasswordRequired": "Current password is required",
+    "currentPasswordIncorrect": "Current password is incorrect",
+    "magicLinkFailed": "Failed to send magic link",
+    "diagnosticFailed": "Failed to run auth diagnostic"
+  },
+  "lists": {
+    "fetchFailed": "Failed to fetch lists",
+    "nameRequired": "List name is required",
+    "duplicateName": "A list with this name already exists",
+    "createFailed": "Failed to create list",
+    "notFoundOrDenied": "List not found or access denied",
+    "updateFailed": "Failed to update list",
+    "deleteFailed": "Failed to delete list"
+  },
+  "gifts": {
+    "addFailed": "Failed to add gift item",
+    "idRequired": "Item ID is required",
+    "deleteFailed": "Failed to delete gift item",
+    "cannotMoveToOtherList": "Cannot move item to a list you do not own",
+    "noFieldsToUpdate": "No valid fields to update",
+    "updateFailed": "Failed to update gift item"
+  },
+  "database": {
+    "connectionFailed": "Failed to connect to database",
+    "queryFailed": "Database query failed",
+    "diagnosticFailed": "Failed to run database diagnostic"
+  },
+  "email": {
+    "sendFailed": "Failed to send email",
+    "diagnosticFailed": "Failed to run email diagnostic"
+  }
+}

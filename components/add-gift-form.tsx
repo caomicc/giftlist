@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Loader2, CreditCard, Users } from 'lucide-react'
+import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
   id: string
@@ -39,6 +40,7 @@ export default function AddGiftForm({
   fetchOGData,
   isSubmitting 
 }: AddGiftFormProps) {
+  const { t } = useTranslation('gifts')
   const [newItem, setNewItem] = useState({
     name: "",
     description: "",
@@ -120,9 +122,9 @@ export default function AddGiftForm({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3">
-        <Label>Link:</Label>
+        <Label>{t.addForm?.labels?.link || 'Link:'}:</Label>
         <Input
-          placeholder="Link (optional)"
+          placeholder={t.addForm?.placeholders?.link || 'Link (optional)'}
           value={newItem.link}
           onChange={(e) => handleNewItemLinkChange(e.target.value)}
           disabled={isSubmitting}
@@ -130,35 +132,35 @@ export default function AddGiftForm({
         {newItemOGLoading && (
           <div className="text-xs text-blue-600 flex items-center gap-1">
             <Loader2 className="w-3 h-3 animate-spin" />
-            Loading link preview...
+            {t.addForm?.messages?.loadingPreview || 'Loading link preview...'}
           </div>
         )}
         {!newItemOGLoading && newItemOGData && (
           <div className="text-xs text-green-600 flex items-center gap-1">
-            ✓ Link preview loaded: {newItemOGData.title || 'Data found'}
+            {formatMessage(t.addForm?.messages?.previewLoaded || '✓ Link preview loaded: {{title}}', { title: newItemOGData.title || 'Data found' })}
           </div>
         )}
         {!newItemOGLoading && newItem.link && newItem.link.startsWith('http') && !newItemOGData && (
           <div className="text-xs text-orange-600 flex items-center gap-1">
-            ⚠ Couldn't load preview (some sites block automated requests)
+            {t.addForm?.messages?.previewFailed || '⚠ Couldn\'t load preview (some sites block automated requests)'}
           </div>
         )}
       </div>
       
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-3">
-          <Label>Gift:</Label>
+          <Label>{t.addForm?.labels?.gift || 'Gift:'}:</Label>
           <Input
-            placeholder="Gift item name *"
+            placeholder={t.addForm?.placeholders?.gift || 'Gift item name *'}
             value={newItem.name}
             onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
             disabled={isSubmitting}
           />
         </div>
         <div className="flex flex-col gap-3">
-          <Label>Price:</Label>
+          <Label>{t.addForm?.labels?.price || 'Price:'}:</Label>
           <Input
-            placeholder="Price (optional)"
+            placeholder={t.addForm?.placeholders?.price || 'Price (optional)'}
             value={newItem.price}
             onChange={(e) => setNewItem((prev) => ({ ...prev, price: e.target.value }))}
             disabled={isSubmitting || newItem.isGiftCard}
@@ -181,14 +183,14 @@ export default function AddGiftForm({
           />
           <Label htmlFor="isGiftCard" className="flex items-center gap-2">
             <CreditCard className="w-4 h-4" />
-            This is a gift card
+            {t.addForm?.labels?.isGiftCard || 'This is a gift card'}
           </Label>
         </div>
         {newItem.isGiftCard && (
           <div className="flex flex-col gap-3">
-            <Label>Target Amount (optional):</Label>
+            <Label>{t.addForm?.labels?.targetAmount || 'Target Amount (optional):'}:</Label>
             <Input
-              placeholder="e.g., 100.00"
+              placeholder={t.addForm?.placeholders?.priceExample || 'e.g., 100.00'}
               type="number"
               min="0"
               step="0.01"
@@ -197,7 +199,7 @@ export default function AddGiftForm({
               disabled={isSubmitting}
             />
             <p className="text-xs text-muted-foreground">
-              Family members can purchase amounts toward this gift card. Leave blank for no target.
+              {t.addForm?.messages?.giftCardHelp || 'Family members can purchase amounts toward this gift card. Leave blank for no target.'}
             </p>
           </div>
         )}
@@ -217,33 +219,33 @@ export default function AddGiftForm({
           />
           <Label htmlFor="isGroupGift" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
-            This is a group gift
+            {t.addForm?.labels?.isGroupGift || 'This is a group gift'}
           </Label>
         </div>
         {newItem.isGroupGift && (
           <p className="text-xs text-muted-foreground">
-            Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate.
+            {t.addForm?.messages?.groupGiftHelp || 'Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate.'}
           </p>
         )}
       </div>
 
       <div className="flex flex-col gap-3">
-        <Label>Image URL:</Label>
+        <Label>{t.addForm?.labels?.imageUrl || 'Image URL:'}:</Label>
         <Input
-          placeholder="Image URL (optional)"
+          placeholder={t.addForm?.placeholders?.imageUrl || 'Image URL (optional)'}
           value={newItem.imageUrl}
           onChange={(e) => setNewItem((prev) => ({ ...prev, imageUrl: e.target.value }))}
           disabled={isSubmitting}
         />
         <p className="text-xs text-muted-foreground">
-          Provide an image URL if no preview is loaded from the link above
+          {t.addForm?.messages?.imageUrlHelp || 'Provide an image URL if no preview is loaded from the link above'}
         </p>
       </div>
       
       <div className="flex flex-col gap-3">
-        <Label>Description:</Label>
+        <Label>{t.addForm?.labels?.description || 'Description:'}:</Label>
         <Textarea
-          placeholder="Description (optional)"
+          placeholder={t.addForm?.placeholders?.description || 'Description (optional)'}
           value={newItem.description}
           onChange={(e) => setNewItem((prev) => ({ ...prev, description: e.target.value }))}
           disabled={isSubmitting}
@@ -252,14 +254,14 @@ export default function AddGiftForm({
       
       {/* List Selector */}
       <div className="flex flex-col w-full gap-3">
-        <Label>Add to List:</Label>
+        <Label>{t.addForm?.labels?.addToList || 'Add to List:'}:</Label>
         <Select
           value={newItem.selectedListId}
           onValueChange={(value) => setNewItem((prev) => ({ ...prev, selectedListId: value }))}
           disabled={isSubmitting}
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a list..." />
+            <SelectValue placeholder={t.addForm?.placeholders?.selectList || 'Select a list...'} />
           </SelectTrigger>
           <SelectContent>
             {userLists.map((list) => (
@@ -277,7 +279,7 @@ export default function AddGiftForm({
         ) : (
           <Plus className="w-4 h-4 mr-2" />
         )}
-        {isSubmitting ? "Adding..." : "Add Gift Idea"}
+        {isSubmitting ? (t.addForm?.buttons?.submitting || 'Adding...') : (t.addForm?.buttons?.submit || 'Add Gift Idea')}
       </Button>
     </div>
   )

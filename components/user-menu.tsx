@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { User, Lock, LogOut, Settings, ChevronDownIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
+import { useI18n } from './i18n-provider'
 
 interface UserMenuProps {
   user: {
@@ -22,6 +23,8 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const router = useRouter()
+  const { locale, translations } = useI18n()
+  const t = translations.common || {}
   const [hasPassword, setHasPassword] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -36,7 +39,7 @@ export function UserMenu({ user }: UserMenuProps) {
     try {
       const response = await fetch('/api/auth/signout', { method: 'POST' })
       if (response.ok) {
-        router.push('/auth/signin')
+        router.push(`/${locale}/auth/signin`)
         router.refresh()
       }
     } catch (error) {
@@ -45,11 +48,11 @@ export function UserMenu({ user }: UserMenuProps) {
   }
 
   const handleSetPassword = () => {
-    router.push('/auth/set-password')
+    router.push(`/${locale}/auth/set-password`)
   }
 
   const handleProfile = () => {
-    router.push('/profile')
+    router.push(`/${locale}/profile`)
   }
 
   const initials = user.name
@@ -60,7 +63,7 @@ export function UserMenu({ user }: UserMenuProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex items-center space-x-2">
-          <span>My Profile</span>
+          <span>{t.nav?.myProfile || 'My Profile'}</span>
           <ChevronDownIcon className="h-4 w-4" />
           <Avatar className="size-12 bg-violet-200 no-underline group-hover:no-underline!">
             <AvatarFallback className=''>{initials}</AvatarFallback>
@@ -75,18 +78,18 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleProfile}>
           <Settings className="mr-2 h-4 w-4" />
-          <span>Profile Settings</span>
+          <span>{t.userMenu?.profileSettings || 'Profile Settings'}</span>
         </DropdownMenuItem>
         {hasPassword === false && (
           <DropdownMenuItem onClick={handleSetPassword}>
             <Lock className="mr-2 h-4 w-4" />
-            <span>Set Password</span>
+            <span>{t.userMenu?.setPassword || 'Set Password'}</span>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Sign out</span>
+          <span>{t.userMenu?.signOut || 'Sign out'}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

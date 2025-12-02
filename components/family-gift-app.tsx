@@ -9,6 +9,7 @@ import { Gift, AlertCircle, Database } from 'lucide-react'
 import { useGiftData } from "@/hooks/useGiftData"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
+import { useI18n, formatMessage } from "./i18n-provider"
 
 // Import our new components
 import AddGiftForm from "./add-gift-form"
@@ -32,6 +33,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [userLists, setUserLists] = useState<any[]>([])
+  const { translations } = useI18n()
+  const t = translations.common || {}
+  const tGifts = translations.gifts || {}
 
   const {
     users,
@@ -55,7 +59,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       const lists = await response.json()
       setUserLists(lists)
     } catch (err) {
-      console.error("Failed to fetch lists:", err)
+      console.error("Failed to fetch lists", err)
     }
   }
 
@@ -79,7 +83,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       const newList = await response.json()
       setUserLists([newList])
     } catch (err) {
-      console.error("Failed to create default list:", err)
+      console.error("Failed to create default list", err)
     }
   }
 
@@ -100,7 +104,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     try {
       await addGiftItem(itemData)
     } catch (err) {
-      console.error("Failed to add gift item:", err)
+      console.error("Failed to add gift item", err)
     } finally {
       setIsSubmitting(false)
     }
@@ -119,7 +123,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await updateGiftItem(editingItem.id, itemData)
       setEditingItem(null)
     } catch (err) {
-      console.error("Failed to update gift item:", err)
+      console.error("Failed to update gift item", err)
     } finally {
       setIsSubmitting(false)
     }
@@ -129,7 +133,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     try {
       await removeGiftItem(itemId)
     } catch (err) {
-      console.error("Failed to remove gift item:", err)
+      console.error("Failed to remove gift item", err)
     }
   }
 
@@ -138,7 +142,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       const newPurchasedBy = currentPurchasedBy ? null : currentUser.id
       await togglePurchaseStatus(itemId, newPurchasedBy)
     } catch (err) {
-      console.error("Failed to toggle purchase status:", err)
+      console.error("Failed to toggle purchase status", err)
     }
   }
 
@@ -146,7 +150,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     try {
       await addGiftCardPurchase(itemId, currentUser.id, amount)
     } catch (err) {
-      console.error("Failed to add gift card purchase:", err)
+      console.error("Failed to add gift card purchase", err)
     }
   }
 
@@ -154,7 +158,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     try {
       await toggleArchiveStatus(itemId)
     } catch (err) {
-      console.error("Failed to toggle archive status:", err)
+      console.error("Failed to toggle archive status", err)
     }
   }
 
@@ -210,7 +214,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
       await fetchUserLists()
     } catch (err) {
-      console.error("Failed to create list:", err)
+      console.error("Failed to create list", err)
     } finally {
       setIsSubmitting(false)
     }
@@ -247,7 +251,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
       await fetchUserLists()
     } catch (err) {
-      console.error("Failed to update list:", err)
+      console.error("Failed to update list", err)
     } finally {
       setIsSubmitting(false)
     }
@@ -270,7 +274,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
       await fetchUserLists()
     } catch (err) {
-      console.error("Failed to delete list:", err)
+      console.error("Failed to delete list", err)
       alert('Failed to delete list')
     } finally {
       setIsSubmitting(false)
@@ -343,8 +347,10 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         <div className="flex items-end justify-between mb-4 md:mb-6 px-4 md:px-0 min-h-[100px] md:min-h-auto">
           <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-2xl font-heading font-medium tracking-wide">Hi, {currentMember?.name}!</h1>
-              <p>Welcome back 😊</p>
+              <h1 className="text-2xl font-heading font-medium tracking-wide">
+                {formatMessage(t.welcome || "Hi, {{name}}!", { name: currentMember?.name || '' })}
+              </h1>
+              <p>{t.welcomeBack || 'Welcome back 😊'}</p>
             </div>
           </div>
         </div>
@@ -353,8 +359,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
           <CardContent className="px-6 md:px-3">
             <Tabs defaultValue="my-list" className="space-y-6">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="my-list">My Gift List</TabsTrigger>
-                <TabsTrigger value="family-lists">Family Lists</TabsTrigger>
+                <TabsTrigger value="my-list">{t.tabs?.myGiftList || 'My Gift List'}</TabsTrigger>
+                <TabsTrigger value="family-lists">{t.tabs?.familyLists || 'Family Lists'}</TabsTrigger>
               </TabsList>
 
               {/* My Gift List Tab */}
@@ -362,7 +368,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                 <div className="flex items-center justify-between mb-2 px-1">
                   <div className="flex items-center gap-2">
                     <Gift className="w-5 h-5" />
-                    My Gift Ideas
+                    {tGifts.myGifts?.title || 'My Gift Ideas'}
                   </div>
                   <ListManagement
                     userLists={userLists}

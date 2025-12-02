@@ -1,0 +1,11 @@
+{
+  "magicLink": {
+    "subject": "Sign in to Gift List",
+    "heading": "Sign in to Gift List",
+    "body": "Click the link below to sign in to your Gift List account",
+    "buttonText": "Sign In",
+    "footer": "This link will expire in 24 hours. If you didn't request this email, you can safely ignore it.",
+    "altLink": "Or copy and paste this URL into your browser",
+    "textVersion": "Sign in to Gift List\n\nClick this link to sign in: {{link}}\n\nThis link will expire in 24 hours."
+  }
+}

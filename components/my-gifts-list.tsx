@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Gift, Archive } from 'lucide-react'
 import GiftItem from "./gift-item"
+import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
   id: string
@@ -40,11 +41,14 @@ export default function MyGiftsList({
   onDelete,
   onArchive
 }: MyGiftsListProps) {
+  const { t } = useTranslation('gifts')
+  const { t: tCommon } = useTranslation('common')
+  
   if (activeMyGifts.length === 0 && archivedMyGifts.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <Gift className="w-12 h-12 mx-auto mb-3 opacity-50" />
-        <p>No gift ideas yet. Add some items above!</p>
+        <p>{t.myGifts?.empty || 'No gift ideas yet. Add some items above!'}</p>
       </div>
     )
   }
@@ -55,7 +59,7 @@ export default function MyGiftsList({
     if (!acc[listId]) {
       const listInfo = userLists.find(l => l.id === listId)
       acc[listId] = {
-        name: listInfo?.name || 'Unknown List',
+        name: listInfo?.name || (t.giftItem?.unknownList || 'Unknown List'),
         description: listInfo?.description || '',
         isPublic: listInfo?.is_public || false,
         createdAt: listInfo?.created_at || null,
@@ -72,7 +76,7 @@ export default function MyGiftsList({
     if (!acc[listId]) {
       const listInfo = userLists.find(l => l.id === listId)
       acc[listId] = {
-        name: listInfo?.name || 'Unknown List',
+        name: listInfo?.name || (t.giftItem?.unknownList || 'Unknown List'),
         description: listInfo?.description || '',
         isPublic: listInfo?.is_public || false,
         createdAt: listInfo?.created_at || null,
@@ -99,22 +103,22 @@ export default function MyGiftsList({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Badge variant={listData.isPublic ? "default" : "secondary"} className="text-xs absolute top-5 right-5 cursor-help">
-                        {listData.isPublic ? "Track Purchases" : "Keep Surprise"}
+                        {listData.isPublic ? (t.myGifts?.trackPurchases || "Track Purchases") : (t.myGifts?.keepSurprise || "Keep Surprise")}
                       </Badge>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>{listData.isPublic
-                        ? "Track Purchases: You can see which items family members have purchased from this list"
-                        : "Keep Surprise: You cannot see which items family members have purchased from this list"}</p>
+                        ? (t.myGifts?.trackPurchasesHelp || "Track Purchases: You can see which items family members have purchased from this list")
+                        : (t.myGifts?.keepSurpriseHelp || "Keep Surprise: You cannot see which items family members have purchased from this list")}</p>
                     </TooltipContent>
                   </Tooltip>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs text-muted-foreground">
-                      {listData.items.length} items
+                      {formatMessage(tCommon.counts?.items || '{{count}} items', { count: listData.items.length })}
                     </span>
                     {listData.createdAt && (
                       <span className="text-xs text-muted-foreground">
-                        Created {new Date(listData.createdAt).toLocaleDateString()}
+                        • {formatMessage(tCommon.dates?.created || 'Created {{date}}', { date: new Date(listData.createdAt).toLocaleDateString() })}
                       </span>
                     )}
                   </div>
@@ -146,7 +150,7 @@ export default function MyGiftsList({
         <div className="pt-4 border-t">
           <h4 className="text-lg font-medium text-muted-foreground mb-4 flex items-center gap-2">
             <Archive className="w-5 h-5" />
-            Archived Items
+            {t.myGifts?.archivedItems || 'Archived Items'}
           </h4>
           <div className="space-y-6">
             {Object.entries(archivedByList).map(([listId, listData]: [string, any]) => (
@@ -156,7 +160,7 @@ export default function MyGiftsList({
                     <h4 className="font-medium text-sm opacity-75">{listData.name} (Archived)</h4>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="outline" className="text-xs opacity-60">
-                        {listData.items.length} archived items
+                        {formatMessage(tCommon.counts?.archived || '{{count}} archived items', { count: listData.items.length })}
                       </Badge>
                     </div>
                   </div>
