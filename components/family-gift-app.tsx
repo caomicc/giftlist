@@ -117,7 +117,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
   const handleUpdateGiftItem = async (itemData: any) => {
     if (!editingItem) return
-    
+
     setIsSubmitting(true)
     try {
       await updateGiftItem(editingItem.id, itemData)
@@ -168,7 +168,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     try {
       // Extract visibility settings
       const { visibility_mode, selected_users, ...restListData } = listData
-      
+
       // Create the list first
       const response = await fetch('/api/lists', {
         method: 'POST',
@@ -184,25 +184,25 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       }
 
       const newList = await response.json()
-      
+
       // Set permissions if needed
       if (visibility_mode !== 'all' && selected_users.length > 0) {
         const otherMembers = users.filter((u: any) => u.id !== currentUser.id)
         const permissions = otherMembers.map((member: any) => {
           let canView = true
-          
+
           if (visibility_mode === "hidden_from") {
             canView = !selected_users.includes(member.id)
           } else if (visibility_mode === "visible_to") {
             canView = selected_users.includes(member.id)
           }
-          
+
           return {
             user_id: member.id,
             can_view: canView
           }
         })
-        
+
         await fetch(`/api/lists/${newList.id}/permissions`, {
           method: 'PUT',
           headers: {
@@ -258,7 +258,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   }
 
   const handleDeleteList = async (listId: string) => {
-    if (!confirm('Are you sure you want to delete this list? Note: Lists with items cannot be deleted - you must move or delete all items first.')) return
+    const tLists = translations.lists || {}
+    if (!confirm(tLists.deleteConfirm?.message || 'Are you sure you want to delete this list? Note: Lists with items cannot be deleted - you must move or delete all items first.')) return
 
     setIsSubmitting(true)
     try {
@@ -268,14 +269,14 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        alert(error.error || 'Failed to delete list')
+        alert(formatMessage(tLists.deleteConfirm?.errorWithDetails || tLists.deleteConfirm?.error || 'Failed to delete list', { error: error.error || '' }))
         return
       }
 
       await fetchUserLists()
     } catch (err) {
       console.error("Failed to delete list", err)
-      alert('Failed to delete list')
+      alert(tLists.deleteConfirm?.error || 'Failed to delete list')
     } finally {
       setIsSubmitting(false)
     }
@@ -354,7 +355,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
             </div>
           </div>
         </div>
-        
+
         <Card className={'bg-card text-card-foreground flex flex-col gap-6 rounded-t-3xl h-full rounded-b-none md:rounded-b-xl md:rounded-xl border-none md:border py-6 md:py-4 shadow-none md:shadow-sm'}>
           <CardContent className="px-6 md:px-3">
             <Tabs defaultValue="my-list" className="space-y-6">
@@ -380,9 +381,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     isSubmitting={isSubmitting}
                   />
                 </div>
-                
+
                 <p className="text-sm text-muted-foreground">
-                  Add items you'd like to receive. Family members can see this list and mark items as purchased.
+                  {tGifts.myGifts?.description || "Add and manage your personal gift ideas here."}
                 </p>
 
                 <AddGiftForm
@@ -412,7 +413,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     {tGifts.familyGifts?.title || "Family Gift Lists"}
                   </div>
                 </div>
-                
+
                 <p className="text-sm text-muted-foreground">
                   {tGifts.familyGifts?.description || "Click on a family member to view and purchase their gifts."}
                 </p>

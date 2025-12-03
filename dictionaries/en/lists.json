@@ -52,6 +52,7 @@
   "deleteConfirm": {
     "title": "Delete List",
     "message": "Are you sure you want to delete this list? Note: Lists with items cannot be deleted - you must move or delete all items first.",
-    "error": "Failed to delete list"
+    "error": "Failed to delete list",
+    "errorWithDetails": "{{error}}"
   }
 }

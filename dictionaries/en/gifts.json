@@ -96,6 +96,10 @@
     "contributions": "Contributions",
     "noContributions": "No contributions yet",
     "contributionItem": "{{name}}: {{amount}}",
+    "addedBy": "{{name}} added:",
+    "deleteConfirm": "Are you sure you want to delete this contribution?",
+    "editTooltip": "Edit your contribution",
+    "deleteTooltip": "Delete your contribution",
     "purchaseDialog": {
       "title": "Contribute to Gift Card",
       "amountLabel": "Amount",

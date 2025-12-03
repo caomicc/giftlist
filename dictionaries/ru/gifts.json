@@ -96,6 +96,10 @@
     "contributions": "Взносы",
     "noContributions": "Взносов пока нет",
     "contributionItem": "{{name}}: {{amount}}",
+    "addedBy": "{{name}} добавил:",
+    "deleteConfirm": "Вы уверены, что хотите удалить этот взнос?",
+    "editTooltip": "Редактировать ваш взнос",
+    "deleteTooltip": "Удалить ваш взнос",
     "purchaseDialog": {
       "title": "Внести взнос на подарочную карту",
       "amountLabel": "Сумма",

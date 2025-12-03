@@ -29,13 +29,13 @@ export function LocaleSwitcher() {
   const handleLocaleChange = (newLocale: string) => {
     // Get the current path without the locale prefix
     const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/";
-    
+
     // Build the new path with the new locale
     const newPath = `/${newLocale}${pathWithoutLocale}`;
-    
+
     // Set cookie for persistence
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=${60 * 60 * 24 * 365}`;
-    
+
     // Navigate to the new path
     router.push(newPath);
     router.refresh();
@@ -43,7 +43,7 @@ export function LocaleSwitcher() {
 
   return (
     <Select value={locale} onValueChange={handleLocaleChange}>
-      <SelectTrigger className="w-[140px]">
+      <SelectTrigger className="w-[140px] shadow-none border-0">
         <SelectValue placeholder="Language" />
       </SelectTrigger>
       <SelectContent>

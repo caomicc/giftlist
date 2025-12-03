@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Edit, Trash2, Check, X } from 'lucide-react';
 import { formatCurrency, getUserLocale, getUserCurrency } from '@/lib/currency';
+import { useTranslation, formatMessage } from './i18n-provider';
 
 interface GiftCardPurchase {
   id: string;
@@ -26,6 +27,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
   isOwner,
   onPurchaseUpdate
 }) => {
+  const { t } = useTranslation('gifts');
   const [purchases, setPurchases] = useState<GiftCardPurchase[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -93,7 +95,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
   };
 
   const handleDelete = async (purchaseId: string) => {
-    if (!confirm('Are you sure you want to delete this contribution?')) {
+    if (!confirm(t.giftCard?.deleteConfirm || 'Are you sure you want to delete this contribution?')) {
       return;
     }
 
@@ -138,7 +140,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
           >
             <div className="flex items-center gap-2  justify-between w-full md:w-auto">
               <span>
-                <span className="font-medium">{purchase.purchaser_name}</span> added:
+                {formatMessage(t.giftCard?.addedBy || '{{name}} added:', { name: purchase.purchaser_name })}
               </span>
               {isEditing ? (
                 <div className="flex items-center gap-1">
@@ -188,7 +190,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
                       size="sm"
                       className="h-5 w-5 p-0 text-blue-600 hover:text-blue-700"
                       onClick={() => handleEditStart(purchase)}
-                      title="Edit your contribution"
+                      title={t.giftCard?.editTooltip || "Edit your contribution"}
                     >
                       <Edit className="w-3 h-3" />
                     </Button>
@@ -197,7 +199,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
                       size="sm"
                       className="h-5 w-5 p-0 text-red-600 hover:text-red-700"
                       onClick={() => handleDelete(purchase.id)}
-                      title="Delete your contribution"
+                      title={t.giftCard?.deleteTooltip || "Delete your contribution"}
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>

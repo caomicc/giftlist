@@ -24,6 +24,12 @@ function getLocale(request: NextRequest): string {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Skip for static files with common extensions
+  const staticExtensions = ['.ico', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.woff', '.woff2', '.ttf', '.eot', '.otf', '.css', '.js', '.map', '.json', '.xml', '.txt']
+  if (staticExtensions.some(ext => pathname.endsWith(ext))) {
+    return NextResponse.next()
+  }
+
   // Check if pathname already has a locale
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
@@ -33,10 +39,10 @@ export function proxy(request: NextRequest) {
   if (!pathnameHasLocale) {
     const locale = getLocale(request)
     request.nextUrl.pathname = `/${locale}${pathname}`
-    
+
     // Set cookie for future requests
     const response = NextResponse.redirect(request.nextUrl)
-    response.cookies.set('NEXT_LOCALE', locale, { 
+    response.cookies.set('NEXT_LOCALE', locale, {
       maxAge: 60 * 60 * 24 * 365, // 1 year
       path: '/',
     })
@@ -74,8 +80,9 @@ export const config = {
      * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * - favicon.ico, robots.txt, sitemap.xml (metadata files)
+     * - Static file extensions
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|robots.txt|sitemap.xml).*)',
   ],
 }
