@@ -150,8 +150,9 @@ const GiftItem: React.FC<GiftItemProps> = ({
               </Badge>
             )}
             {item.price && !isGiftCard && <PriceTag price={item.price} />}
-            {/* Purchase status badge */}
-            {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && (
+            {/* Purchase status badge - only show if not owner viewing private list */}
+            {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) &&
+              (!isMyGift || (isMyGift && item.is_public)) && (
               <Badge className="text-xs bg-green-100 text-green-800">
                 {isGiftCard
                   ? (t.giftItem?.buttons?.complete || 'Complete')
