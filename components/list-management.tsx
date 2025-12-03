@@ -50,7 +50,7 @@ export default function ListManagement({
 }: ListManagementProps) {
   const { t } = useTranslation('lists')
   const { t: tCommon } = useTranslation('common')
-  
+
   const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false)
   const [isManageListsDialogOpen, setIsManageListsDialogOpen] = useState(false)
   const [editingList, setEditingList] = useState<any>(null)
@@ -99,7 +99,8 @@ export default function ListManagement({
     setEditingList(list)
 
     try {
-      const { permissions } = await fetchListPermissions(list.id)
+      const response = await fetchListPermissions(list.id)
+      const permissions = response?.permissions || []
 
       // Determine visibility mode based on permissions
       const hiddenUsers = permissions.filter((p: any) => !p.can_view).map((p: any) => p.user_id)
@@ -391,11 +392,16 @@ export default function ListManagement({
               disabled={!newListForm.name.trim() || isSubmitting}
             >
               {isSubmitting ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {t.createDialog?.submittingButton || "Creating..."}
+                </>
               ) : (
-                <Plus className="w-4 h-4 mr-2" />
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  {t.createDialog?.submitButton || "Create List"}
+                </>
               )}
-              {isSubmitting ? (t.createDialog?.submittingButton || "Creating...") : (t.createDialog?.submitButton || "Create List")}
             </Button>
           </div>
         </DialogContent>
@@ -537,11 +543,16 @@ export default function ListManagement({
                 disabled={!editListForm.name.trim() || isSubmitting}
               >
                 {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t.editDialog?.submittingButton || "Updating..."}
+                  </>
                 ) : (
-                  <Edit className="w-4 h-4 mr-2" />
+                  <>
+                    <Edit className="w-4 h-4 mr-2" />
+                    {t.editDialog?.submitButton || "Update List"}
+                  </>
                 )}
-                {isSubmitting ? (t.editDialog?.submittingButton || "Updating...") : (t.editDialog?.submitButton || "Update List")}
               </Button>
             </div>
           </DialogContent>

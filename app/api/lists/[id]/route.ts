@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth'
 import { sql } from '@/lib/neon'
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuth()
-    const { id } = params
+    const { id } = await params
 
     // Get the specific list
     const [list] = await sql`
@@ -24,10 +24,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuth()
-    const { id } = params
+    const { id } = await params
     const { name, description, is_public } = await request.json()
 
     if (!name?.trim()) {
@@ -73,10 +73,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await requireAuth()
-    const { id } = params
+    const { id } = await params
 
     // Check if user owns this list and if it has any items
     const [listInfo] = await sql`
@@ -94,8 +94,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
 
     if (listInfo.item_count > 0) {
-      return NextResponse.json({ 
-        error: 'Cannot delete list with items. Please move or delete all items first.' 
+      return NextResponse.json({
+        error: 'Cannot delete list with items. Please move or delete all items first.'
       }, { status: 400 })
     }
 
