@@ -24,6 +24,11 @@ function getLocale(request: NextRequest): string {
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Skip for favicon and common static files
+  if (pathname === '/favicon.ico' || pathname === '/robots.txt' || pathname === '/sitemap.xml') {
+    return NextResponse.next()
+  }
+
   // Skip for static files with common extensions
   const staticExtensions = ['.ico', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.woff', '.woff2', '.ttf', '.eot', '.otf', '.css', '.js', '.map', '.json', '.xml', '.txt']
   if (staticExtensions.some(ext => pathname.endsWith(ext))) {
