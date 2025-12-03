@@ -37,20 +37,36 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       ORDER BY name
     `
 
-    // Combine to show current state
-    // If there are ANY explicit permissions set, we need to determine the default behavior
+    // Determine visibility mode based on explicit permissions
     const hasExplicitPermissions = permissions.length > 0
+
+    if (!hasExplicitPermissions) {
+      // No explicit permissions = visible to all (default mode)
+      const userPermissions = allUsers.map(member => ({
+        user_id: member.id,
+        user_name: member.name,
+        user_email: member.email,
+        can_view: true,
+        is_explicit: false
+      }))
+      return NextResponse.json({ permissions: userPermissions })
+    }
+
+    // Check if all explicit permissions are denials or all are approvals
     const explicitDenials = permissions.filter(p => !p.can_view).length
     const explicitApprovals = permissions.filter(p => p.can_view).length
 
-    // Determine default for users without explicit permissions:
-    // - If there are more denials than approvals, it's likely "hidden from specific" mode, so default to true
-    // - If there are more approvals than denials, it's likely "visible to specific" mode, so default to false
-    // - If equal or no permissions, default to true (visible to all)
+    // Determine the visibility mode based on what's stored:
+    // - Only denials (can_view=false): "hidden from specific" mode → new users default to CAN view
+    // - Only approvals (can_view=true): "visible to specific" mode → new users default to CANNOT view
+    // - Mixed or zero: shouldn't happen with our storage strategy, default to visible to all
     let defaultCanView = true
-    if (hasExplicitPermissions && explicitApprovals > 0 && explicitApprovals < allUsers.length) {
-      // This looks like "visible to specific" mode
+    if (explicitApprovals > 0 && explicitDenials === 0) {
+      // Only approvals stored = "visible to specific" mode
       defaultCanView = false
+    } else if (explicitDenials > 0 && explicitApprovals === 0) {
+      // Only denials stored = "hidden from specific" mode
+      defaultCanView = true
     }
 
     const userPermissions = allUsers.map(member => {
@@ -59,7 +75,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         user_id: member.id,
         user_name: member.name,
         user_email: member.email,
-        can_view: permission?.can_view ?? defaultCanView
+        can_view: permission?.can_view ?? defaultCanView,
+        is_explicit: !!permission
       }
     })
 
@@ -86,16 +103,26 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'List not found' }, { status: 404 })
     }
 
-    // Update permissions for each user
-    for (const permission of permissions) {
+    // If permissions array is empty, delete all permissions ("visible to all" mode)
+    if (!permissions || permissions.length === 0) {
       await sql`
-        INSERT INTO list_permissions (list_id, user_id, can_view)
-        VALUES (${id}, ${permission.user_id}, ${permission.can_view})
-        ON CONFLICT (list_id, user_id) 
-        DO UPDATE SET 
-          can_view = ${permission.can_view},
-          updated_at = NOW()
+        DELETE FROM list_permissions
+        WHERE list_id = ${id}
       `
+    } else {
+      // First, delete all existing permissions for this list
+      await sql`
+        DELETE FROM list_permissions
+        WHERE list_id = ${id}
+      `
+
+      // Then insert the new permissions
+      for (const permission of permissions) {
+        await sql`
+          INSERT INTO list_permissions (list_id, user_id, can_view)
+          VALUES (${id}, ${permission.user_id}, ${permission.can_view})
+        `
+      }
     }
 
     return NextResponse.json({ success: true })

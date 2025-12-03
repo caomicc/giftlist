@@ -186,23 +186,15 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
       const newList = await response.json()
 
-      // Set permissions if needed
-      if (visibility_mode !== 'all' && selected_users.length > 0) {
-        const otherMembers = users.filter((u: any) => u.id !== currentUser.id)
-        const permissions = otherMembers.map((member: any) => {
-          let canView = true
-
-          if (visibility_mode === "hidden_from") {
-            canView = !selected_users.includes(member.id)
-          } else if (visibility_mode === "visible_to") {
-            canView = selected_users.includes(member.id)
-          }
-
-          return {
-            user_id: member.id,
-            can_view: canView
-          }
-        })
+      // Set permissions only if NOT in "visible to all" mode
+      if (visibility_mode !== 'all') {
+        // Only store exceptions to the default:
+        // - "hidden_from" mode: store can_view=false for selected users
+        // - "visible_to" mode: store can_view=true for selected users
+        const permissions = selected_users.map((userId: string) => ({
+          user_id: userId,
+          can_view: visibility_mode === "visible_to" // true for visible_to, false for hidden_from
+        }))
 
         await fetch(`/api/lists/${newList.id}/permissions`, {
           method: 'PUT',

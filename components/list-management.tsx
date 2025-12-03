@@ -102,27 +102,31 @@ export default function ListManagement({
       const response = await fetchListPermissions(list.id)
       const permissions = response?.permissions || []
 
-      // Determine visibility mode based on permissions
-      const hiddenUsers = permissions.filter((p: any) => !p.can_view).map((p: any) => p.user_id)
-      const visibleUsers = permissions.filter((p: any) => p.can_view).map((p: any) => p.user_id)
-      const totalUsers = permissions.length
+      // Only consider explicit permissions (not defaults applied to new users)
+      const explicitPermissions = permissions.filter((p: any) => p.is_explicit)
+
+      // Determine visibility mode based on explicit permissions only
+      const explicitHiddenUsers = explicitPermissions.filter((p: any) => !p.can_view).map((p: any) => p.user_id)
+      const explicitVisibleUsers = explicitPermissions.filter((p: any) => p.can_view).map((p: any) => p.user_id)
 
       let visibilityMode: "all" | "hidden_from" | "visible_to" = "all"
       let selectedUsers: string[] = []
 
-      // If there are hidden users but not all are hidden, it's "hidden_from" mode
-      if (hiddenUsers.length > 0 && hiddenUsers.length < totalUsers) {
+      if (explicitPermissions.length === 0) {
+        // No explicit permissions = visible to all
+        visibilityMode = "all"
+        selectedUsers = []
+      } else if (explicitHiddenUsers.length > 0 && explicitVisibleUsers.length === 0) {
+        // Only denials = "hidden from specific" mode
         visibilityMode = "hidden_from"
-        selectedUsers = hiddenUsers
-      } 
-      // If there are visible users but not all are visible, it's "visible_to" mode
-      else if (visibleUsers.length > 0 && visibleUsers.length < totalUsers) {
+        selectedUsers = explicitHiddenUsers
+      } else if (explicitVisibleUsers.length > 0 && explicitHiddenUsers.length === 0) {
+        // Only approvals = "visible to specific" mode
         visibilityMode = "visible_to"
-        selectedUsers = visibleUsers
-      }
-      // If all users are hidden, it's actually "visible_to" with none selected
-      else if (hiddenUsers.length === totalUsers) {
-        visibilityMode = "visible_to"
+        selectedUsers = explicitVisibleUsers
+      } else {
+        // Mixed explicit permissions - shouldn't happen with our UI but fall back to "all"
+        visibilityMode = "all"
         selectedUsers = []
       }
 
@@ -155,20 +159,18 @@ export default function ListManagement({
     }
 
     // Calculate permissions based on visibility mode
-    const permissions = otherMembers.map(member => {
-      let canView = true
+    let permissions: any[] = []
 
-      if (editListForm.visibilityMode === "hidden_from") {
-        canView = !editListForm.selectedUsers.includes(member.id)
-      } else if (editListForm.visibilityMode === "visible_to") {
-        canView = editListForm.selectedUsers.includes(member.id)
-      }
-
-      return {
-        user_id: member.id,
-        can_view: canView
-      }
-    })
+    // Only create explicit permissions if not in "visible to all" mode
+    if (editListForm.visibilityMode !== "all") {
+      // Only store exceptions to the default:
+      // - "hidden_from" mode: store can_view=false for selected users (everyone else defaults to true)
+      // - "visible_to" mode: store can_view=true for selected users (everyone else defaults to false)
+      permissions = editListForm.selectedUsers.map(userId => ({
+        user_id: userId,
+        can_view: editListForm.visibilityMode === "visible_to" // true for visible_to, false for hidden_from
+      }))
+    }
 
     await onUpdateList(editingList.id, listData, permissions)
     setEditingList(null)

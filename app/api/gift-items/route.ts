@@ -29,13 +29,19 @@ export async function GET(request: NextRequest) {
         LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
         LEFT JOIN list_permissions lp ON l.id = lp.list_id AND lp.user_id = ${currentUser.id}
         WHERE gi.list_id = ${listId}
+        AND gi.archived = FALSE
         AND (
           l.owner_id = ${currentUser.id}  -- User owns the list
-          OR (lp.user_id IS NOT NULL AND lp.can_view = TRUE)  -- User has explicit permission to view
-          OR (lp.user_id IS NULL AND NOT EXISTS (
-            SELECT 1 FROM list_permissions lp2 
-            WHERE lp2.list_id = l.id
-          ))  -- No permissions set for this list means visible by default
+          OR (lp.can_view = TRUE)  -- User has explicit permission to view
+          OR (
+            -- User doesn't have explicit permission, apply default based on permission mode
+            lp.user_id IS NULL AND (
+              -- No permissions at all = visible to all
+              NOT EXISTS (SELECT 1 FROM list_permissions lp2 WHERE lp2.list_id = l.id)
+              -- Only denials exist = "hidden from" mode, default is CAN view
+              OR NOT EXISTS (SELECT 1 FROM list_permissions lp2 WHERE lp2.list_id = l.id AND lp2.can_view = TRUE)
+            )
+          )
         )
         ORDER BY gi.created_at DESC
       `
@@ -70,13 +76,19 @@ export async function GET(request: NextRequest) {
         LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
         LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
         LEFT JOIN list_permissions lp ON l.id = lp.list_id AND lp.user_id = ${currentUser.id}
-        WHERE (
+        WHERE gi.archived = FALSE
+        AND (
           l.owner_id = ${currentUser.id}  -- User owns the list
-          OR (lp.user_id IS NOT NULL AND lp.can_view = TRUE)  -- User has explicit permission to view
-          OR (lp.user_id IS NULL AND NOT EXISTS (
-            SELECT 1 FROM list_permissions lp2 
-            WHERE lp2.list_id = l.id
-          ))  -- No permissions set for this list means visible by default
+          OR (lp.can_view = TRUE)  -- User has explicit permission to view
+          OR (
+            -- User doesn't have explicit permission, apply default based on permission mode
+            lp.user_id IS NULL AND (
+              -- No permissions at all = visible to all
+              NOT EXISTS (SELECT 1 FROM list_permissions lp2 WHERE lp2.list_id = l.id)
+              -- Only denials exist = "hidden from" mode, default is CAN view
+              OR NOT EXISTS (SELECT 1 FROM list_permissions lp2 WHERE lp2.list_id = l.id AND lp2.can_view = TRUE)
+            )
+          )
         )
         ORDER BY gi.created_at DESC
       `
