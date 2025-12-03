@@ -22,7 +22,14 @@ export async function GET(request: NextRequest) {
           l.name as list_name,
           l.owner_id as list_owner_id,
           u_owner.name as owner_name,
-          u_purchaser.name as purchaser_name
+          u_purchaser.name as purchaser_name,
+          -- Comment count: for private lists, owner only sees their own comments count
+          CASE 
+            WHEN l.is_public = FALSE AND l.owner_id = ${currentUser.id} THEN
+              (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id AND c.user_id = ${currentUser.id})
+            ELSE
+              (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id)
+          END as comment_count
         FROM gift_items gi
         JOIN lists l ON gi.list_id = l.id
         LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
@@ -53,7 +60,14 @@ export async function GET(request: NextRequest) {
           l.is_public,
           l.name as list_name,
           u_owner.name as owner_name,
-          u_purchaser.name as purchaser_name
+          u_purchaser.name as purchaser_name,
+          -- Comment count: for private lists, owner only sees their own comments count
+          CASE 
+            WHEN l.is_public = FALSE AND l.owner_id = ${currentUser.id} THEN
+              (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id AND c.user_id = ${currentUser.id})
+            ELSE
+              (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id)
+          END as comment_count
         FROM gift_items gi
         JOIN lists l ON gi.list_id = l.id
         LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
@@ -70,7 +84,14 @@ export async function GET(request: NextRequest) {
           l.name as list_name,
           l.owner_id as list_owner_id,
           u_owner.name as owner_name,
-          u_purchaser.name as purchaser_name
+          u_purchaser.name as purchaser_name,
+          -- Comment count: for private lists, owner only sees their own comments count
+          CASE 
+            WHEN l.is_public = FALSE AND l.owner_id = ${currentUser.id} THEN
+              (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id AND c.user_id = ${currentUser.id})
+            ELSE
+              (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id)
+          END as comment_count
         FROM gift_items gi
         JOIN lists l ON gi.list_id = l.id
         LEFT JOIN users u_owner ON gi.owner_id = u_owner.id

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive, Users, ChevronRight } from 'lucide-react';
+import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive, Users, ChevronRight, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
@@ -32,6 +32,7 @@ export type GiftItemProps = {
     og_site_name?: string | null;
     archived?: boolean;
     image_url?: string | null;
+    comment_count?: number;
   };
   currentUserId: string;
   purchaserName?: string;
@@ -150,6 +151,13 @@ const GiftItem: React.FC<GiftItemProps> = ({
               </Badge>
             )}
             {item.price && !isGiftCard && <PriceTag price={item.price} />}
+            {/* Comment indicator */}
+            {item.comment_count && item.comment_count > 0 && (
+              <Badge variant="outline" className="text-xs text-muted-foreground">
+                <MessageCircle className="w-3 h-3 mr-0.5" />
+                {item.comment_count}
+              </Badge>
+            )}
             {/* Purchase status badge - only show if not owner viewing private list */}
             {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) &&
               (!isMyGift || (isMyGift && item.is_public)) && (
