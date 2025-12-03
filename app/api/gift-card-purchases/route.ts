@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       SELECT gcp.*, u.name as purchaser_name 
       FROM gift_card_purchases gcp
       JOIN users u ON gcp.purchaser_id = u.id
-      WHERE gcp.gift_item_id = ${giftItemId}
+      WHERE gcp.gift_item_id = ${giftItemId}::uuid
       ORDER BY gcp.created_at DESC
     `
 
@@ -45,13 +45,13 @@ export async function POST(request: NextRequest) {
     // Insert the purchase
     const data = await sql`
       INSERT INTO gift_card_purchases (gift_item_id, purchaser_id, amount)
-      VALUES (${gift_item_id}, ${purchaser_id}, ${amount})
+      VALUES (${gift_item_id}::uuid, ${purchaser_id}::uuid, ${amount})
       RETURNING *
     `
 
     // Get the updated gift item with new total
     const giftItem = await sql`
-      SELECT * FROM gift_items WHERE id = ${gift_item_id}
+      SELECT * FROM gift_items WHERE id = ${gift_item_id}::uuid
     `
 
     return NextResponse.json({
@@ -81,7 +81,7 @@ export async function DELETE(request: NextRequest) {
 
     // Get the gift item id before deleting
     const purchase = await sql`
-      SELECT gift_item_id FROM gift_card_purchases WHERE id = ${purchaseId}
+      SELECT gift_item_id FROM gift_card_purchases WHERE id = ${purchaseId}::uuid
     `
 
     if (purchase.length === 0) {
@@ -92,11 +92,11 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete the purchase
-    await sql`DELETE FROM gift_card_purchases WHERE id = ${purchaseId}`
+    await sql`DELETE FROM gift_card_purchases WHERE id = ${purchaseId}::uuid`
 
     // Get the updated gift item
     const giftItem = await sql`
-      SELECT * FROM gift_items WHERE id = ${purchase[0].gift_item_id}
+      SELECT * FROM gift_items WHERE id = ${purchase[0].gift_item_id}::uuid
     `
 
     return NextResponse.json({
@@ -136,7 +136,7 @@ export async function PUT(request: NextRequest) {
     const updatedPurchase = await sql`
       UPDATE gift_card_purchases 
       SET amount = ${amount}
-      WHERE id = ${purchaseId}
+      WHERE id = ${purchaseId}::uuid
       RETURNING *
     `
 
@@ -149,7 +149,7 @@ export async function PUT(request: NextRequest) {
 
     // Get the updated gift item
     const giftItem = await sql`
-      SELECT * FROM gift_items WHERE id = ${updatedPurchase[0].gift_item_id}
+      SELECT * FROM gift_items WHERE id = ${updatedPurchase[0].gift_item_id}::uuid
     `
 
     return NextResponse.json({

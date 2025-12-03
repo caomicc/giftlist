@@ -105,16 +105,25 @@ export default function ListManagement({
       // Determine visibility mode based on permissions
       const hiddenUsers = permissions.filter((p: any) => !p.can_view).map((p: any) => p.user_id)
       const visibleUsers = permissions.filter((p: any) => p.can_view).map((p: any) => p.user_id)
+      const totalUsers = permissions.length
 
       let visibilityMode: "all" | "hidden_from" | "visible_to" = "all"
       let selectedUsers: string[] = []
 
-      if (hiddenUsers.length > 0 && hiddenUsers.length < permissions.length) {
+      // If there are hidden users but not all are hidden, it's "hidden_from" mode
+      if (hiddenUsers.length > 0 && hiddenUsers.length < totalUsers) {
         visibilityMode = "hidden_from"
         selectedUsers = hiddenUsers
-      } else if (visibleUsers.length > 0 && visibleUsers.length < permissions.length) {
+      } 
+      // If there are visible users but not all are visible, it's "visible_to" mode
+      else if (visibleUsers.length > 0 && visibleUsers.length < totalUsers) {
         visibilityMode = "visible_to"
         selectedUsers = visibleUsers
+      }
+      // If all users are hidden, it's actually "visible_to" with none selected
+      else if (hiddenUsers.length === totalUsers) {
+        visibilityMode = "visible_to"
+        selectedUsers = []
       }
 
       setEditListForm({

@@ -38,13 +38,28 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     `
 
     // Combine to show current state
+    // If there are ANY explicit permissions set, we need to determine the default behavior
+    const hasExplicitPermissions = permissions.length > 0
+    const explicitDenials = permissions.filter(p => !p.can_view).length
+    const explicitApprovals = permissions.filter(p => p.can_view).length
+
+    // Determine default for users without explicit permissions:
+    // - If there are more denials than approvals, it's likely "hidden from specific" mode, so default to true
+    // - If there are more approvals than denials, it's likely "visible to specific" mode, so default to false
+    // - If equal or no permissions, default to true (visible to all)
+    let defaultCanView = true
+    if (hasExplicitPermissions && explicitApprovals > 0 && explicitApprovals < allUsers.length) {
+      // This looks like "visible to specific" mode
+      defaultCanView = false
+    }
+
     const userPermissions = allUsers.map(member => {
       const permission = permissions.find(p => p.user_id === member.id)
       return {
         user_id: member.id,
         user_name: member.name,
         user_email: member.email,
-        can_view: permission?.can_view ?? true // Default to true if no permission set
+        can_view: permission?.can_view ?? defaultCanView
       }
     })
 
