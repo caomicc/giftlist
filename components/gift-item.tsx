@@ -306,6 +306,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
               giftItemId={item.id}
               currentUserId={currentUserId}
               isOwner={isMyGift}
+              isPublic={item.is_public}
               onInterestChange={handlePurchaseUpdate}
             />
           )}

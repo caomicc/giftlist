@@ -16,6 +16,7 @@ interface GroupGiftInterestProps {
   giftItemId: string;
   currentUserId: string;
   isOwner: boolean;
+  isPublic?: boolean;
   onInterestChange?: () => void;
 }
 
@@ -23,6 +24,7 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
   giftItemId,
   currentUserId,
   isOwner,
+  isPublic = true,
   onInterestChange
 }) => {
   const { t } = useTranslation('gifts');
@@ -87,7 +89,10 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
   };
 
   // Filter out owner from the visible interests
-  const visibleInterests = isOwner
+  // If owner and list is private (surprise mode), hide all interests
+  const visibleInterests = isOwner && !isPublic
+    ? []
+    : isOwner
     ? interests.filter(interest => interest.user_id !== currentUserId)
     : interests;
 
