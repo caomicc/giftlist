@@ -3,13 +3,11 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive, Users } from 'lucide-react';
+import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive, Users, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
-import GiftCardDetails from './gift-card-details';
-import GiftCardContributions from './gift-card-contributions';
-import GroupGiftInterest from './group-gift-interest';
+import GiftItemDrawer from './gift-item-drawer';
 import { cn } from '@/lib/utils';
 import { useTranslation, formatMessage } from './i18n-provider';
 
@@ -58,6 +56,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
 }) => {
   const { t } = useTranslation('gifts')
   const [isGiftCardDialogOpen, setIsGiftCardDialogOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const isMyGift = variant === 'my-gifts';
@@ -77,244 +76,194 @@ const GiftItem: React.FC<GiftItemProps> = ({
 
   const handlePurchaseUpdate = () => {
     setRefreshKey(prev => prev + 1);
-    // This will trigger a refresh of parent component data
-    // You might want to call a parent callback here if needed
   };
+
+  const handleRowClick = (e: React.MouseEvent) => {
+    // Prevent opening drawer when clicking on buttons or links
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('a')) {
+      return;
+    }
+    setIsDrawerOpen(true);
+  };
+
+  // Get preview image (OG image or custom image)
+  const previewImage = item.og_image || item.image_url;
 
   return (
     <>
       <div
-        className={`flex items-center flex-col md:flex-row justify-between transition-colors relative py-4 md:py-2 ${
-          isArchived
-            ? "bg-gray-100 border-gray-300 opacity-75"
-            // : (isPurchased && (!isMyGift || (isMyGift && item.is_public))) || (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))
-            // ? "bg-green-50 border-green-200"
-            : "bg-transparent"
-        }`}
+        onClick={handleRowClick}
+        className={cn(
+          'flex items-center gap-3 py-3 px-2 transition-colors cursor-pointer hover:bg-muted/50 group',
+          isArchived && 'bg-gray-100 opacity-75',
+        )}
       >
-        <div className="flex items-start md:items-center gap-1 md:absolute w-full md:w-auto md:right-4 md:top-4 mb-2">
-            {isArchived && (
-              <Badge variant="outline" className="text-gray-600 border-gray-400">
-                <Archive className="w-3 h-3 mr-1" />
-                {t.giftItem.status.archived || 'Archived'}
-              </Badge>
-            )}
-            {isGroupGift && (
-              <Badge variant="outline" className="text-purple-600 border-purple-400">
-                <Users className="w-3 h-3 mr-1" />
-                {t.giftItem.badges.groupGift || 'Group Gift'}
-              </Badge>
-            )}
-            {isGiftCard && (
-              <Badge variant="giftcard" className="">
-                <CreditCard className="w-3 h-3 mr-1" />
-                {t.giftItem.badges.giftCard || 'Gift Card'}
-              </Badge>
-            )}
-            {item.price !== undefined && !isGiftCard && (
-              <PriceTag price={item.price} />
-            )}
-            {isGiftCard && (
-              <GiftCardDetails
-                key={refreshKey}
-                giftItemId={item.id}
-                currentUserId={currentUserId}
-                isOwner={isMyGift}
-                totalPurchased={giftCardTotal}
-                targetAmount={giftCardTarget}
-              />
-            )}
-        </div>
-        <div className="flex-1 w-full">
-          <div className="flex flex-col gap-1 mb-1">
-            <h3
-              className={`font-medium truncate md:text-lg md:pr-20 ${
-                isArchived ? "line-through text-gray-500" :
-                ((isPurchased && (!isMyGift || (isMyGift && item.is_public))) || (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))) ? "line-through text-muted-foreground" : ""
-              }`}
-            >
-              {item.name}
-            </h3>
-          <div className="flex gap-3 flex-row">  {item.image_url && !item.og_image && (
-              <div className="flex-shrink-0">
-                <div
-                              className="size-16 md:size-16 object-cover rounded overflow-hidden bg-gray-100 flex items-center justify-center"
->
-                <img
-              src={item.image_url}
-              alt={item.og_title || item.name}
-              className="size-16 md:size-16 object-cover rounded"
+        {/* Thumbnail */}
+        {previewImage && (
+          <div className="shrink-0">
+            <img
+              src={previewImage}
+              alt={item.name}
+              className="size-12 object-cover rounded"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none'
               }}
             />
-            </div>
-              </div>)}
-          {item.description && (
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-foreground mb-2 md:mb-4 mt-1">
-                {item.description}
-              </p>
-            </div>
-          )}
           </div>
+        )}
+
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3
+              className={cn(
+                'font-medium truncate text-sm md:text-base',
+                isArchived && 'line-through text-gray-500',
+                ((isPurchased && (!isMyGift || (isMyGift && item.is_public))) ||
+                  (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))) &&
+                  'line-through text-muted-foreground'
+              )}
+            >
+              {item.name}
+            </h3>
           </div>
 
-          {/* OpenGraph Data Display */}
-          {(item.og_title || item.og_description || item.og_image) && (
-            <div className="">
-              {item.link && (
-                <Link
-                  href={item.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                <div className="flex gap-3 flex-row">
-                  {item.og_image && (
-                    <div className="flex-shrink-0">
-                      <img
-                        src={item.og_image}
-                        alt={item.og_title || item.name}
-                        className="size-16 md:size-16 object-cover rounded"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none'
-                        }}
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    {item.og_title && (
-                      <h4 className="text-sm font-medium text-gray-900 truncate sr-only">
-                        {item.og_title}
-                      </h4>
-                    )}
-                    {item.og_description && (
-                      <p className="text-xs text-gray-600 line-clamp-2 mt-1">
-                        {item.og_description}
-                      </p>
-                    )}
-                    {item.og_site_name && (
-                      <p className="text-xs text-foreground mt-1 font-medium">
-                        {item.og_site_name} <ExternalLink className="inline size-3 -mt-1" />
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </Link>)}
-            </div>
-          )}
-
-          <div className='flex md:items-center gap-2 flex-row mt-6'>
-            {item.link && (
-              <Link
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className='w-1/2 md:w-auto'
-                passHref
-              >
-                <Button variant="default" size="sm" className="w-full md:w-auto">
-                  {t.giftItem.buttons.viewLink ?? 'View Link'}<ExternalLink className="size-3" />
-                </Button>
-              </Link>
+          {/* Badges row */}
+          <div className="flex items-center gap-1 mt-1 flex-wrap">
+            {isArchived && (
+              <Badge variant="outline" className="text-xs text-gray-600 border-gray-400">
+                <Archive className="w-3 h-3 mr-0.5" />
+                {t.giftItem?.badges?.archived || 'Archived'}
+              </Badge>
             )}
-            {!isMyGift && (
-              <>
-                {isGiftCard ? (
-                  <Button
-                    variant={isGiftCardComplete ? "default" : "secondary"}
-                    size="sm"
-                    onClick={() => setIsGiftCardDialogOpen(true)}
-                    className={cn(isGiftCardComplete ? "bg-green-600 hover:bg-green-700" : "", 'w-1/2 md:w-auto')}
-                    disabled={isGiftCardComplete}
-                  >
-                    <CreditCard className="size-3" />
-                    {isGiftCardComplete ? t.giftItem.buttons.complete : t.giftItem.buttons.addAmount}
-                  </Button>
-                ) : (
-                  <Button
-                    variant={isPurchased ? "default" : "secondary"}
-                    size="sm"
-                    onClick={() => onTogglePurchase?.(item.id, item.purchased_by || null)}
-                    className={cn(isPurchased ? "bg-green-600 hover:bg-green-700" : "", 'w-1/2 md:w-auto')}
-                  >
-                    <ShoppingCart className="size-3" />
-                    {t.giftItem.buttons[isPurchased ? "purchased" : "purchase"]}
-                  </Button>
-                )}
-              </>
+            {isGroupGift && (
+              <Badge variant="outline" className="text-xs text-purple-600 border-purple-400">
+                <Users className="w-3 h-3 mr-0.5" />
+                {t.giftItem?.badges?.groupGift || 'Group Gift'}
+              </Badge>
             )}
-            {isMyGift && (
-          // My Gifts - Edit/Delete/Archive buttons
-              <div className="flex md:flex-row gap-2 ml-auto">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit?.(item)}
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  disabled={isArchived}
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onArchive?.(item.id)}
-                  className={isArchived ? "text-blue-600 hover:text-blue-700 hover:bg-blue-50" : "text-orange-600 hover:text-orange-700 hover:bg-orange-50"}
-                  title={isArchived ? "Unarchive item" : "Archive item"}
-                >
-                  <Archive className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDelete?.(item.id)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+            {isGiftCard && (
+              <Badge variant="secondary" className="text-xs">
+                <CreditCard className="w-3 h-3 mr-0.5" />
+                {t.giftItem?.badges?.giftCard || 'Gift Card'}
+              </Badge>
+            )}
+            {item.price && !isGiftCard && <PriceTag price={item.price} />}
+            {/* Purchase status badge */}
+            {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && (
+              <Badge className="text-xs bg-green-100 text-green-800">
+                {isGiftCard
+                  ? (t.giftItem?.buttons?.complete || 'Complete')
+                  : (t.giftItem?.buttons?.purchased || 'Purchased')}
+              </Badge>
             )}
           </div>
-            {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && !isMyGift && purchaserName && (
-            <Badge className="bg-green-100 text-green-800 mt-4">
-              {formatMessage(isGiftCard ? t.giftItem.status.giftCardComplete ?? "Gift Card Complete" : t.giftItem.status.purchasedBy ?? `Purchased by ${purchaserName}`, {name: purchaserName})}
-            </Badge>
-          )}
-
-          {/* Show purchase status for owners if list is public */}
-          {isMyGift && item.is_public && ((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) && purchaserName && (
-            <Badge className="bg-green-100 text-green-800 mt-4">
-              {formatMessage(isGiftCard ? t.giftItem.status.giftCardComplete ?? "Gift Card Complete" : t.giftItem.status.purchasedBy ?? `Purchased by ${purchaserName}`, {name: purchaserName})}
-            </Badge>
-          )}
-
-          {/* Gift Card Contributions */}
-            {isGiftCard && !isMyGift && (
-            <GiftCardContributions
-              key={`contributions-${refreshKey}`}
-              giftItemId={item.id}
-              currentUserId={currentUserId}
-              isOwner={isMyGift}
-              onPurchaseUpdate={handlePurchaseUpdate}
-            />
-            )}
-
-          {/* Group Gift Interest */}
-          {isGroupGift && (
-            <GroupGiftInterest
-              giftItemId={item.id}
-              currentUserId={currentUserId}
-              isOwner={isMyGift}
-              isPublic={item.is_public}
-              onInterestChange={handlePurchaseUpdate}
-            />
-          )}
         </div>
 
-        {/* Action Buttons */}
+        {/* Quick Actions */}
+        <div className="flex items-center gap-1 shrink-0">
+          {!isMyGift && (
+            <>
+              {isGiftCard ? (
+                <Button
+                  variant={isGiftCardComplete ? 'default' : 'secondary'}
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsGiftCardDialogOpen(true);
+                  }}
+                  className={cn(isGiftCardComplete && 'bg-green-600 hover:bg-green-700')}
+                  disabled={isGiftCardComplete}
+                >
+                  <CreditCard className="size-3" />
+                  <span className="hidden md:inline ml-1">
+                    {isGiftCardComplete ? t.giftItem?.buttons?.complete : t.giftItem?.buttons?.addAmount}
+                  </span>
+                </Button>
+              ) : (
+                <Button
+                  variant={isPurchased ? 'default' : 'secondary'}
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTogglePurchase?.(item.id, item.purchased_by || null);
+                  }}
+                  className={cn(isPurchased && 'bg-green-600 hover:bg-green-700')}
+                >
+                  <ShoppingCart className="size-3" />
+                  <span className="hidden md:inline ml-1">
+                    {t.giftItem?.buttons?.[isPurchased ? 'purchased' : 'purchase']}
+                  </span>
+                </Button>
+              )}
+            </>
+          )}
 
+          {isMyGift && (
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(item);
+                }}
+                className="size-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                disabled={isArchived}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive?.(item.id);
+                }}
+                className={cn(
+                  'size-8',
+                  isArchived
+                    ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
+                    : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'
+                )}
+                title={isArchived ? 'Unarchive item' : 'Archive item'}
+              >
+                <Archive className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete?.(item.id);
+                }}
+                className="size-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+
+          {/* Chevron indicator for drawer */}
+          <ChevronRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
       </div>
+
+      {/* Gift Item Drawer */}
+      <GiftItemDrawer
+        item={item}
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+        currentUserId={currentUserId}
+        purchaserName={purchaserName}
+        variant={variant}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onArchive={onArchive}
+        onTogglePurchase={onTogglePurchase}
+        onGiftCardPurchase={onGiftCardPurchase}
+      />
 
       {/* Gift Card Purchase Dialog */}
       {isGiftCard && (

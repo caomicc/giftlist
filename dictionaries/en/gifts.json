@@ -120,5 +120,15 @@
     "alreadyInterested": "Interested",
     "removeInterest": "Not Interested",
     "hiddenFromOthers": "Your interest is hidden from others"
+  },
+  "drawer": {
+    "detailsTitle": "Gift Details",
+    "description": "Description",
+    "commentsTitle": "Comments",
+    "noComments": "No comments yet. Start the conversation!",
+    "addCommentPlaceholder": "Add a comment...",
+    "postComment": "Post",
+    "deleteComment": "Delete comment",
+    "viewDetails": "View details"
   }
 }

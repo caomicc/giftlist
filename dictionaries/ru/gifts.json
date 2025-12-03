@@ -120,5 +120,15 @@
     "alreadyInterested": "Интересует",
     "removeInterest": "Не интересно",
     "hiddenFromOthers": "Ваш интерес скрыт от других"
+  },
+  "drawer": {
+    "detailsTitle": "Детали подарка",
+    "description": "Описание",
+    "commentsTitle": "Комментарии",
+    "noComments": "Комментариев пока нет. Начните обсуждение!",
+    "addCommentPlaceholder": "Добавить комментарий...",
+    "postComment": "Отправить",
+    "deleteComment": "Удалить комментарий",
+    "viewDetails": "Подробнее"
   }
 }

@@ -49,5 +49,11 @@
     "purchased": "{{count}} куплено",
     "archived": "{{count}} архивный подарок",
     "archivedPlural": "{{count}} архивных подарков"
+  },
+  "timeAgo": {
+    "justNow": "Только что",
+    "minutesAgo": "{{count}} мин. назад",
+    "hoursAgo": "{{count}} ч. назад",
+    "daysAgo": "{{count}} д. назад"
   }
 }

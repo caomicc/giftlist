@@ -49,5 +49,11 @@
     "purchased": "{{count}} purchased",
     "archived": "{{count}} archived item",
     "archivedPlural": "{{count}} archived items"
+  },
+  "timeAgo": {
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
   }
 }

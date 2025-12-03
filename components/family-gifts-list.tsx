@@ -31,7 +31,7 @@ export default function FamilyGiftsList({
 }: FamilyGiftsListProps) {
   const { t } = useTranslation('gifts')
   const { t: tCommon } = useTranslation('common')
-  
+
   const getOtherMembers = () => users.filter((u: any) => u.id !== currentUser.id)
   const getMemberGifts = (memberId: string) => giftItems.filter((item: any) => item.owner_id === memberId && !item.archived)
 
@@ -131,7 +131,7 @@ export default function FamilyGiftsList({
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="pb-0">
-                          <div className="px-1 md:px-2 border-purple-200 divide divide-y divide-purple-300">
+                          <div className="px-1 md:px-2 border-purple-200 divide divide-y divide-indigo-500">
                             {listData.items.map((item: any) => {
                               const purchaserName = item.purchased_by
                                 ? users.find((u: any) => u.id === item.purchased_by)?.name
