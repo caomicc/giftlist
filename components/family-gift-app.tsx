@@ -33,6 +33,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [userLists, setUserLists] = useState<any[]>([])
+  const [activeTab, setActiveTab] = useState("my-list")
   const { translations } = useI18n()
   const t = translations.common || {}
   const tGifts = translations.gifts || {}
@@ -358,7 +359,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
         <Card className={'bg-card text-card-foreground flex flex-col gap-6 rounded-t-3xl h-full rounded-b-none md:rounded-b-xl md:rounded-xl border-none md:border py-6 md:py-4 shadow-none md:shadow-sm'}>
           <CardContent className="px-6 md:px-3">
-            <Tabs defaultValue="my-list" className="space-y-6">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="my-list">{t.tabs?.myGiftList || 'My Gift List'}</TabsTrigger>
                 <TabsTrigger value="family-lists">{t.tabs?.familyLists || 'Family Lists'}</TabsTrigger>
