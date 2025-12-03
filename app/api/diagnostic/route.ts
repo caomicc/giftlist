@@ -22,7 +22,7 @@ export async function GET() {
       `
       giftCardPurchasesInfo = { exists: true, columns }
     } catch (error) {
-      giftCardPurchasesInfo = { exists: false, error: error.message }
+      giftCardPurchasesInfo = { exists: false, error: error instanceof Error ? error.message : String(error) }
     }
 
     // Check gift_items table columns
@@ -36,7 +36,7 @@ export async function GET() {
       `
       giftItemsInfo = { exists: true, columns }
     } catch (error) {
-      giftItemsInfo = { exists: false, error: error.message }
+      giftItemsInfo = { exists: false, error: error instanceof Error ? error.message : String(error) }
     }
 
     return NextResponse.json({
@@ -47,7 +47,7 @@ export async function GET() {
   } catch (error) {
     console.error('Database diagnostic failed:', error)
     return NextResponse.json(
-      { error: 'Failed to run database diagnostic', details: error.message },
+      { error: 'Failed to run database diagnostic', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }
