@@ -21,10 +21,10 @@ export default async function LangLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ lang: Locale }>;
+  params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const translations = await getAllDictionaries(lang);
+  const translations = await getAllDictionaries(lang as Locale);
 
   return (
     <html lang={lang}>

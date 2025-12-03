@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         u.email as user_email
       FROM gift_interest gi
       JOIN users u ON gi.user_id = u.id
-      WHERE gi.gift_item_id = ${giftItemId}
+      WHERE gi.gift_item_id = ${giftItemId}::uuid
       ORDER BY gi.created_at ASC
     `
 
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     // Check if user already expressed interest
     const existing = await sql`
       SELECT id FROM gift_interest
-      WHERE gift_item_id = ${gift_item_id} AND user_id = ${user_id}
+      WHERE gift_item_id = ${gift_item_id}::uuid AND user_id = ${user_id}::uuid
     `
 
     if (existing.length > 0) {
@@ -80,13 +80,13 @@ export async function POST(request: NextRequest) {
     // Add interest
     const data = await sql`
       INSERT INTO gift_interest (gift_item_id, user_id)
-      VALUES (${gift_item_id}, ${user_id})
+      VALUES (${gift_item_id}::uuid, ${user_id}::uuid)
       RETURNING *
     `
 
     // Get user details
     const [userDetails] = await sql`
-      SELECT name, email FROM users WHERE id = ${user_id}
+      SELECT name, email FROM users WHERE id = ${user_id}::uuid
     `
 
     return NextResponse.json({
@@ -131,7 +131,7 @@ export async function DELETE(request: NextRequest) {
 
     await sql`
       DELETE FROM gift_interest
-      WHERE gift_item_id = ${giftItemId} AND user_id = ${userId}
+      WHERE gift_item_id = ${giftItemId}::uuid AND user_id = ${userId}::uuid
     `
 
     return NextResponse.json({ success: true })
