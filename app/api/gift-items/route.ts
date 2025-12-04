@@ -23,6 +23,11 @@ export async function GET(request: NextRequest) {
           l.owner_id as list_owner_id,
           u_owner.name as owner_name,
           u_purchaser.name as purchaser_name,
+          -- Suggested by name: hide from owner if anonymous, show to others
+          CASE 
+            WHEN gi.suggested_by_id IS NOT NULL AND gi.is_anonymous_suggestion = TRUE AND l.owner_id = ${currentUser.id} THEN NULL
+            ELSE u_suggester.name
+          END as suggested_by_name,
           -- Comment count: for private lists, owner only sees their own comments count
           CASE 
             WHEN l.is_public = FALSE AND l.owner_id = ${currentUser.id} THEN
@@ -34,6 +39,7 @@ export async function GET(request: NextRequest) {
         JOIN lists l ON gi.list_id = l.id
         LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
         LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
+        LEFT JOIN users u_suggester ON gi.suggested_by_id::uuid = u_suggester.id
         LEFT JOIN list_permissions lp ON l.id = lp.list_id AND lp.user_id = ${currentUser.id}
         WHERE gi.list_id = ${listId}
         AND gi.archived = FALSE
@@ -61,6 +67,11 @@ export async function GET(request: NextRequest) {
           l.name as list_name,
           u_owner.name as owner_name,
           u_purchaser.name as purchaser_name,
+          -- Suggested by name: hide from owner if anonymous, show to others
+          CASE 
+            WHEN gi.suggested_by_id IS NOT NULL AND gi.is_anonymous_suggestion = TRUE AND l.owner_id = ${currentUser.id} THEN NULL
+            ELSE u_suggester.name
+          END as suggested_by_name,
           -- Comment count: for private lists, owner only sees their own comments count
           CASE 
             WHEN l.is_public = FALSE AND l.owner_id = ${currentUser.id} THEN
@@ -72,6 +83,7 @@ export async function GET(request: NextRequest) {
         JOIN lists l ON gi.list_id = l.id
         LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
         LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
+        LEFT JOIN users u_suggester ON gi.suggested_by_id::uuid = u_suggester.id
         WHERE gi.owner_id = ${userId}
         ORDER BY l.name, gi.created_at DESC
       `
@@ -85,6 +97,11 @@ export async function GET(request: NextRequest) {
           l.owner_id as list_owner_id,
           u_owner.name as owner_name,
           u_purchaser.name as purchaser_name,
+          -- Suggested by name: hide from owner if anonymous, show to others
+          CASE 
+            WHEN gi.suggested_by_id IS NOT NULL AND gi.is_anonymous_suggestion = TRUE AND l.owner_id = ${currentUser.id} THEN NULL
+            ELSE u_suggester.name
+          END as suggested_by_name,
           -- Comment count: for private lists, owner only sees their own comments count
           CASE 
             WHEN l.is_public = FALSE AND l.owner_id = ${currentUser.id} THEN
@@ -96,6 +113,7 @@ export async function GET(request: NextRequest) {
         JOIN lists l ON gi.list_id = l.id
         LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
         LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
+        LEFT JOIN users u_suggester ON gi.suggested_by_id::uuid = u_suggester.id
         LEFT JOIN list_permissions lp ON l.id = lp.list_id AND lp.user_id = ${currentUser.id}
         WHERE gi.archived = FALSE
         AND (

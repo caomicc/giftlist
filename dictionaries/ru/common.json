@@ -27,7 +27,8 @@
   },
   "tabs": {
     "myGiftList": "Мой список подарков",
-    "familyLists": "Списки семьи"
+    "familyLists": "Списки семьи",
+    "suggestions": "Предложения"
   },
   "errors": {
     "databaseConnection": "Ошибка подключения к базе данных",

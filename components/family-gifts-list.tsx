@@ -1,10 +1,11 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "./ui/avatar"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { Gift } from 'lucide-react'
+import { Gift, Lightbulb } from 'lucide-react'
 import GiftItem from "./gift-item"
 import { useTranslation, formatMessage } from "./i18n-provider"
 
@@ -20,6 +21,7 @@ interface FamilyGiftsListProps {
   giftItems: any[]
   onTogglePurchase: (itemId: string, currentPurchasedBy: string | null) => Promise<void>
   onGiftCardPurchase: (itemId: string, amount: number) => Promise<void>
+  onSuggestGift?: (targetUserId: string) => void
 }
 
 export default function FamilyGiftsList({
@@ -27,7 +29,8 @@ export default function FamilyGiftsList({
   users,
   giftItems,
   onTogglePurchase,
-  onGiftCardPurchase
+  onGiftCardPurchase,
+  onSuggestGift
 }: FamilyGiftsListProps) {
   const { t } = useTranslation('gifts')
   const { t: tCommon } = useTranslation('common')
@@ -96,6 +99,24 @@ export default function FamilyGiftsList({
             </AccordionTrigger>
             <AccordionContent>
               <div className="pt-4">
+                {/* Suggest Gift Button */}
+                {onSuggestGift && (
+                  <div className="flex justify-end mb-3 px-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onSuggestGift(member.id)
+                      }}
+                      className="text-yellow-600 border-yellow-400 hover:bg-yellow-50"
+                    >
+                      <Lightbulb className="w-4 h-4 mr-1" />
+                      {t.suggestions?.suggestGift || 'Suggest a Gift'}
+                    </Button>
+                  </div>
+                )}
+                
                 {memberGifts.length === 0 ? (
                   <div className="text-center py-6 text-muted-foreground">
                     <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
