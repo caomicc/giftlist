@@ -25,7 +25,7 @@ export default async function BrowseListPage({ params }: BrowseListPageProps) {
 
   // Get the list info and verify permission
   const [list] = await sql`
-    SELECT 
+    SELECT
       l.id, l.name, l.description, l.owner_id, l.is_public
     FROM lists l
     LEFT JOIN list_permissions lp ON l.id = lp.list_id AND lp.user_id = ${currentUser.id}
@@ -48,12 +48,12 @@ export default async function BrowseListPage({ params }: BrowseListPageProps) {
 
   // Get items for this list
   const items = await sql`
-    SELECT 
+    SELECT
       gi.*,
       l.is_public,
       l.name as list_name,
       u_purchaser.name as purchaser_name,
-      CASE 
+      CASE
         WHEN gi.suggested_by_id IS NOT NULL AND gi.is_anonymous_suggestion = TRUE AND l.owner_id = ${currentUser.id} THEN NULL
         ELSE u_suggester.name
       END as suggested_by_name,

@@ -16,6 +16,8 @@
   "optional": "необязательно",
   "required": "*",
   "nav": {
+    "home": "Главная",
+    "appName": "Giftlist",
     "myGiftlist": "Мой список подарков",
     "familyGiftlists": "Списки семьи",
     "myProfile": "Мой профиль"

@@ -3,7 +3,6 @@ import { type Locale, getAllDictionaries } from "@/lib/i18n";
 import { locales } from "@/lib/i18n-config";
 import { UserMenuWrapper } from "@/components/user-menu-wrapper";
 import { I18nProvider } from "@/components/i18n-provider";
-import { LocaleSwitcher } from "@/components/locale-switcher";
 import { BottomTabBar } from "@/components/bottom-tab-bar";
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
@@ -43,17 +42,15 @@ export default async function LangLayout({
 
       <body className={"bg-gradient-to-br from-red-100 to-violet-300 min-h-screen"}>
         <I18nProvider locale={lang} translations={translations}>
-          <div className="absolute top-4 left-4 z-50">
-            <LocaleSwitcher />
-          </div>
           <UserMenuWrapper />
-          <div className="relative z-10 pb-14 md:pb-0">{children}</div>
+          {/* Main content with padding for mobile header (top) and bottom nav */}
+          <div className="relative z-10 pt-14 pb-14 md:pt-18 md:pb-0">{children}</div>
           <BottomTabBar />
-          <div
+          {/* <div
             className={
               "absolute h-[50vh] bg-white block md:hidden bottom-14 left-0 right-0 z-1 w-full"
             }
-          ></div>
+          ></div> */}
         </I18nProvider>
       </body>
     </html>

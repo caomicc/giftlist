@@ -1,16 +1,12 @@
 "use client"
 
-import * as React from "react"
 import Link from "next/link"
-import { CircleCheckIcon, CircleHelpIcon, CircleIcon } from "lucide-react"
 
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { UserMenu } from "./user-menu"
@@ -24,91 +20,43 @@ interface User {
   created_at: Date
 }
 
-const components: { title: string; href: string; description: string }[] = [
-  {
-    title: "Alert Dialog",
-    href: "/docs/primitives/alert-dialog",
-    description:
-      "A modal dialog that interrupts the user with important content and expects a response.",
-  },
-  {
-    title: "Hover Card",
-    href: "/docs/primitives/hover-card",
-    description:
-      "For sighted users to preview content available behind a link.",
-  },
-  {
-    title: "Progress",
-    href: "/docs/primitives/progress",
-    description:
-      "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
-  },
-  {
-    title: "Scroll-area",
-    href: "/docs/primitives/scroll-area",
-    description: "Visually or semantically separates content.",
-  },
-  {
-    title: "Tabs",
-    href: "/docs/primitives/tabs",
-    description:
-      "A set of layered sections of content—known as tab panels—that are displayed one at a time.",
-  },
-  {
-    title: "Tooltip",
-    href: "/docs/primitives/tooltip",
-    description:
-      "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
-  },
-]
-
 export function NavigationBar({ user }: { user: User }) {
   const { locale } = useI18n()
   const { translations } = useI18n()
   const t = translations.common || {}
 
   return (
-    <NavigationMenu viewport={false} className="border-b border-border px-4 py-1 rounded-md bg-background top-4 left-1/2 -translate-x-1/2 fixed">
-      <NavigationMenuList>
-
-        <NavigationMenuItem>
-          <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-            <Link href={`/${locale}`}>{t.nav?.myGiftlist || 'My Giftlist'}</Link>
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-
-        <NavigationMenuItem>
-          <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
-            <Link href={`/${locale}`}>{t.nav?.familyGiftlists || 'Family Giftlists'}</Link>
-          </NavigationMenuLink>
-        </NavigationMenuItem>
-
-        <NavigationMenuItem>
-          <LocaleSwitcher />
-        </NavigationMenuItem>
+    <>
+      {/* Mobile Header - fixed at top */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-2 flex items-center justify-between">
+        <LocaleSwitcher />
 
         <UserMenu user={user} />
-      </NavigationMenuList>
-    </NavigationMenu>
-  )
-}
+      </div>
 
-function ListItem({
-  title,
-  children,
-  href,
-  ...props
-}: React.ComponentPropsWithoutRef<"li"> & { href: string }) {
-  return (
-    <li {...props}>
-      <NavigationMenuLink asChild>
-        <Link href={href}>
-          <div className="text-sm leading-none font-medium">{title}</div>
-          <p className="text-muted-foreground line-clamp-2 text-sm leading-snug">
-            {children}
-          </p>
-        </Link>
-      </NavigationMenuLink>
-    </li>
+      {/* Desktop Navigation - centered floating pill */}
+      <NavigationMenu viewport={false} className="hidden md:flex border-b border-border px-4 py-1 rounded-md bg-background top-4 left-1/2 -translate-x-1/2 fixed z-50">
+        <NavigationMenuList>
+
+          <NavigationMenuItem>
+            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+              <Link href={`/${locale}`}>{t.nav?.home || 'Home'}</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+
+          <NavigationMenuItem>
+            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+              <Link href={`/${locale}/browse`}>{t.nav?.familyGiftlists || 'Family Giftlists'}</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+
+          <NavigationMenuItem>
+            <LocaleSwitcher />
+          </NavigationMenuItem>
+
+          <UserMenu user={user} />
+        </NavigationMenuList>
+      </NavigationMenu>
+    </>
   )
 }

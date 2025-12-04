@@ -151,7 +151,7 @@ export default function SuggestionsView({
     const isPending = suggestion.status === "pending"
 
     return (
-      <Card key={suggestion.id} className={cn(!isPending && "opacity-75", 'py-0')}>
+      <Card key={suggestion.id} className={cn(!isPending && "opacity-75", 'py-0 overflow-hidden')}>
         <CardContent className="p-4">
           <div className="flex gap-3">
             {/* Thumbnail */}
@@ -169,15 +169,15 @@ export default function SuggestionsView({
             )}
 
             {/* Content */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <div className="flex items-start justify-between gap-2">
-                <div>
+                <div className="min-w-0 flex-1">
                   <h4 className="font-medium truncate">{suggestion.name}</h4>
                   {variant === "incoming" && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground truncate">
                       {suggestion.is_anonymous && isPending ? (
                         <span className="flex items-center gap-1">
-                          <UserX className="w-3 h-3" />
+                          <UserX className="w-3 h-3 shrink-0" />
                           {t.suggestions?.fromAnonymous || "From: Anonymous"}
                         </span>
                       ) : (
@@ -188,14 +188,16 @@ export default function SuggestionsView({
                     </p>
                   )}
                   {variant === "outgoing" && (
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground truncate">
                       {formatMessage(t.suggestions?.toName || "To: {{name}}", {
                         name: suggestion.target_user_name || "Unknown",
                       })}
                     </p>
                   )}
                 </div>
-                {getStatusBadge(suggestion.status)}
+                <div className="shrink-0">
+                  {getStatusBadge(suggestion.status)}
+                </div>
               </div>
 
               {suggestion.description && (
@@ -218,9 +220,9 @@ export default function SuggestionsView({
               )}
 
               {/* Actions */}
-              <div className="flex items-center gap-2 mt-3">
+              <div className="flex flex-wrap items-center gap-2 mt-3">
                 {suggestion.link && (
-                  <Button variant="ghost" size="sm" asChild>
+                  <Button variant="ghost" size="sm" asChild className="h-9">
                     <a href={suggestion.link} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="w-3 h-3 mr-1" />
                       {t.suggestions?.viewLink || "View"}
@@ -233,7 +235,7 @@ export default function SuggestionsView({
                     <Button
                       variant="default"
                       size="sm"
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-green-600 hover:bg-green-700 h-9"
                       onClick={() => handleApproveClick(suggestion)}
                     >
                       <Check className="w-3 h-3 mr-1" />
@@ -242,7 +244,7 @@ export default function SuggestionsView({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-red-600 border-red-300 hover:bg-red-50"
+                      className="text-red-600 border-red-300 hover:bg-red-50 h-9"
                       onClick={() => handleDenyClick(suggestion)}
                     >
                       <X className="w-3 h-3 mr-1" />
@@ -255,7 +257,7 @@ export default function SuggestionsView({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 h-9"
                     onClick={() => handleDeleteClick(suggestion)}
                   >
                     <Trash2 className="w-3 h-3 mr-1" />

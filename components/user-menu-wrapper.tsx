@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { UserMenu } from '@/components/user-menu'
+import { NavigationBar } from '@/components/navigation-bar'
 import { usePathname } from 'next/navigation'
 
 interface User {
@@ -53,9 +53,5 @@ export function UserMenuWrapper() {
     return null
   }
 
-  return (
-    <div className="absolute md:fixed top-0 right-0 p-4 z-50">
-      <UserMenu user={user} />
-    </div>
-  )
+  return <NavigationBar user={user} />
 }

@@ -16,6 +16,8 @@
   "optional": "optional",
   "required": "*",
   "nav": {
+    "home": "Home",
+    "appName": "Giftlist",
     "myGiftlist": "My Giftlist",
     "familyGiftlists": "Family Giftlists",
     "myProfile": "My Profile"
