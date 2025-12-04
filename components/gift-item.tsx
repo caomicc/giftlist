@@ -152,13 +152,6 @@ const GiftItem: React.FC<GiftItemProps> = ({
               </Badge>
             )}
             {item.price && !isGiftCard && <PriceTag price={item.price} />}
-            {/* Suggested by badge - show in family view only */}
-            {!isMyGift && item.suggested_by_name && (
-              <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-400">
-                <Lightbulb className="w-3 h-3 mr-0.5" />
-                {formatMessage(t.giftItem?.badges?.suggestedBy || 'Suggested by {{name}}', { name: item.suggested_by_name })}
-              </Badge>
-            )}
             {/* Comment indicator */}
             {item.comment_count && item.comment_count > 0 && (
               <Badge variant="outline" className="text-xs text-muted-foreground">
