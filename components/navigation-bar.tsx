@@ -25,12 +25,7 @@ export function NavigationBar({ user }: { user: User }) {
   const t = translations.common || {}
 
   return (
-    <>
-      {/* Mobile Header - fixed at top */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-2 flex items-center justify-end">
-        <UserMenu user={user} />
-      </div>
-
+    <>      
       {/* Desktop Navigation - centered floating pill */}
       <NavigationMenu viewport={false} className="hidden md:flex border-b border-border px-4 py-1 rounded-md bg-background top-4 left-1/2 -translate-x-1/2 fixed z-50">
         <NavigationMenuList>

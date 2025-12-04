@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const user = session.user
-    const { name, description, is_public, hidden_from } = await request.json()
+    const { name, description, is_public, visibility_mode, selected_users } = await request.json()
 
     if (!name?.trim()) {
       return NextResponse.json({ error: 'List name is required' }, { status: 400 })
@@ -54,21 +54,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'A list with this name already exists' }, { status: 400 })
     }
 
-    // Create new list (removed is_visible column)
+    // Create new list
     const [newList] = await sql`
       INSERT INTO lists (name, description, owner_id, is_public)
       VALUES (${name.trim()}, ${description || null}, ${user.id}, ${is_public !== false})
       RETURNING *
     `
 
-    // If hidden_from array is provided, create permission entries
-    if (hidden_from && Array.isArray(hidden_from) && hidden_from.length > 0) {
-      // Get all family members
-      const allUsers = await sql`SELECT id FROM users WHERE id != ${user.id}`
-
-      // Create permissions for each user
-      for (const userId of allUsers.map(u => u.id)) {
-        const canView = !hidden_from.includes(userId)
+    // Handle visibility permissions based on mode
+    if (visibility_mode && visibility_mode !== 'all' && selected_users && Array.isArray(selected_users) && selected_users.length > 0) {
+      // Create permission entries for selected users
+      for (const userId of selected_users) {
+        const canView = visibility_mode === 'visible_to' // true for visible_to, false for hidden_from
         await sql`
           INSERT INTO list_permissions (list_id, user_id, can_view)
           VALUES (${newList.id}, ${userId}, ${canView})

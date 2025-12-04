@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { FloatingActionButton } from "@/components/ui/floating-action-button"
 import { AddItemDrawer } from "@/components/add-item-drawer"
@@ -69,6 +71,11 @@ export function MyListsView({
   const [name, setName] = useState("")
   const [description, setDescription] = useState("")
   const [isPublic, setIsPublic] = useState(false)
+  const [visibilityMode, setVisibilityMode] = useState<"all" | "hidden_from" | "visible_to">("all")
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+
+  // Other family members (excluding current user)
+  const otherMembers = allUsers.filter(u => u.id !== currentUserId)
 
   const handleCreateList = async () => {
     if (!name.trim()) return
@@ -82,6 +89,8 @@ export function MyListsView({
           name: name.trim(),
           description: description.trim() || null,
           is_public: isPublic,
+          visibility_mode: visibilityMode,
+          selected_users: selectedUsers,
         }),
       })
 
@@ -102,6 +111,15 @@ export function MyListsView({
     setIsSubmitting(true)
 
     try {
+      // Calculate permissions based on visibility mode
+      let permissions: { user_id: string; can_view: boolean }[] = []
+      if (visibilityMode !== "all") {
+        permissions = selectedUsers.map(userId => ({
+          user_id: userId,
+          can_view: visibilityMode === "visible_to"
+        }))
+      }
+
       const response = await fetch(`/api/lists/${selectedList.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -109,6 +127,7 @@ export function MyListsView({
           name: name.trim(),
           description: description.trim() || null,
           is_public: isPublic,
+          permissions,
         }),
       })
 
@@ -147,14 +166,51 @@ export function MyListsView({
     setName("")
     setDescription("")
     setIsPublic(false)
+    setVisibilityMode("all")
+    setSelectedUsers([])
   }
 
-  const openEditDialog = (list: UserList) => {
+  const openEditDialog = async (list: UserList) => {
     setSelectedList(list)
     setName(list.name)
     setDescription(list.description || "")
     setIsPublic(list.is_public)
+
+    // Set default state first
+    setVisibilityMode("all")
+    setSelectedUsers([])
     setIsEditDialogOpen(true)
+
+    // Then load existing permissions
+    try {
+      const response = await fetch(`/api/lists/${list.id}/permissions`)
+      if (response.ok) {
+        const data = await response.json()
+        const permissions = data.permissions || []
+
+        // Only look at explicit permissions to determine the mode
+        const explicitPermissions = permissions.filter((p: any) => p.is_explicit)
+
+        if (explicitPermissions.length > 0) {
+          // Determine visibility mode from explicit permissions only
+          const hiddenUsers = explicitPermissions.filter((p: any) => !p.can_view).map((p: any) => p.user_id)
+          const visibleUsers = explicitPermissions.filter((p: any) => p.can_view).map((p: any) => p.user_id)
+
+          if (hiddenUsers.length > 0 && visibleUsers.length === 0) {
+            setVisibilityMode("hidden_from")
+            setSelectedUsers(hiddenUsers)
+          } else if (visibleUsers.length > 0 && hiddenUsers.length === 0) {
+            setVisibilityMode("visible_to")
+            setSelectedUsers(visibleUsers)
+          }
+          // If mixed, keep default "all"
+        }
+        // If no explicit permissions, keep default "all"
+      }
+    } catch (error) {
+      console.error("Failed to load permissions:", error)
+      // Keep defaults on error
+    }
   }
 
   const itemsLabel = (count: number) => {
@@ -169,7 +225,7 @@ export function MyListsView({
     <div className="space-y-4">
       {/* Lists */}
       {lists.length === 0 ? (
-        <Card>
+        <Card className="py-0">
           <CardContent className="py-12 text-center text-muted-foreground">
             <ClipboardList className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p className="font-medium">
@@ -183,7 +239,7 @@ export function MyListsView({
       ) : (
         <div className="space-y-3">
           {lists.map((list) => (
-            <Card key={list.id} className="overflow-hidden">
+            <Card key={list.id} className="overflow-hidden py-0">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <Link
@@ -281,7 +337,7 @@ export function MyListsView({
 
       {/* Create List Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t.myLists?.createTitle || "Create New List"}</DialogTitle>
             <DialogDescription>
@@ -317,8 +373,8 @@ export function MyListsView({
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
+            <div className="flex items-center justify-between gap-4 p-3 border rounded-lg">
+              <div className="space-y-0.5 flex-1">
                 <Label htmlFor="is_public">
                   {t.myLists?.visibilityLabel || "Track Purchases"}
                 </Label>
@@ -331,7 +387,76 @@ export function MyListsView({
                 id="is_public"
                 checked={isPublic}
                 onCheckedChange={setIsPublic}
+                className="shrink-0"
               />
+            </div>
+
+            {/* List Visibility (Who can see this list) */}
+            <div className="p-3 border rounded-lg space-y-3">
+              <div>
+                <Label>{t.myLists?.listVisibilityLabel || "Who can see this list"}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t.myLists?.listVisibilityHelp || "Control which family members can view this list."}
+                </p>
+              </div>
+
+              <RadioGroup
+                value={visibilityMode}
+                onValueChange={(value: "all" | "hidden_from" | "visible_to") => {
+                  setVisibilityMode(value)
+                  setSelectedUsers([])
+                }}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="visibility-all" />
+                  <Label htmlFor="visibility-all" className="text-sm font-normal cursor-pointer">
+                    {t.myLists?.visibilityAll || "Visible to everyone"}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="hidden_from" id="visibility-hidden" />
+                  <Label htmlFor="visibility-hidden" className="text-sm font-normal cursor-pointer">
+                    {t.myLists?.visibilityHidden || "Hidden from specific people"}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="visible_to" id="visibility-visible" />
+                  <Label htmlFor="visibility-visible" className="text-sm font-normal cursor-pointer">
+                    {t.myLists?.visibilitySpecific || "Only visible to specific people"}
+                  </Label>
+                </div>
+              </RadioGroup>
+
+              {visibilityMode !== "all" && otherMembers.length > 0 && (
+                <div className="mt-3 p-3 bg-muted rounded-lg space-y-2">
+                  <Label className="text-sm font-medium">
+                    {visibilityMode === "hidden_from"
+                      ? (t.myLists?.selectToHide || "Select people to hide from:")
+                      : (t.myLists?.selectToShow || "Select people who can view:")}
+                  </Label>
+                  <div className="space-y-2 mt-2">
+                    {otherMembers.map((member) => (
+                      <div key={member.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`create-member-${member.id}`}
+                          checked={selectedUsers.includes(member.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedUsers(prev => [...prev, member.id])
+                            } else {
+                              setSelectedUsers(prev => prev.filter(id => id !== member.id))
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`create-member-${member.id}`} className="text-sm font-normal cursor-pointer">
+                          {member.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -357,7 +482,7 @@ export function MyListsView({
 
       {/* Edit List Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t.myLists?.editTitle || "Edit List"}</DialogTitle>
           </DialogHeader>
@@ -387,8 +512,8 @@ export function MyListsView({
               />
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
+            <div className="flex items-center justify-between gap-4 p-3 border rounded-lg">
+              <div className="space-y-0.5 flex-1">
                 <Label htmlFor="edit-is_public">
                   {t.myLists?.visibilityLabel || "Track Purchases"}
                 </Label>
@@ -401,7 +526,76 @@ export function MyListsView({
                 id="edit-is_public"
                 checked={isPublic}
                 onCheckedChange={setIsPublic}
+                className="shrink-0"
               />
+            </div>
+
+            {/* List Visibility (Who can see this list) */}
+            <div className="p-3 border rounded-lg space-y-3">
+              <div>
+                <Label>{t.myLists?.listVisibilityLabel || "Who can see this list"}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t.myLists?.listVisibilityHelp || "Control which family members can view this list."}
+                </p>
+              </div>
+
+              <RadioGroup
+                value={visibilityMode}
+                onValueChange={(value: "all" | "hidden_from" | "visible_to") => {
+                  setVisibilityMode(value)
+                  setSelectedUsers([])
+                }}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="edit-visibility-all" />
+                  <Label htmlFor="edit-visibility-all" className="text-sm font-normal cursor-pointer">
+                    {t.myLists?.visibilityAll || "Visible to everyone"}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="hidden_from" id="edit-visibility-hidden" />
+                  <Label htmlFor="edit-visibility-hidden" className="text-sm font-normal cursor-pointer">
+                    {t.myLists?.visibilityHidden || "Hidden from specific people"}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="visible_to" id="edit-visibility-visible" />
+                  <Label htmlFor="edit-visibility-visible" className="text-sm font-normal cursor-pointer">
+                    {t.myLists?.visibilitySpecific || "Only visible to specific people"}
+                  </Label>
+                </div>
+              </RadioGroup>
+
+              {visibilityMode !== "all" && otherMembers.length > 0 && (
+                <div className="mt-3 p-3 bg-muted rounded-lg space-y-2">
+                  <Label className="text-sm font-medium">
+                    {visibilityMode === "hidden_from"
+                      ? (t.myLists?.selectToHide || "Select people to hide from:")
+                      : (t.myLists?.selectToShow || "Select people who can view:")}
+                  </Label>
+                  <div className="space-y-2 mt-2">
+                    {otherMembers.map((member) => (
+                      <div key={member.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`edit-member-${member.id}`}
+                          checked={selectedUsers.includes(member.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedUsers(prev => [...prev, member.id])
+                            } else {
+                              setSelectedUsers(prev => prev.filter(id => id !== member.id))
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`edit-member-${member.id}`} className="text-sm font-normal cursor-pointer">
+                          {member.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

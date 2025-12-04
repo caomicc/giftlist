@@ -37,7 +37,8 @@
     "home": "Home",
     "browse": "Browse",
     "claimed": "Claimed",
-    "myLists": "My Lists"
+    "myLists": "My Lists",
+    "settings": "Settings"
   },
   "errors": {
     "databaseConnection": "Database Connection Error",

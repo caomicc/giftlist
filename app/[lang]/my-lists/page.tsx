@@ -16,7 +16,7 @@ export default async function MyListsPage({ params }: MyListsPageProps) {
 
   // Get user's lists with item counts
   const lists = await sql`
-    SELECT 
+    SELECT
       l.*,
       COUNT(gi.id) FILTER (WHERE gi.archived = FALSE) as item_count,
       COUNT(gi.id) FILTER (WHERE gi.archived = TRUE) as archived_count

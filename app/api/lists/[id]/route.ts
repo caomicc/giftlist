@@ -28,7 +28,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   try {
     const user = await requireAuth()
     const { id } = await params
-    const { name, description, is_public } = await request.json()
+    const { name, description, is_public, permissions } = await request.json()
 
     if (!name?.trim()) {
       return NextResponse.json({ error: 'List name is required' }, { status: 400 })
@@ -65,6 +65,25 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       WHERE id = ${id} AND owner_id = ${user.id}
       RETURNING *
     `
+
+    // Update permissions if provided
+    if (permissions !== undefined) {
+      // Delete existing permissions
+      await sql`
+        DELETE FROM list_permissions
+        WHERE list_id = ${id}
+      `
+
+      // Insert new permissions
+      if (Array.isArray(permissions) && permissions.length > 0) {
+        for (const perm of permissions) {
+          await sql`
+            INSERT INTO list_permissions (list_id, user_id, can_view)
+            VALUES (${id}, ${perm.user_id}, ${perm.can_view})
+          `
+        }
+      }
+    }
 
     return NextResponse.json(updatedList)
   } catch (error) {

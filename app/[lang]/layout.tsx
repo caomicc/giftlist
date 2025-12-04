@@ -43,8 +43,8 @@ export default async function LangLayout({
       <body className={"bg-gradient-to-br from-red-100 to-violet-300 min-h-screen"}>
         <I18nProvider locale={lang} translations={translations}>
           <UserMenuWrapper />
-          {/* Main content with padding for mobile header (top) and bottom nav */}
-          <div className="relative z-10 pt-14 pb-14 md:pt-18 md:pb-0">{children}</div>
+          {/* Main content with padding for bottom nav on mobile, top nav on desktop */}
+          <div className="relative z-10 pb-14 md:pt-18 md:pb-0">{children}</div>
           <BottomTabBar />
           {/* <div
             className={

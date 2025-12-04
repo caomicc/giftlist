@@ -37,7 +37,8 @@
     "home": "Главная",
     "browse": "Списки",
     "claimed": "Мои дары",
-    "myLists": "Мои списки"
+    "myLists": "Мои списки",
+    "settings": "Настройки"
   },
   "errors": {
     "databaseConnection": "Ошибка подключения к базе данных",
