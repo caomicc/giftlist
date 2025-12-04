@@ -2,9 +2,11 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Gift } from "lucide-react"
+import { ChevronLeft, Gift, Check, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { SwipeableCard } from "@/components/ui/swipeable-card"
+import { useToast } from "@/hooks/use-toast"
 import GiftItem from "@/components/gift-item"
 import { useTranslation } from "./i18n-provider"
 
@@ -62,28 +64,62 @@ export function BrowseItemsList({
 }: BrowseItemsListProps) {
   const { t } = useTranslation("gifts")
   const router = useRouter()
+  const { toast } = useToast()
 
   const handleTogglePurchase = async (
     itemId: string,
-    currentPurchasedBy: string | null
+    currentPurchasedBy: string | null,
+    itemName?: string
   ) => {
+    const isClaiming = !currentPurchasedBy
+    
     try {
       const response = await fetch("/api/gift-items", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: itemId,
-          purchased_by: currentPurchasedBy ? null : currentUserId,
+          purchased_by: isClaiming ? currentUserId : null,
         }),
       })
 
       if (!response.ok) throw new Error("Failed to update purchase status")
 
+      // Show undo toast
+      toast({
+        title: isClaiming 
+          ? (t.swipe?.claimed || "Claimed!")
+          : (t.swipe?.unclaimed || "Unclaimed"),
+        description: itemName,
+        action: (
+          <button
+            onClick={() => handleTogglePurchase(itemId, isClaiming ? currentUserId : null)}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {t.swipe?.undo || "Undo"}
+          </button>
+        ),
+      })
+
       // Refresh the page to get updated data
       router.refresh()
     } catch (error) {
       console.error("Error toggling purchase:", error)
+      toast({
+        title: t.swipe?.error || "Error",
+        description: t.swipe?.errorDescription || "Failed to update. Please try again.",
+        variant: "destructive",
+      })
     }
+  }
+
+  const handleSwipeClaim = (item: BrowseItem) => {
+    // Can't claim your own items
+    if (item.owner_id === currentUserId) return
+    // Can't claim gift cards with swipe (need to enter amount)
+    if (item.is_gift_card) return
+    
+    handleTogglePurchase(item.id, item.purchased_by, item.name)
   }
 
   const handleGiftCardPurchase = async (itemId: string, amount: number) => {
@@ -163,39 +199,69 @@ export function BrowseItemsList({
         </div>
       ) : (
         <div className="divide-y rounded-lg border bg-card overflow-hidden">
-          {items.map((item) => (
-            <GiftItem
-              key={item.id}
-              item={{
-                id: item.id,
-                name: item.name,
-                description: item.description || undefined,
-                price: item.price || undefined,
-                link: item.link || undefined,
-                image_url: item.image_url,
-                owner_id: item.owner_id,
-                purchased_by: item.purchased_by,
-                list_id: item.list_id,
-                is_gift_card: item.is_gift_card,
-                is_group_gift: item.is_group_gift,
-                gift_card_target_amount: item.gift_card_target_amount,
-                gift_card_total_purchased: item.gift_card_total_purchased,
-                og_title: item.og_title,
-                og_description: item.og_description,
-                og_image: item.og_image,
-                og_site_name: item.og_site_name,
-                archived: item.archived,
-                is_public: list.isPublic,
-                comment_count: item.comment_count,
-                suggested_by_name: item.suggested_by_name,
-              }}
-              currentUserId={currentUserId}
-              purchaserName={getPurchaserName(item.purchased_by)}
-              variant="family-gifts"
-              onTogglePurchase={handleTogglePurchase}
-              onGiftCardPurchase={handleGiftCardPurchase}
-            />
-          ))}
+          {items.map((item) => {
+            const isPurchased = !!item.purchased_by
+            const isPurchasedByMe = item.purchased_by === currentUserId
+            const canSwipe = item.owner_id !== currentUserId && !item.is_gift_card
+            
+            return (
+              <SwipeableCard
+                key={item.id}
+                disabled={!canSwipe}
+                onSwipeRight={
+                  canSwipe && !isPurchased
+                    ? () => handleSwipeClaim(item)
+                    : undefined
+                }
+                onSwipeLeft={
+                  canSwipe && isPurchasedByMe
+                    ? () => handleSwipeClaim(item)
+                    : undefined
+                }
+                leftAction={{
+                  icon: <X className="h-5 w-5" />,
+                  label: t.swipe?.unclaim || "Unclaim",
+                  className: "bg-gray-500",
+                }}
+                rightAction={{
+                  icon: <Check className="h-5 w-5" />,
+                  label: t.swipe?.claim || "Claim",
+                  className: "bg-green-500",
+                }}
+              >
+                <GiftItem
+                  item={{
+                    id: item.id,
+                    name: item.name,
+                    description: item.description || undefined,
+                    price: item.price || undefined,
+                    link: item.link || undefined,
+                    image_url: item.image_url,
+                    owner_id: item.owner_id,
+                    purchased_by: item.purchased_by,
+                    list_id: item.list_id,
+                    is_gift_card: item.is_gift_card,
+                    is_group_gift: item.is_group_gift,
+                    gift_card_target_amount: item.gift_card_target_amount,
+                    gift_card_total_purchased: item.gift_card_total_purchased,
+                    og_title: item.og_title,
+                    og_description: item.og_description,
+                    og_image: item.og_image,
+                    og_site_name: item.og_site_name,
+                    archived: item.archived,
+                    is_public: list.isPublic,
+                    comment_count: item.comment_count,
+                    suggested_by_name: item.suggested_by_name,
+                  }}
+                  currentUserId={currentUserId}
+                  purchaserName={getPurchaserName(item.purchased_by)}
+                  variant="family-gifts"
+                  onTogglePurchase={(id, purchasedBy) => handleTogglePurchase(id, purchasedBy)}
+                  onGiftCardPurchase={handleGiftCardPurchase}
+                />
+              </SwipeableCard>
+            )
+          })}
         </div>
       )}
     </div>

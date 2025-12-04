@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Plus, Edit2, Eye, EyeOff, Trash2, ClipboardList } from "lucide-react"
+import { Plus, Edit2, Eye, EyeOff, Trash2, ClipboardList, Gift } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -20,6 +20,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { FloatingActionButton } from "@/components/ui/floating-action-button"
+import { AddItemDrawer } from "@/components/add-item-drawer"
 import { cn } from "@/lib/utils"
 import { useTranslation, formatMessage } from "./i18n-provider"
 
@@ -59,6 +61,7 @@ export function MyListsView({
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isAddItemDrawerOpen, setIsAddItemDrawerOpen] = useState(false)
   const [selectedList, setSelectedList] = useState<UserList | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -421,6 +424,21 @@ export function MyListsView({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* FAB for adding items */}
+      {lists.length > 0 && (
+        <FloatingActionButton
+          onClick={() => setIsAddItemDrawerOpen(true)}
+          label={t.addForm?.buttons?.submit || "Add Gift Idea"}
+        />
+      )}
+
+      {/* Add Item Drawer */}
+      <AddItemDrawer
+        open={isAddItemDrawerOpen}
+        onOpenChange={setIsAddItemDrawerOpen}
+        lists={lists.map((l) => ({ id: l.id, name: l.name }))}
+      />
     </div>
   )
 }

@@ -1,4 +1,20 @@
 {
+  "home": {
+    "subtitle": "Your gift coordination hub"
+  },
+  "activity": {
+    "title": "Recent Activity",
+    "empty": "No recent activity",
+    "emptyHelp": "Gift updates from your family will appear here.",
+    "you": "You",
+    "your": "your",
+    "someone": "Someone",
+    "itemAdded": "{{owner}} added {{item}} to {{list}}",
+    "itemClaimed": "{{actor}} claimed {{item}} from {{owner}} list",
+    "itemUnclaimed": "{{actor}} unclaimed {{item}}",
+    "itemUpdated": "{{item}} was updated on {{owner}} list",
+    "itemCommented": "{{actor}} commented on {{item}}"
+  },
   "myGifts": {
     "title": "My Gift Ideas",
     "description": "Add items you'd like to receive. Family members can see this list and mark items as purchased.",
@@ -210,5 +226,14 @@
       "approved": "Approved",
       "denied": "Declined"
     }
+  },
+  "swipe": {
+    "claim": "Claim",
+    "unclaim": "Unclaim",
+    "claimed": "Claimed!",
+    "unclaimed": "Unclaimed",
+    "undo": "Undo",
+    "error": "Error",
+    "errorDescription": "Failed to update. Please try again."
   }
 }
