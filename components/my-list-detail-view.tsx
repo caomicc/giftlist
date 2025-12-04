@@ -7,7 +7,6 @@ import { ChevronLeft, Plus, Eye, EyeOff, Archive } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { FloatingActionButton } from "@/components/ui/floating-action-button"
 import { AddItemDrawer } from "@/components/add-item-drawer"
 import GiftItem from "@/components/gift-item"
 import EditGiftDialog from "@/components/edit-gift-dialog"
@@ -121,8 +120,18 @@ export function MyListDetailView({
         </Link>
 
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold">{list.name}</h1>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold truncate">{list.name}</h1>
+              <Button
+                onClick={() => setIsAddDrawerOpen(true)}
+                size="sm"
+                className="shrink-0"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                {t.addForm?.buttons?.submit || "Add"}
+              </Button>
+            </div>
             {list.description && (
               <p className="text-muted-foreground mt-1">{list.description}</p>
             )}
@@ -227,11 +236,17 @@ export function MyListDetailView({
         </div>
       )}
 
-      {/* FAB for adding items */}
-      <FloatingActionButton
-        onClick={() => setIsAddDrawerOpen(true)}
-        label={t.addForm?.buttons?.submit || "Add Gift Idea"}
-      />
+      {/* Add item button at bottom of list */}
+      {items.length > 0 && (
+        <Button
+          onClick={() => setIsAddDrawerOpen(true)}
+          variant="outline"
+          className="w-full"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          {t.addForm?.buttons?.submit || "Add Gift Idea"}
+        </Button>
+      )}
 
       {/* Add Item Drawer */}
       <AddItemDrawer

@@ -22,7 +22,6 @@ import { Switch } from "@/components/ui/switch"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { FloatingActionButton } from "@/components/ui/floating-action-button"
 import { AddItemDrawer } from "@/components/add-item-drawer"
 import { cn } from "@/lib/utils"
 import { useTranslation, formatMessage } from "./i18n-provider"
@@ -335,6 +334,18 @@ export function MyListsView({
         {t.myLists?.createNew || "Create New List"}
       </Button>
 
+      {/* Add Gift Item Button */}
+      {lists.length > 0 && (
+        <Button
+          onClick={() => setIsAddItemDrawerOpen(true)}
+          className="w-full"
+          variant="default"
+        >
+          <Gift className="h-4 w-4 mr-2" />
+          {t.addForm?.buttons?.submit || "Add Gift Idea"}
+        </Button>
+      )}
+
       {/* Create List Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -618,14 +629,6 @@ export function MyListsView({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* FAB for adding items */}
-      {lists.length > 0 && (
-        <FloatingActionButton
-          onClick={() => setIsAddItemDrawerOpen(true)}
-          label={t.addForm?.buttons?.submit || "Add Gift Idea"}
-        />
-      )}
 
       {/* Add Item Drawer */}
       <AddItemDrawer
