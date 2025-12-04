@@ -30,6 +30,12 @@
     "familyLists": "Family Lists",
     "suggestions": "Suggestions"
   },
+  "bottomNav": {
+    "home": "Home",
+    "browse": "Browse",
+    "claimed": "Claimed",
+    "myLists": "My Lists"
+  },
   "errors": {
     "databaseConnection": "Database Connection Error",
     "unableToConnect": "Unable to connect to Neon database",

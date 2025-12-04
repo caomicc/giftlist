@@ -30,6 +30,12 @@
     "familyLists": "Списки семьи",
     "suggestions": "Предложения"
   },
+  "bottomNav": {
+    "home": "Главная",
+    "browse": "Списки",
+    "claimed": "Мои дары",
+    "myLists": "Мои списки"
+  },
   "errors": {
     "databaseConnection": "Ошибка подключения к базе данных",
     "unableToConnect": "Не удалось подключиться к базе данных Neon",

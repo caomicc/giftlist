@@ -4,6 +4,7 @@ import { locales } from "@/lib/i18n-config";
 import { UserMenuWrapper } from "@/components/user-menu-wrapper";
 import { I18nProvider } from "@/components/i18n-provider";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { BottomTabBar } from "@/components/bottom-tab-bar";
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 
@@ -46,10 +47,11 @@ export default async function LangLayout({
             <LocaleSwitcher />
           </div>
           <UserMenuWrapper />
-          <div className="relative z-10">{children}</div>
+          <div className="relative z-10 pb-14 md:pb-0">{children}</div>
+          <BottomTabBar />
           <div
             className={
-              "absolute h-[50vh] bg-white block md:hidden bottom-0 left-0 right-0 z-1 w-full"
+              "absolute h-[50vh] bg-white block md:hidden bottom-14 left-0 right-0 z-1 w-full"
             }
           ></div>
         </I18nProvider>

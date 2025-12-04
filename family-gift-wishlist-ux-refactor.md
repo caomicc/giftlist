@@ -41,14 +41,14 @@ Nested accordions present several UX problems that make them unsuitable for this
 
 Review all interactive elements against these minimum standards:
 
-| Element Type | Minimum Size | Current Status |
-|-------------|--------------|----------------|
-| Buttons | 44×44px (iOS) / 48×48dp (Android) | [ ] Audit needed |
-| Icon buttons | 44×44px touch area (icon can be smaller) | [ ] Audit needed |
-| List item tap areas | Full row height, min 48px | [ ] Audit needed |
-| Accordion headers | Full width, min 48px height | [ ] Audit needed |
-| Checkbox/radio inputs | 44×44px touch area | [ ] Audit needed |
-| Links in text | Add padding or convert to buttons | [ ] Audit needed |
+| Element Type          | Minimum Size                             | Current Status   |
+| --------------------- | ---------------------------------------- | ---------------- |
+| Buttons               | 44×44px (iOS) / 48×48dp (Android)        | [ ] Audit needed |
+| Icon buttons          | 44×44px touch area (icon can be smaller) | [ ] Audit needed |
+| List item tap areas   | Full row height, min 48px                | [ ] Audit needed |
+| Accordion headers     | Full width, min 48px height              | [ ] Audit needed |
+| Checkbox/radio inputs | 44×44px touch area                       | [ ] Audit needed |
+| Links in text         | Add padding or convert to buttons        | [ ] Audit needed |
 
 **Spacing Requirements**
 - Minimum 8px between adjacent interactive elements
@@ -74,12 +74,12 @@ Replace any hidden navigation with a persistent bottom tab bar containing 4 prim
 
 **Tab Definitions**
 
-| Tab | Icon | Purpose | Primary Actions |
-|-----|------|---------|-----------------|
-| Home | House | Dashboard overview | Quick stats, recent activity, suggestions to review |
-| Browse | People | Browse family wishlists | View members' lists you have access to |
-| Claimed | Checkmark | Items you've claimed | Track what you're getting for others |
-| My Lists | Clipboard | Your wishlists & settings | Manage multiple lists, visibility permissions |
+| Tab      | Icon      | Purpose                   | Primary Actions                                     |
+| -------- | --------- | ------------------------- | --------------------------------------------------- |
+| Home     | House     | Dashboard overview        | Quick stats, recent activity, suggestions to review |
+| Browse   | People    | Browse family wishlists   | View members' lists you have access to              |
+| Claimed  | Checkmark | Items you've claimed      | Track what you're getting for others                |
+| My Lists | Clipboard | Your wishlists & settings | Manage multiple lists, visibility permissions       |
 
 **Design Specifications**
 - Tab bar height: 56-64px (includes safe area padding on iOS)
@@ -311,11 +311,11 @@ When creating or editing a list, visibility is set via bottom sheet:
 4. **Status badge**: Small pill indicating availability
 
 **Status States**
-| Status | Visual Treatment | Visible To |
-|--------|------------------|------------|
-| Available | Green "Available" or no badge | Everyone |
-| Claimed | Yellow "Claimed" or "Claimed by [Name]" | All except list owner (recipient) |
-| Suggested | Blue "Suggested for you" | List owner only |
+| Status    | Visual Treatment                        | Visible To                        |
+| --------- | --------------------------------------- | --------------------------------- |
+| Available | Green "Available" or no badge           | Everyone                          |
+| Claimed   | Yellow "Claimed" or "Claimed by [Name]" | All except list owner (recipient) |
+| Suggested | Blue "Suggested for you"                | List owner only                   |
 
 ---
 
@@ -499,14 +499,14 @@ When no items are claimed, show a helpful prompt directing to the Browse tab.
 
 Use a consistent 4px base unit:
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| `space-1` | 4px | Tight spacing, icon-to-text |
-| `space-2` | 8px | Related elements |
-| `space-3` | 12px | Card internal padding |
-| `space-4` | 16px | Section gaps, card margins |
-| `space-5` | 20px | Major section dividers |
-| `space-6` | 24px | Screen edge padding |
+| Token     | Value | Usage                       |
+| --------- | ----- | --------------------------- |
+| `space-1` | 4px   | Tight spacing, icon-to-text |
+| `space-2` | 8px   | Related elements            |
+| `space-3` | 12px  | Card internal padding       |
+| `space-4` | 16px  | Section gaps, card margins  |
+| `space-5` | 20px  | Major section dividers      |
+| `space-6` | 24px  | Screen edge padding         |
 
 **Tailwind Classes**
 ```css
@@ -523,14 +523,14 @@ px-6  /* 24px */
 
 ### 4.2 Typography Scale
 
-| Element | Size | Weight | Line Height |
-|---------|------|--------|-------------|
-| Screen title | 24px | 600 | 1.2 |
-| Section header | 18px | 600 | 1.3 |
-| Card title | 16px | 500 | 1.4 |
-| Body text | 14px | 400 | 1.5 |
-| Caption/meta | 12px | 400 | 1.4 |
-| Badge text | 11px | 500 | 1.0 |
+| Element        | Size | Weight | Line Height |
+| -------------- | ---- | ------ | ----------- |
+| Screen title   | 24px | 600    | 1.2         |
+| Section header | 18px | 600    | 1.3         |
+| Card title     | 16px | 500    | 1.4         |
+| Body text      | 14px | 400    | 1.5         |
+| Caption/meta   | 12px | 400    | 1.4         |
+| Badge text     | 11px | 500    | 1.0         |
 
 **Tailwind Classes**
 ```css
@@ -611,7 +611,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 
 export function BrowseWishlists({ familyMembers }: { familyMembers: FamilyMember[] }) {
   const router = useRouter();
-  
+
   return (
     <Accordion type="multiple" className="space-y-2 px-4">
       {familyMembers.map(member => (
@@ -630,7 +630,7 @@ export function BrowseWishlists({ familyMembers }: { familyMembers: FamilyMember
                 <button
                   key={list.id}
                   onClick={() => router.push(`/browse/${member.id}/${list.id}`)}
-                  className="w-full flex items-center justify-between px-4 py-3 
+                  className="w-full flex items-center justify-between px-4 py-3
                              hover:bg-muted rounded-md min-h-[48px] text-left"
                 >
                   <div>
@@ -752,7 +752,7 @@ export function WishlistItemCard({
     <div className="relative overflow-hidden rounded-lg">
       {/* Action revealed on swipe */}
       {!isOwnList && (
-        <div 
+        <div
           className={cn(
             "absolute inset-y-0 right-0 w-20",
             "flex items-center justify-center",
@@ -780,9 +780,9 @@ export function WishlistItemCard({
         {/* Thumbnail */}
         <div className="w-16 h-16 rounded-md bg-muted flex-shrink-0 overflow-hidden">
           {item.imageUrl && (
-            <img 
-              src={item.imageUrl} 
-              alt="" 
+            <img
+              src={item.imageUrl}
+              alt=""
               className="w-full h-full object-cover"
             />
           )}
@@ -817,7 +817,7 @@ export function WishlistItemCard({
 **Bottom Tab Bar**
 ```tsx
 <nav role="tablist" aria-label="Main navigation">
-  <button 
+  <button
     role="tab"
     aria-selected={isActive}
     aria-controls="home-panel"
@@ -841,14 +841,14 @@ export function WishlistItemCard({
 
 ### 6.2 Keyboard Navigation
 
-| Context | Key | Action |
-|---------|-----|--------|
-| Tab bar | Tab | Move between tabs |
-| Tab bar | Enter/Space | Activate tab |
-| Item list | Arrow Down/Up | Move between items |
-| Item | Enter | Expand item details |
-| Item expanded | Tab | Navigate to action buttons |
-| Bottom sheet | Escape | Close sheet |
+| Context       | Key           | Action                     |
+| ------------- | ------------- | -------------------------- |
+| Tab bar       | Tab           | Move between tabs          |
+| Tab bar       | Enter/Space   | Activate tab               |
+| Item list     | Arrow Down/Up | Move between items         |
+| Item          | Enter         | Expand item details        |
+| Item expanded | Tab           | Navigate to action buttons |
+| Bottom sheet  | Escape        | Close sheet                |
 
 ### 6.3 Screen Reader Announcements
 
@@ -865,11 +865,11 @@ export function WishlistItemCard({
 **Russian Text Expansion**
 Russian text typically requires 20-30% more space than English. Plan for:
 
-| English | Russian | Growth |
-|---------|---------|--------|
-| "Add" | "Добавить" | +60% |
-| "Mark as purchased" | "Отметить как купленное" | +50% |
-| "Wishlist" | "Список желаний" | +30% |
+| English             | Russian                  | Growth |
+| ------------------- | ------------------------ | ------ |
+| "Add"               | "Добавить"               | +60%   |
+| "Mark as purchased" | "Отметить как купленное" | +50%   |
+| "Wishlist"          | "Список желаний"         | +30%   |
 
 **Mitigation Strategies**
 - Use `min-width` rather than fixed widths
@@ -922,16 +922,16 @@ If future languages include RTL, ensure:
 
 ## Appendix A: Component Checklist
 
-| Component | Touch Target | ARIA | Keyboard | i18n |
-|-----------|-------------|------|----------|------|
-| Bottom Tab Bar | ✅ Full width | ✅ tablist | ✅ Tab nav | ✅ Labels |
-| Person Accordion | ✅ 56px min | ✅ accordion | ✅ Enter/Space | ✅ Flex width |
-| List Row | ✅ 48px min | ✅ button | ✅ Enter | ✅ Truncate |
-| Item Card | ✅ Full row | ✅ listitem | ✅ Enter expand | ✅ Truncate |
-| Swipe Action | ✅ 80px reveal | ✅ Hint text | ✅ Button fallback | ✅ Claim/Unclaim |
-| FAB | ✅ 56×56px | ✅ aria-label | ✅ Focus visible | ✅ Add icon |
-| Bottom Sheet | ✅ All inputs | ✅ dialog | ✅ Escape close | ✅ All labels |
-| Visibility Picker | ✅ 44px checkboxes | ✅ checkbox group | ✅ Space toggle | ✅ Names |
+| Component         | Touch Target      | ARIA             | Keyboard          | i18n            |
+| ----------------- | ----------------- | ---------------- | ----------------- | --------------- |
+| Bottom Tab Bar    | ✅ Full width      | ✅ tablist        | ✅ Tab nav         | ✅ Labels        |
+| Person Accordion  | ✅ 56px min        | ✅ accordion      | ✅ Enter/Space     | ✅ Flex width    |
+| List Row          | ✅ 48px min        | ✅ button         | ✅ Enter           | ✅ Truncate      |
+| Item Card         | ✅ Full row        | ✅ listitem       | ✅ Enter expand    | ✅ Truncate      |
+| Swipe Action      | ✅ 80px reveal     | ✅ Hint text      | ✅ Button fallback | ✅ Claim/Unclaim |
+| FAB               | ✅ 56×56px         | ✅ aria-label     | ✅ Focus visible   | ✅ Add icon      |
+| Bottom Sheet      | ✅ All inputs      | ✅ dialog         | ✅ Escape close    | ✅ All labels    |
+| Visibility Picker | ✅ 44px checkboxes | ✅ checkbox group | ✅ Space toggle    | ✅ Names         |
 
 ---
 
