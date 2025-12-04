@@ -25,6 +25,7 @@
   "userMenu": {
     "profileSettings": "Настройки профиля",
     "setPassword": "Установить пароль",
+    "language": "Язык",
     "signOut": "Выйти"
   },
   "tabs": {

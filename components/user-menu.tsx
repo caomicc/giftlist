@@ -6,13 +6,18 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { User, Lock, LogOut, Settings, ChevronDownIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { User, Lock, LogOut, Settings, ChevronDownIcon, Globe, Check } from 'lucide-react'
+import { useRouter, usePathname } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import { useI18n } from './i18n-provider'
+import { locales } from '@/lib/i18n-config'
 
 interface UserMenuProps {
   user: {
@@ -21,11 +26,30 @@ interface UserMenuProps {
   }
 }
 
+const localeNames: Record<string, string> = {
+  en: 'English',
+  ru: 'Русский',
+}
+
+const localeFlags: Record<string, string> = {
+  en: '🇺🇸',
+  ru: '🇷🇺',
+}
+
 export function UserMenu({ user }: UserMenuProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const { locale, translations } = useI18n()
   const t = translations.common || {}
   const [hasPassword, setHasPassword] = useState<boolean | null>(null)
+
+  const handleLocaleChange = (newLocale: string) => {
+    const pathWithoutLocale = pathname.replace(`/${locale}`, '') || '/'
+    const newPath = `/${newLocale}${pathWithoutLocale}`
+    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=${60 * 60 * 24 * 365}`
+    router.push(newPath)
+    router.refresh()
+  }
 
   useEffect(() => {
     // Check if user has a password
@@ -86,6 +110,26 @@ export function UserMenu({ user }: UserMenuProps) {
             <span>{t.userMenu?.setPassword || 'Set Password'}</span>
           </DropdownMenuItem>
         )}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className='gap-2'>
+            <Globe className="mr-2 h-4 w-4 color-muted-foreground" />
+            <span>{t.userMenu?.language || 'Language'}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              {locales.map((loc) => (
+                <DropdownMenuItem
+                  key={loc}
+                  onClick={() => handleLocaleChange(loc)}
+                >
+                  <span className="mr-2">{localeFlags[loc]}</span>
+                  <span>{localeNames[loc]}</span>
+                  {locale === loc && <Check className="ml-auto h-4 w-4" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />

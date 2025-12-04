@@ -10,7 +10,6 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { UserMenu } from "./user-menu"
-import { LocaleSwitcher } from "./locale-switcher"
 import { useI18n } from "./i18n-provider"
 
 interface User {
@@ -28,9 +27,7 @@ export function NavigationBar({ user }: { user: User }) {
   return (
     <>
       {/* Mobile Header - fixed at top */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-2 flex items-center justify-between">
-        <LocaleSwitcher />
-
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-2 flex items-center justify-end">
         <UserMenu user={user} />
       </div>
 
@@ -48,10 +45,6 @@ export function NavigationBar({ user }: { user: User }) {
             <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
               <Link href={`/${locale}/browse`}>{t.nav?.familyGiftlists || 'Family Giftlists'}</Link>
             </NavigationMenuLink>
-          </NavigationMenuItem>
-
-          <NavigationMenuItem>
-            <LocaleSwitcher />
           </NavigationMenuItem>
 
           <UserMenu user={user} />
