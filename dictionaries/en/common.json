@@ -27,7 +27,8 @@
   },
   "tabs": {
     "myGiftList": "My Gift List",
-    "familyLists": "Family Lists"
+    "familyLists": "Family Lists",
+    "suggestions": "Suggestions"
   },
   "errors": {
     "databaseConnection": "Database Connection Error",

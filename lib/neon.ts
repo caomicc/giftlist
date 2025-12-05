@@ -96,3 +96,26 @@ export type GiftItemComment = {
   // Joined fields
   user_name?: string
 }
+
+export type GiftSuggestion = {
+  id: string
+  suggested_by_id: string
+  target_user_id: string
+  name: string
+  description: string | null
+  price: string | null
+  link: string | null
+  image_url: string | null
+  is_anonymous: boolean
+  status: 'pending' | 'approved' | 'denied'
+  denial_reason: string | null
+  og_title: string | null
+  og_description: string | null
+  og_image: string | null
+  og_site_name: string | null
+  created_at: string
+  updated_at: string
+  // Joined fields
+  suggested_by_name?: string
+  target_user_name?: string
+}

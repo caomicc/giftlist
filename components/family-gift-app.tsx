@@ -5,8 +5,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Gift, AlertCircle, Database } from 'lucide-react'
+import { Badge } from "@/components/ui/badge"
+import { Gift, AlertCircle, Database, Lightbulb } from 'lucide-react'
 import { useGiftData } from "@/hooks/useGiftData"
+import { useSuggestionData } from "@/hooks/useSuggestionData"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
 import { useI18n, formatMessage } from "./i18n-provider"
@@ -17,6 +19,8 @@ import EditGiftDialog from "./edit-gift-dialog"
 import ListManagement from "./list-management"
 import MyGiftsList from "./my-gifts-list"
 import FamilyGiftsList from "./family-gifts-list"
+import SuggestGiftDialog from "./suggest-gift-dialog"
+import SuggestionsView from "./suggestions-view"
 
 interface User {
   id: string
@@ -34,6 +38,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [userLists, setUserLists] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState("my-list")
+  const [suggestDialogOpen, setSuggestDialogOpen] = useState(false)
+  const [suggestTargetUserId, setSuggestTargetUserId] = useState<string | null>(null)
   const { translations } = useI18n()
   const t = translations.common || {}
   const tGifts = translations.gifts || {}
@@ -49,18 +55,39 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     togglePurchaseStatus,
     toggleArchiveStatus,
     addGiftCardPurchase,
-    fetchOGData
+    fetchOGData,
+    refetch: refetchGifts
   } = useGiftData()
+
+  const {
+    incomingSuggestions,
+    outgoingSuggestions,
+    pendingCount,
+    createSuggestion,
+    approveSuggestion,
+    denySuggestion,
+    deleteSuggestion,
+    refetch: refetchSuggestions
+  } = useSuggestionData()
 
   // Fetch user's lists
   const fetchUserLists = async () => {
     try {
-      const response = await fetch('/api/lists')
-      if (!response.ok) throw new Error('Failed to fetch lists')
+      const response = await fetch('/api/lists', {
+        credentials: 'include'
+      })
+      if (response.status === 401) {
+        // User not authenticated
+        return
+      }
+      if (!response.ok) {
+        console.warn('Failed to fetch lists with status:', response.status)
+        return
+      }
       const lists = await response.json()
       setUserLists(lists)
     } catch (err) {
-      console.error("Failed to fetch lists", err)
+      console.warn("Failed to fetch lists", err)
     }
   }
 
@@ -72,6 +99,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           name: `${currentUser.name || 'My'}'s List`,
           description: 'Default wishlist',
@@ -80,11 +108,18 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         }),
       })
 
-      if (!response.ok) throw new Error('Failed to create default list')
+      if (response.status === 401) {
+        // User not authenticated
+        return
+      }
+      if (!response.ok) {
+        console.warn('Failed to create default list with status:', response.status)
+        return
+      }
       const newList = await response.json()
       setUserLists([newList])
     } catch (err) {
-      console.error("Failed to create default list", err)
+      console.warn("Failed to create default list", err)
     }
   }
 
@@ -161,6 +196,35 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     } catch (err) {
       console.error("Failed to toggle archive status", err)
     }
+  }
+
+  // Suggestion handlers
+  const handleOpenSuggestDialog = (targetUserId: string) => {
+    setSuggestTargetUserId(targetUserId)
+    setSuggestDialogOpen(true)
+  }
+
+  const handleCloseSuggestDialog = () => {
+    setSuggestDialogOpen(false)
+    setSuggestTargetUserId(null)
+  }
+
+  const handleCreateSuggestion = async (suggestionData: any) => {
+    await createSuggestion(suggestionData)
+  }
+
+  const handleApproveSuggestion = async (suggestionId: string, listId: string) => {
+    await approveSuggestion(suggestionId, listId)
+    // Refetch gift items to show the newly added item
+    await refetchGifts()
+  }
+
+  const handleDenySuggestion = async (suggestionId: string, reason?: string) => {
+    await denySuggestion(suggestionId, reason)
+  }
+
+  const handleDeleteSuggestion = async (suggestionId: string) => {
+    await deleteSuggestion(suggestionId)
   }
 
   // List management handlers
@@ -352,9 +416,18 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         <Card className={'bg-card text-card-foreground flex flex-col gap-6 rounded-t-3xl h-full rounded-b-none md:rounded-b-xl md:rounded-xl border-none md:border py-6 md:py-4 shadow-none md:shadow-sm'}>
           <CardContent className="px-6 md:px-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="my-list">{t.tabs?.myGiftList || 'My Gift List'}</TabsTrigger>
                 <TabsTrigger value="family-lists">{t.tabs?.familyLists || 'Family Lists'}</TabsTrigger>
+                <TabsTrigger value="suggestions" className="flex items-center gap-1">
+                  <Lightbulb className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t.tabs?.suggestions || 'Suggestions'}</span>
+                  {pendingCount > 0 && (
+                    <Badge className="bg-red-500 text-white text-xs px-1.5 py-0 min-w-[18px] h-[18px]">
+                      {pendingCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
               </TabsList>
 
               {/* My Gift List Tab */}
@@ -417,6 +490,20 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   giftItems={giftItems}
                   onTogglePurchase={handleTogglePurchase}
                   onGiftCardPurchase={handleGiftCardPurchase}
+                  onSuggestGift={handleOpenSuggestDialog}
+                />
+              </TabsContent>
+
+              {/* Suggestions Tab */}
+              <TabsContent value="suggestions" className="space-y-6 mb-0 md:mb-6">
+                <SuggestionsView
+                  incomingSuggestions={incomingSuggestions}
+                  outgoingSuggestions={outgoingSuggestions}
+                  userLists={userLists}
+                  pendingCount={pendingCount}
+                  onApprove={handleApproveSuggestion}
+                  onDeny={handleDenySuggestion}
+                  onDelete={handleDeleteSuggestion}
                 />
               </TabsContent>
             </Tabs>
@@ -432,6 +519,17 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
           onUpdateGiftItem={handleUpdateGiftItem}
           fetchOGData={fetchOGData}
           isSubmitting={isSubmitting}
+        />
+
+        {/* Suggest Gift Dialog */}
+        <SuggestGiftDialog
+          isOpen={suggestDialogOpen}
+          onClose={handleCloseSuggestDialog}
+          currentUser={currentUser}
+          familyMembers={users}
+          targetUserId={suggestTargetUserId}
+          onSubmit={handleCreateSuggestion}
+          fetchOGData={fetchOGData}
         />
       </div>
     </TooltipProvider>

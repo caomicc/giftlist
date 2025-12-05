@@ -21,7 +21,7 @@ function getLocale(request: NextRequest): string {
   return locale
 }
 
-export function proxy(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip for favicon and common static files

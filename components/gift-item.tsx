@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive, Users, ChevronRight, MessageCircle } from 'lucide-react';
+import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive, Users, ChevronRight, MessageCircle, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
@@ -33,6 +33,7 @@ export type GiftItemProps = {
     archived?: boolean;
     image_url?: string | null;
     comment_count?: number;
+    suggested_by_name?: string | null;
   };
   currentUserId: string;
   purchaserName?: string;
@@ -156,6 +157,13 @@ const GiftItem: React.FC<GiftItemProps> = ({
               <Badge variant="outline" className="text-xs text-muted-foreground">
                 <MessageCircle className="w-3 h-3 mr-0.5" />
                 {item.comment_count}
+              </Badge>
+            )}
+            {/* Suggested by badge - visible to family members, not the owner */}
+            {!isMyGift && item.suggested_by_name && (
+              <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-400">
+                <Lightbulb className="w-3 h-3 mr-0.5" />
+                {formatMessage(t.giftItem?.badges?.suggestedBy || 'Suggested by {{name}}', { name: item.suggested_by_name })}
               </Badge>
             )}
             {/* Purchase status badge - only show if not owner viewing private list */}

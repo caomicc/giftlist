@@ -69,7 +69,8 @@
     "badges": {
       "archived": "Archived",
       "groupGift": "Group Gift",
-      "giftCard": "Gift Card"
+      "giftCard": "Gift Card",
+      "suggestedBy": "Suggested by {{name}}"
     },
     "buttons": {
       "viewLink": "View Link",
@@ -130,5 +131,54 @@
     "postComment": "Post",
     "deleteComment": "Delete comment",
     "viewDetails": "View details"
+  },
+  "suggestions": {
+    "title": "Gift Suggestions",
+    "suggestGift": "Suggest a Gift",
+    "suggestTo": "Suggest a gift idea to {{name}}",
+    "selectMember": "Select a family member to suggest a gift to",
+    "incoming": "Incoming",
+    "sent": "Sent",
+    "linkPlaceholder": "Paste a product link...",
+    "namePlaceholder": "Gift name (or auto-filled from link)",
+    "message": "Message",
+    "messagePlaceholder": "Add a note about why you think they'd like this...",
+    "optional": "optional",
+    "anonymous": "Send anonymously",
+    "anonymousHelp": "Your identity will be hidden from the recipient, but revealed to other family members if they add it to their list.",
+    "preview": "Preview",
+    "cancel": "Cancel",
+    "sending": "Sending...",
+    "send": "Send Suggestion",
+    "fromAnonymous": "From: Anonymous",
+    "fromName": "From: {{name}}",
+    "toName": "To: {{name}}",
+    "reasonGiven": "Reason: {{reason}}",
+    "viewLink": "View",
+    "approve": "Add to List",
+    "deny": "Decline",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this suggestion?",
+    "approveTitle": "Add to Your List",
+    "approveDescription": "Choose which list to add \"{{name}}\" to.",
+    "selectList": "Select List",
+    "selectListPlaceholder": "Choose a list...",
+    "confirmApprove": "Add to List",
+    "denyTitle": "Decline Suggestion",
+    "denyDescription": "Optionally provide a reason for declining \"{{name}}\".",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "e.g., Already have one, Not my style, etc.",
+    "confirmDeny": "Decline",
+    "noIncoming": "No suggestions yet",
+    "noIncomingHelp": "When someone suggests a gift for you, it will appear here.",
+    "noOutgoing": "No suggestions sent",
+    "noOutgoingHelp": "Suggestions you make to family members will appear here.",
+    "pendingSection": "Pending Review",
+    "processedSection": "Previously Reviewed",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "denied": "Declined"
+    }
   }
 }

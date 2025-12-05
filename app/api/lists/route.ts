@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import { sql } from '@/lib/neon'
 import type { List } from '@/lib/neon'
 
 export async function GET() {
   try {
-    const user = await requireAuth()
+    const session = await getSession()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const user = session.user
 
     // Get all lists owned by the user
     const lists = await sql`
@@ -29,7 +33,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const user = await requireAuth()
+    const session = await getSession()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const user = session.user
     const { name, description, is_public, hidden_from } = await request.json()
 
     if (!name?.trim()) {
@@ -57,7 +65,7 @@ export async function POST(request: Request) {
     if (hidden_from && Array.isArray(hidden_from) && hidden_from.length > 0) {
       // Get all family members
       const allUsers = await sql`SELECT id FROM users WHERE id != ${user.id}`
-      
+
       // Create permissions for each user
       for (const userId of allUsers.map(u => u.id)) {
         const canView = !hidden_from.includes(userId)
