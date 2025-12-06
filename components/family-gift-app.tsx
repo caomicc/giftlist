@@ -420,8 +420,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                 <TabsTrigger value="my-list">{t.tabs?.myGiftList || 'My Gift List'}</TabsTrigger>
                 <TabsTrigger value="family-lists">{t.tabs?.familyLists || 'Family Lists'}</TabsTrigger>
                 <TabsTrigger value="suggestions" className="flex items-center gap-1">
-                  <Lightbulb className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t.tabs?.suggestions || 'Suggestions'}</span>
+                  <span className="inline truncate">{t.tabs?.suggestions || 'Suggestions'}</span>
                   {pendingCount > 0 && (
                     <Badge className="bg-red-500 text-white text-xs px-1.5 py-0 min-w-[18px] h-[18px]">
                       {pendingCount}

@@ -214,8 +214,18 @@ export default function ListManagement({
                       <p className="text-sm text-muted-foreground">
                         {list.description || (t.form?.descriptionPlaceholder || "No description")}
                       </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Tooltip>
+                      <div className="flex flex-col items-start gap-2 mt-1">
+
+                        <span className="text-xs text-muted-foreground">
+                          {itemCount(list.item_count || 0)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatMessage(t.listItem?.created || 'Created {{date}}', { date: new Date(list.created_at).toLocaleDateString() })}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-col">
+                                              <Tooltip>
                           <TooltipTrigger asChild>
                             <Badge variant={list.is_public ? "default" : "secondary"} className="text-xs cursor-help">
                               {list.is_public ? (t.listItem?.badges?.tracked || "Tracked") : (t.listItem?.badges?.surprise || "Surprise")}
@@ -227,15 +237,7 @@ export default function ListManagement({
                               : (t.form?.keepSurpriseHelp || "Keep Surprise: You cannot see which items family members have purchased from this list")}</p>
                           </TooltipContent>
                         </Tooltip>
-                        <span className="text-xs text-muted-foreground">
-                          {itemCount(list.item_count || 0)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatMessage(t.listItem?.created || 'Created {{date}}', { date: new Date(list.created_at).toLocaleDateString() })}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
+                      <div>
                       <Button
                         variant="outline"
                         size="sm"
@@ -254,7 +256,7 @@ export default function ListManagement({
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
-                    </div>
+                </div>    </div>
                   </div>
                 ))}
               </div>
@@ -421,7 +423,7 @@ export default function ListManagement({
       {/* Edit List Dialog */}
       {editingList && (
         <Dialog open={!!editingList} onOpenChange={() => setEditingList(null)}>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px] overflow-y-scroll max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>{t.editDialog?.title}</DialogTitle>
               <DialogDescription>

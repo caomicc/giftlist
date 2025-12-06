@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Edit, Loader2, CreditCard, Users } from 'lucide-react'
+import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
   id: string
@@ -44,6 +45,9 @@ export default function EditGiftDialog({
   fetchOGData,
   isSubmitting
 }: EditGiftDialogProps) {
+  const { t } = useTranslation("gifts")
+  const { t: tCommon } = useTranslation("common")
+
   const [editForm, setEditForm] = useState({
     name: "",
     description: "",
@@ -72,7 +76,7 @@ export default function EditGiftDialog({
         giftCardTargetAmount: editingItem.gift_card_target_amount ? editingItem.gift_card_target_amount.toString() : "",
         selectedListId: editingItem.list_id || ""
       })
-      
+
       // Set existing OG data if available
       if (editingItem.og_title || editingItem.og_description || editingItem.og_image) {
         setEditFormOGData({
@@ -104,7 +108,7 @@ export default function EditGiftDialog({
 
   const handleUpdateGiftItem = async () => {
     if (!editingItem || !editForm.name.trim() || isSubmitting || !editForm.selectedListId) return
-    
+
     const itemData = {
       name: editForm.name,
       description: editForm.description || undefined,
@@ -129,45 +133,99 @@ export default function EditGiftDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-scroll">
         <DialogHeader>
-          <DialogTitle>Edit Gift Item</DialogTitle>
+          <DialogTitle>{t.editDialog?.title || "Edit Gift Item"}</DialogTitle>
           <DialogDescription>
-            Update your gift item details below.
+            {t.editDialog?.description || "Update your gift item details."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="edit-name">Gift item name *</Label>
+        <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+            <Label htmlFor="edit-name">{t.addForm?.labels?.gift || "Gift"} *</Label>
             <Input
               id="edit-name"
               value={editForm.name}
               onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Gift item name"
+              placeholder={t.addForm?.placeholders?.gift || "Gift item name *"}
               disabled={isSubmitting}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="edit-description">Description</Label>
+            <Label htmlFor="edit-price">{t.addForm?.labels?.price || "Price"}</Label>
+            <Input
+              id="edit-price"
+              value={editForm.price}
+              onChange={(e) => setEditForm((prev) => ({ ...prev, price: e.target.value }))}
+              placeholder={t.addForm?.placeholders?.price || "Price (optional)"}
+              disabled={isSubmitting || editForm.isGiftCard}
+            />
+          </div>
+</div>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-link">{t.addForm?.labels?.link || "Link"}</Label>
+              <Input
+                id="edit-link"
+                value={editForm.link}
+                onChange={(e) => handleEditFormLinkChange(e.target.value)}
+                placeholder={t.addForm?.placeholders?.link || "Link (optional)"}
+                disabled={isSubmitting}
+              />
+              {editFormOGLoading && (
+                <div className="text-xs text-blue-600 flex items-center gap-1">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  {t.addForm?.messages?.loadingPreview || "Loading link preview..."}
+                </div>
+              )}
+              {!editFormOGLoading && editFormOGData && (
+                <div className="text-xs text-green-600 flex items-center gap-1">
+                  {formatMessage(t.addForm?.messages?.previewLoaded || "✓ Link preview loaded: {{title}}", { title: editFormOGData.title || 'Data found' })}
+                </div>
+              )}
+              {!editFormOGLoading && editForm.link && editForm.link.startsWith('http') && !editFormOGData && (
+                <div className="text-xs text-orange-600 flex items-center gap-1">
+                  {t.addForm?.messages?.previewFailed || "⚠ Couldn't load preview (some sites block automated requests)"}
+                </div>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="edit-imageUrl">{t.addForm?.labels?.imageUrl || "Image URL"}</Label>
+              <Input
+                id="edit-imageUrl"
+                placeholder="https://example.com/image.jpg"
+                value={editForm.imageUrl}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                disabled={isSubmitting}
+              />
+              {/* <p className="text-xs text-muted-foreground">
+                {t.addForm?.messages?.imageUrlHelp || "Provide a custom image URL if no preview is available"}
+              </p> */}
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="edit-description">{t.addForm?.labels?.description || "Description"}</Label>
             <Textarea
               id="edit-description"
               value={editForm.description}
               onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder="Description (optional)"
+              placeholder={t.addForm?.placeholders?.description || "Description (optional)"}
               disabled={isSubmitting}
             />
           </div>
 
           {/* List Selector */}
           <div className="grid gap-2">
-            <Label htmlFor="edit-list">List</Label>
+            <Label htmlFor="edit-list">{t.editDialog?.moveToList || "List"}</Label>
             <Select
               value={editForm.selectedListId}
               onValueChange={(value) => setEditForm((prev) => ({ ...prev, selectedListId: value }))}
               disabled={isSubmitting}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a list..." />
+                <SelectValue placeholder={t.addForm?.placeholders?.selectList || "Select a list..."} />
               </SelectTrigger>
               <SelectContent>
                 {userLists.map((list) => (
@@ -178,58 +236,7 @@ export default function EditGiftDialog({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-1 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-price">Price</Label>
-              <Input
-                id="edit-price"
-                value={editForm.price}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, price: e.target.value }))}
-                placeholder="Price (optional)"
-                disabled={isSubmitting || editForm.isGiftCard}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-link">Link</Label>
-              <Input
-                id="edit-link"
-                value={editForm.link}
-                onChange={(e) => handleEditFormLinkChange(e.target.value)}
-                placeholder="Link (optional)"
-                disabled={isSubmitting}
-              />
-              {editFormOGLoading && (
-                <div className="text-xs text-blue-600 flex items-center gap-1">
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                  Loading link preview...
-                </div>
-              )}
-              {!editFormOGLoading && editFormOGData && (
-                <div className="text-xs text-green-600 flex items-center gap-1">
-                  ✓ Link preview loaded: {editFormOGData.title || 'Data found'}
-                </div>
-              )}
-              {!editFormOGLoading && editForm.link && editForm.link.startsWith('http') && !editFormOGData && (
-                <div className="text-xs text-orange-600 flex items-center gap-1">
-                  ⚠ Couldn't load preview (some sites block automated requests)
-                </div>
-              )}
-            </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="edit-imageUrl">Image URL (optional):</Label>
-              <Input
-                id="edit-imageUrl"
-                placeholder="https://example.com/image.jpg"
-                value={editForm.imageUrl}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                disabled={isSubmitting}
-              />
-              <p className="text-xs text-muted-foreground">
-                Provide a custom image URL if no preview is available
-              </p>
-            </div>
-          </div>
 
           {/* Gift Card Section */}
           <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
@@ -246,15 +253,15 @@ export default function EditGiftDialog({
               />
               <Label htmlFor="edit-isGiftCard" className="flex items-center gap-2">
                 <CreditCard className="w-4 h-4" />
-                This is a gift card
+                {t.addForm?.labels?.isGiftCard || "This is a gift card"}
               </Label>
             </div>
             {editForm.isGiftCard && (
               <div className="flex flex-col gap-3">
-                <Label htmlFor="edit-giftCardTargetAmount">Target Amount (optional):</Label>
+                <Label htmlFor="edit-giftCardTargetAmount">{t.addForm?.labels?.targetAmount || "Target Amount (optional)"}</Label>
                 <Input
                   id="edit-giftCardTargetAmount"
-                  placeholder="e.g., 100.00"
+                  placeholder={t.addForm?.placeholders?.priceExample || "e.g., 100.00"}
                   type="number"
                   min="0"
                   step="0.01"
@@ -263,7 +270,7 @@ export default function EditGiftDialog({
                   disabled={isSubmitting}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Family members can purchase amounts toward this gift card. Leave blank for no target.
+                  {t.addForm?.messages?.giftCardHelp || "Family members can purchase amounts toward this gift card. Leave blank for no target."}
                 </p>
               </div>
             )}
@@ -283,12 +290,12 @@ export default function EditGiftDialog({
               />
               <Label htmlFor="edit-isGroupGift" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                This is a group gift
+                {t.addForm?.labels?.groupGift || "This is a group gift"}
               </Label>
             </div>
             {editForm.isGroupGift && (
               <p className="text-xs text-muted-foreground">
-                Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate.
+                {t.addForm?.messages?.groupGiftHelp || "Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate."}
               </p>
             )}
           </div>
@@ -299,7 +306,7 @@ export default function EditGiftDialog({
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
           >
-            Cancel
+            {tCommon.buttons?.cancel || "Cancel"}
           </Button>
           <Button
             onClick={handleUpdateGiftItem}
@@ -310,7 +317,7 @@ export default function EditGiftDialog({
             ) : (
               <Edit className="w-4 h-4 mr-2" />
             )}
-            {isSubmitting ? "Updating..." : "Update Gift"}
+            {isSubmitting ? (t.editDialog?.buttons?.updating || "Updating...") : (t.editDialog?.buttons?.update || "Update Gift")}
           </Button>
         </div>
       </DialogContent>
