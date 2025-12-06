@@ -160,7 +160,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-        <DrawerContent className="sm:max-w-lg">
+        <DrawerContent className="sm:max-w-lg overflow-scroll">
           <DrawerHeader className="border-b">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
