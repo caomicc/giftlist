@@ -170,9 +170,8 @@ export default function SuggestionsView({
 
             {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h4 className="font-medium truncate">{suggestion.name}</h4>
+              <div className="flex items-start justify-between gap-2 flex-col">
+                  <h4 className="font-medium truncate max-w-full ">{suggestion.name}</h4>
                   {variant === "incoming" && (
                     <p className="text-sm text-muted-foreground">
                       {suggestion.is_anonymous && isPending ? (
@@ -194,7 +193,6 @@ export default function SuggestionsView({
                       })}
                     </p>
                   )}
-                </div>
                 {getStatusBadge(suggestion.status)}
               </div>
 
