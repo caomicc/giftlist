@@ -235,11 +235,11 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
               {item.og_description && (
                 <div className="bg-muted/50 rounded-lg p-3">
                   <p className="text-xs text-muted-foreground line-clamp-3">{item.og_description}</p>
-                  {item.og_site_name && (
-                    <p className="text-xs text-foreground mt-2 font-medium flex items-center gap-1">
+                  {item.og_site_name && item.link && (
+                    <Link href={item.link} target="_blank" rel="noopener noreferrer" className="text-xs text-foreground mt-2 font-medium flex items-center gap-1">
                       {item.og_site_name}
                       <ExternalLink className="size-3" />
-                    </p>
+                    </Link>
                   )}
                 </div>
               )}
