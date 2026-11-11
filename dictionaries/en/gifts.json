@@ -236,5 +236,22 @@
   "deleteGift": {
     "title": "Delete “{{name}}”?",
     "description": "This removes it from your list for good. To hide it without losing it, archive it instead."
+  },
+  "quickAdd": {
+    "title": "Save to Meep",
+    "saved": "Saved to {{list}}",
+    "addAnother": "Add another",
+    "openList": "Open my lists",
+    "backToShop": "Back to the shop",
+    "close": "Close",
+    "noLists": "You don’t have a list yet.",
+    "createList": "Open Meep to create one",
+    "loading": "Loading your lists…",
+    "bookmarklet": {
+      "title": "Save gifts while you browse",
+      "body": "Drag this button to your bookmarks bar. On any product page, click it to save the page to your list.",
+      "button": "Save to Meep",
+      "hint": "Can’t drag? Show your bookmarks bar first (Ctrl+Shift+B, or ⌘⇧B on a Mac)."
+    }
   }
 }

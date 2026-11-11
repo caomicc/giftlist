@@ -85,3 +85,10 @@ Also: failed saves no longer replace the app with the full-screen "Database Conn
 - [x] Tab section titles are now `h2`. Removed the undefined `font-heading` class.
 - [x] `npm run build` passes and the type-check is clean (the 5 stale `.next/types` errors are pre-existing).
 - [ ] Re-run `/impeccable critique` and the audit. This is worth doing once someone is signed in, because neither run could see the authenticated screens.
+
+## Follow-up: quick import while browsing
+- [x] `/[lang]/add?url=…&title=…`: a signed-in page that opens the quick-add form with the link filled in. It previews the link and falls back to the page title when the shop blocks previews. It defaults to the last-used list (remembered per browser). After saving it shows "Saved to {list}" and closes itself when opened as a popup. Share-style `text=` links are accepted too.
+- [x] Sign-in round trip: a signed-out visit to a deep link stores it in an HttpOnly `meep_return_to` cookie (15 min). The first request after sign-in returns there. Works for both password and magic-link sign-in. Unsafe paths are ignored.
+- [x] "Save to Meep" bookmarklet card on the profile page (drag to bookmarks bar). Falls back to the same tab when popups are blocked.
+- [x] Fixed `UserMenuWrapper` treating `/en/auth/...` as a non-auth page; it was causing the 401 on sign-in.
+- [ ] Next: PWA manifest with `share_target` → `/add` (Android share sheet), and an iOS Shortcut recipe.

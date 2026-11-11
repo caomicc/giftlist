@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useRouter } from 'next/navigation'
+import { SaveBookmarklet } from '@/components/save-bookmarklet'
 
 interface UserProfile {
   id: string
@@ -156,7 +157,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Profile Settings</CardTitle>
@@ -303,6 +304,7 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
+      <SaveBookmarklet />
     </div>
   )
 }

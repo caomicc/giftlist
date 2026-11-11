@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,11 +31,28 @@ interface AddGiftFormProps {
   onAddGiftItem: (itemData: any) => Promise<void>
   fetchOGData: (url: string) => Promise<any>
   isSubmitting: boolean
+  /** Pre-fills the quick-add field (e.g. a link shared from the bookmarklet) */
+  initialQuery?: string
+  /** Called after a successful save with the list it went to */
+  onAdded?: (listId: string) => void
+  /** Focus the field on mount */
+  autoFocus?: boolean
+  /** Name to use when the link preview has no title (e.g. the page title from the bookmarklet) */
+  fallbackName?: string
 }
 
 type GiftType = 'item' | 'gift-card' | 'group-gift'
 
 const isUrl = (value: string) => /^https?:\/\/\S+/i.test(value.trim())
+
+// Remember the last list a gift was added to (per browser; purely a convenience)
+const LAST_LIST_KEY = 'meep:lastListId'
+const readLastList = () => {
+  try { return window.localStorage.getItem(LAST_LIST_KEY) } catch { return null }
+}
+const writeLastList = (id: string) => {
+  try { window.localStorage.setItem(LAST_LIST_KEY, id) } catch { /* storage unavailable */ }
+}
 
 const emptyItem = (selectedListId: string) => ({
   link: "",
@@ -57,21 +74,27 @@ export default function AddGiftForm({
   userLists,
   onAddGiftItem,
   fetchOGData,
-  isSubmitting
+  isSubmitting,
+  initialQuery,
+  onAdded,
+  autoFocus,
+  fallbackName,
 }: AddGiftFormProps) {
   const { t } = useTranslation('gifts')
   const tForm = t.addForm || {}
   const tQuick = tForm.quick || {}
 
   const [query, setQuery] = useState("")
-  const [item, setItem] = useState(() => emptyItem(userLists[0]?.id || ""))
+  const [item, setItem] = useState(() => emptyItem(""))
+  const [lastListId, setLastListId] = useState<string | null>(null)
   const [ogData, setOgData] = useState<any>(null)
   const [ogLoading, setOgLoading] = useState(false)
   const latestLink = useRef("")
 
   const isLinkMode = isUrl(query)
   const isExpanded = query.trim().length > 0
-  const selectedListId = item.selectedListId || userLists[0]?.id || ""
+  const rememberedList = lastListId && userLists.some((l) => l.id === lastListId) ? lastListId : null
+  const selectedListId = item.selectedListId || rememberedList || userLists[0]?.id || ""
   const giftName = isLinkMode ? item.name : query
 
   const handleQueryChange = async (value: string) => {
@@ -95,15 +118,26 @@ export default function AddGiftForm({
     if (latestLink.current !== link) return
     setOgData(data)
     setOgLoading(false)
-    if (data) {
-      setItem((prev) => ({
-        ...prev,
-        name: prev.name || data.title || "",
-        price: prev.price || data.price || "",
-        imageUrl: prev.imageUrl || data.image || "",
-      }))
-    }
+    setItem((prev) => ({
+      ...prev,
+      name: prev.name || data?.title || fallbackName || "",
+      price: prev.price || data?.price || "",
+      imageUrl: prev.imageUrl || data?.image || "",
+    }))
   }
+
+  useEffect(() => {
+    setLastListId(readLastList())
+  }, [])
+
+  // Pre-fill once (e.g. /add?url=…); runs the same link preview as typing would
+  const prefilled = useRef(false)
+  useEffect(() => {
+    if (prefilled.current || !initialQuery) return
+    prefilled.current = true
+    handleQueryChange(initialQuery)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuery])
 
   const reset = () => {
     setQuery("")
@@ -139,7 +173,10 @@ export default function AddGiftForm({
         og_image: ogData?.image,
         og_site_name: ogData?.siteName,
       })
+      writeLastList(selectedListId)
+      setLastListId(selectedListId)
       reset()
+      onAdded?.(selectedListId)
     } catch {
       // Save failed (the app shows a toast): keep what the user typed
     }
@@ -159,6 +196,7 @@ export default function AddGiftForm({
             onChange={(e) => handleQueryChange(e.target.value)}
             disabled={isSubmitting}
             autoComplete="off"
+            autoFocus={autoFocus}
             aria-describedby="add-gift-status"
           />
         </div>

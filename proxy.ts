@@ -4,6 +4,8 @@ import { match as matchLocale } from '@formatjs/intl-localematcher'
 import Negotiator from 'negotiator'
 import { locales, defaultLocale } from '@/lib/i18n-config'
 
+const RETURN_TO_COOKIE = 'meep_return_to'
+
 function getLocale(request: NextRequest): string {
   // Check if locale is stored in cookie
   const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value
@@ -73,7 +75,30 @@ export default function proxy(request: NextRequest) {
 
   // If user is not authenticated and trying to access protected route
   if (!sessionToken && !isPublicRoute) {
-    return NextResponse.redirect(new URL(`/${locale}/auth/signin`, request.url))
+    const response = NextResponse.redirect(new URL(`/${locale}/auth/signin`, request.url))
+    // Remember deep links (e.g. /en/add?url=… from the bookmarklet) so sign-in can return there.
+    // Works for both password and magic-link sign-in because the return happens here, below.
+    if (pathWithoutLocale !== '/') {
+      response.cookies.set(RETURN_TO_COOKIE, pathname + request.nextUrl.search, {
+        maxAge: 60 * 15,
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+      })
+    }
+    return response
+  }
+
+  // First request after signing in: go back to the page that sent you to sign-in
+  const returnTo = request.cookies.get(RETURN_TO_COOKIE)?.value
+  if (sessionToken && returnTo && !pathWithoutLocale.startsWith('/auth/')) {
+    const isSafe = returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('\\')
+    const current = pathname + request.nextUrl.search
+    const response = isSafe && returnTo !== current
+      ? NextResponse.redirect(new URL(returnTo, request.url))
+      : NextResponse.next()
+    response.cookies.delete(RETURN_TO_COOKIE)
+    return response
   }
 
   // If user is authenticated and trying to access auth pages
