@@ -64,7 +64,6 @@ export function useGiftData() {
       setGiftItems((prev) => [giftItem, ...prev])
       return giftItem as GiftItem
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add gift item")
       throw err
     }
   }
@@ -97,10 +96,9 @@ export function useGiftData() {
       if (!response.ok) throw new Error('Failed to update gift item')
       const { giftItem } = await response.json()
 
-      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? giftItem : item)))
+      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? { ...item, ...giftItem } : item)))
       return giftItem as GiftItem
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update gift item")
       throw err
     }
   }
@@ -115,7 +113,6 @@ export function useGiftData() {
       if (!response.ok) throw new Error('Failed to remove gift item')
       setGiftItems((prev) => prev.filter((item) => item.id !== itemId))
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to remove gift item")
       throw err
     }
   }
@@ -131,13 +128,16 @@ export function useGiftData() {
         body: JSON.stringify({ id: itemId, purchased_by: purchasedBy }),
       })
 
-      if (!response.ok) throw new Error('Failed to update purchase status')
+      if (!response.ok) {
+        const err = new Error('Failed to update purchase status') as Error & { status?: number }
+        err.status = response.status
+        throw err
+      }
       const { giftItem } = await response.json()
 
-      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? giftItem : item)))
+      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? { ...item, ...giftItem } : item)))
       return giftItem as GiftItem
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update purchase status")
       throw err
     }
   }
@@ -160,10 +160,9 @@ export function useGiftData() {
       if (!response.ok) throw new Error('Failed to update archive status')
       const { giftItem } = await response.json()
 
-      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? giftItem : item)))
+      setGiftItems((prev) => prev.map((item) => (item.id === itemId ? { ...item, ...giftItem } : item)))
       return giftItem as GiftItem
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update archive status")
       throw err
     }
   }
@@ -186,10 +185,9 @@ export function useGiftData() {
       if (!response.ok) throw new Error('Failed to add gift card purchase')
       const { purchase, giftItem } = await response.json()
 
-      setGiftItems((prev) => prev.map((item) => (item.id === giftItemId ? giftItem : item)))
+      setGiftItems((prev) => prev.map((item) => (item.id === giftItemId ? { ...item, ...giftItem } : item)))
       return { purchase, giftItem }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add gift card purchase")
       throw err
     }
   }
@@ -208,10 +206,9 @@ export function useGiftData() {
       if (!response.ok) throw new Error('Failed to edit gift card purchase')
       const { purchase, giftItem } = await response.json()
 
-      setGiftItems((prev) => prev.map((item) => (item.id === giftItem.id ? giftItem : item)))
+      setGiftItems((prev) => prev.map((item) => (item.id === giftItem.id ? { ...item, ...giftItem } : item)))
       return { purchase, giftItem }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to edit gift card purchase")
       throw err
     }
   }
@@ -226,10 +223,9 @@ export function useGiftData() {
       if (!response.ok) throw new Error('Failed to delete gift card purchase')
       const { giftItem } = await response.json()
 
-      setGiftItems((prev) => prev.map((item) => (item.id === giftItem.id ? giftItem : item)))
+      setGiftItems((prev) => prev.map((item) => (item.id === giftItem.id ? { ...item, ...giftItem } : item)))
       return { giftItem }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete gift card purchase")
       throw err
     }
   }
@@ -242,7 +238,6 @@ export function useGiftData() {
       const { purchases } = await response.json()
       return purchases
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch gift card purchases")
       throw err
     }
   }

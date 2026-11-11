@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Loader2, CreditCard, Users } from 'lucide-react'
+import { Plus, Loader2, CreditCard, Users, Gift } from 'lucide-react'
 import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
@@ -33,254 +33,301 @@ interface AddGiftFormProps {
   isSubmitting: boolean
 }
 
-export default function AddGiftForm({ 
-  currentUser, 
-  userLists, 
-  onAddGiftItem, 
+type GiftType = 'item' | 'gift-card' | 'group-gift'
+
+const isUrl = (value: string) => /^https?:\/\/\S+/i.test(value.trim())
+
+const emptyItem = (selectedListId: string) => ({
+  link: "",
+  name: "",
+  price: "",
+  description: "",
+  imageUrl: "",
+  type: 'item' as GiftType,
+  giftCardTargetAmount: "",
+  selectedListId,
+})
+
+/**
+ * Quick add: one field that takes either a product link or a gift name.
+ * Details (type, price, description, list) appear once something is typed.
+ */
+export default function AddGiftForm({
+  currentUser,
+  userLists,
+  onAddGiftItem,
   fetchOGData,
-  isSubmitting 
+  isSubmitting
 }: AddGiftFormProps) {
   const { t } = useTranslation('gifts')
-  const [newItem, setNewItem] = useState({
-    name: "",
-    description: "",
-    price: "",
-    link: "",
-    imageUrl: "",
-    isGiftCard: false,
-    isGroupGift: false,
-    giftCardTargetAmount: "",
-    selectedListId: userLists.length > 0 ? userLists[0].id : ""
-  })
-  const [newItemOGData, setNewItemOGData] = useState<any>(null)
-  const [newItemOGLoading, setNewItemOGLoading] = useState(false)
+  const tForm = t.addForm || {}
+  const tQuick = tForm.quick || {}
 
-  // Handle OG data fetching for new item
-  const handleNewItemLinkChange = async (link: string) => {
-    setNewItem((prev) => ({ ...prev, link }))
+  const [query, setQuery] = useState("")
+  const [item, setItem] = useState(() => emptyItem(userLists[0]?.id || ""))
+  const [ogData, setOgData] = useState<any>(null)
+  const [ogLoading, setOgLoading] = useState(false)
+  const latestLink = useRef("")
 
-    if (link && link.startsWith('http')) {
-      setNewItemOGLoading(true)
-      const ogData = await fetchOGData(link)
-      setNewItemOGData(ogData)
-      setNewItemOGLoading(false)
+  const isLinkMode = isUrl(query)
+  const isExpanded = query.trim().length > 0
+  const selectedListId = item.selectedListId || userLists[0]?.id || ""
+  const giftName = isLinkMode ? item.name : query
 
-      // Auto-fill fields if empty and OG data exists
-      if (ogData) {
-        setNewItem((prev) => ({
-          ...prev,
-          name: !prev.name && ogData.title ? ogData.title : prev.name,
-          price: !prev.price && ogData.price ? ogData.price : prev.price,
-          imageUrl: !prev.imageUrl && ogData.image ? ogData.image : prev.imageUrl,
-        }))
-      }
-    } else {
-      setNewItemOGData(null)
-      setNewItemOGLoading(false)
+  const handleQueryChange = async (value: string) => {
+    setQuery(value)
+
+    if (!isUrl(value)) {
+      latestLink.current = ""
+      setOgData(null)
+      setOgLoading(false)
+      setItem((prev) => ({ ...prev, link: "" }))
+      return
+    }
+
+    const link = value.trim()
+    if (link === latestLink.current) return
+    latestLink.current = link
+    setItem((prev) => ({ ...prev, link }))
+    setOgLoading(true)
+    const data = await fetchOGData(link)
+    // Ignore responses for a link the user has since replaced
+    if (latestLink.current !== link) return
+    setOgData(data)
+    setOgLoading(false)
+    if (data) {
+      setItem((prev) => ({
+        ...prev,
+        name: prev.name || data.title || "",
+        price: prev.price || data.price || "",
+        imageUrl: prev.imageUrl || data.image || "",
+      }))
     }
   }
 
-  const handleAddGiftItem = async () => {
-    if (!newItem.name.trim() || isSubmitting || !newItem.selectedListId) return
+  const reset = () => {
+    setQuery("")
+    setItem((prev) => emptyItem(prev.selectedListId))
+    setOgData(null)
+    setOgLoading(false)
+    latestLink.current = ""
+  }
 
-    const itemData = {
-      name: newItem.name,
-      description: newItem.description || undefined,
-      price: newItem.price || undefined,
-      link: newItem.link || undefined,
-      image_url: newItem.imageUrl || undefined,
-      owner_id: currentUser.id,
-      list_id: newItem.selectedListId,
-      is_gift_card: newItem.isGiftCard,
-      is_group_gift: newItem.isGroupGift,
-      gift_card_target_amount: newItem.isGiftCard && newItem.giftCardTargetAmount
-        ? parseFloat(newItem.giftCardTargetAmount)
-        : undefined,
-      og_title: newItemOGData?.title,
-      og_description: newItemOGData?.description,
-      og_image: newItemOGData?.image,
-      og_site_name: newItemOGData?.siteName,
+  const canSubmit = !!giftName.trim() && !!selectedListId && !isSubmitting
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!canSubmit) return
+
+    const isGiftCard = item.type === 'gift-card'
+    try {
+      await onAddGiftItem({
+        name: giftName.trim(),
+        description: item.description || undefined,
+        price: !isGiftCard && item.price ? item.price : undefined,
+        link: item.link || undefined,
+        image_url: item.imageUrl || undefined,
+        owner_id: currentUser.id,
+        list_id: selectedListId,
+        is_gift_card: isGiftCard,
+        is_group_gift: item.type === 'group-gift',
+        gift_card_target_amount: isGiftCard && item.giftCardTargetAmount
+          ? parseFloat(item.giftCardTargetAmount)
+          : undefined,
+        og_title: ogData?.title,
+        og_description: ogData?.description,
+        og_image: ogData?.image,
+        og_site_name: ogData?.siteName,
+      })
+      reset()
+    } catch {
+      // Save failed (the app shows a toast): keep what the user typed
     }
-
-    await onAddGiftItem(itemData)
-
-    // Reset form but keep the same list selected
-    setNewItem(prev => ({
-      name: "",
-      description: "",
-      price: "",
-      link: "",
-      imageUrl: "",
-      isGiftCard: false,
-      isGroupGift: false,
-      giftCardTargetAmount: "",
-      selectedListId: prev.selectedListId
-    }))
-    setNewItemOGData(null)
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-3">
-        <Label>{t.addForm?.labels?.link || 'Link:'}:</Label>
-        <Input
-          placeholder={t.addForm?.placeholders?.link || 'Link (optional)'}
-          value={newItem.link}
-          onChange={(e) => handleNewItemLinkChange(e.target.value)}
-          disabled={isSubmitting}
-        />
-        {newItemOGLoading && (
-          <div className="text-xs text-blue-600 flex items-center gap-1">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            {t.addForm?.messages?.loadingPreview || 'Loading link preview...'}
-          </div>
-        )}
-        {!newItemOGLoading && newItemOGData && (
-          <div className="text-xs text-green-600 flex items-center gap-1">
-            {formatMessage(t.addForm?.messages?.previewLoaded || '✓ Link preview loaded: {{title}}', { title: newItemOGData.title || 'Data found' })}
-          </div>
-        )}
-        {!newItemOGLoading && newItem.link && newItem.link.startsWith('http') && !newItemOGData && (
-          <div className="text-xs text-orange-600 flex items-center gap-1">
-            {t.addForm?.messages?.previewFailed || '⚠ Couldn\'t load preview (some sites block automated requests)'}
-          </div>
-        )}
-      </div>
-      
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-3">
-          <Label>{t.addForm?.labels?.gift || 'Gift:'}:</Label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="add-gift-query" className="sr-only">
+          {tQuick.label || 'Add a gift idea'}
+        </Label>
+        <div>
           <Input
-            placeholder={t.addForm?.placeholders?.gift || 'Gift item name *'}
-            value={newItem.name}
-            onChange={(e) => setNewItem((prev) => ({ ...prev, name: e.target.value }))}
+            id="add-gift-query"
+            placeholder={tQuick.placeholder || 'Paste a link or type a gift'}
+            value={query}
+            onChange={(e) => handleQueryChange(e.target.value)}
             disabled={isSubmitting}
+            autoComplete="off"
+            aria-describedby="add-gift-status"
           />
         </div>
-        <div className="flex flex-col gap-3">
-          <Label>{t.addForm?.labels?.price || 'Price:'}:</Label>
-          <Input
-            placeholder={t.addForm?.placeholders?.price || 'Price (optional)'}
-            value={newItem.price}
-            onChange={(e) => setNewItem((prev) => ({ ...prev, price: e.target.value }))}
-            disabled={isSubmitting || newItem.isGiftCard}
-          />
-        </div>
-      </div>
-
-      {/* Gift Card Section */}
-      <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="isGiftCard"
-            checked={newItem.isGiftCard}
-            onCheckedChange={(checked) => setNewItem((prev) => ({
-              ...prev,
-              isGiftCard: checked === true,
-              price: checked === true ? "" : prev.price // Clear price if gift card
-            }))}
-            disabled={isSubmitting}
-          />
-          <Label htmlFor="isGiftCard" className="flex items-center gap-2">
-            <CreditCard className="w-4 h-4" />
-            {t.addForm?.labels?.isGiftCard || 'This is a gift card'}
-          </Label>
-        </div>
-        {newItem.isGiftCard && (
-          <div className="flex flex-col gap-3">
-            <Label>{t.addForm?.labels?.targetAmount || 'Target Amount (optional):'}:</Label>
-            <Input
-              placeholder={t.addForm?.placeholders?.priceExample || 'e.g., 100.00'}
-              type="number"
-              min="0"
-              step="0.01"
-              value={newItem.giftCardTargetAmount}
-              onChange={(e) => setNewItem((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
-              disabled={isSubmitting}
-            />
-            <p className="text-xs text-muted-foreground">
-              {t.addForm?.messages?.giftCardHelp || 'Family members can purchase amounts toward this gift card. Leave blank for no target.'}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Group Gift Section */}
-      <div className="flex flex-col gap-4 p-4 border rounded-lg bg-purple-50">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="isGroupGift"
-            checked={newItem.isGroupGift}
-            onCheckedChange={(checked) => setNewItem((prev) => ({
-              ...prev,
-              isGroupGift: checked === true
-            }))}
-            disabled={isSubmitting}
-          />
-          <Label htmlFor="isGroupGift" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            {t.addForm?.labels?.isGroupGift || 'This is a group gift'}
-          </Label>
-        </div>
-        {newItem.isGroupGift && (
-          <p className="text-xs text-muted-foreground">
-            {t.addForm?.messages?.groupGiftHelp || 'Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate.'}
-          </p>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <Label>{t.addForm?.labels?.imageUrl || 'Image URL:'}:</Label>
-        <Input
-          placeholder={t.addForm?.placeholders?.imageUrl || 'Image URL (optional)'}
-          value={newItem.imageUrl}
-          onChange={(e) => setNewItem((prev) => ({ ...prev, imageUrl: e.target.value }))}
-          disabled={isSubmitting}
-        />
-        <p className="text-xs text-muted-foreground">
-          {t.addForm?.messages?.imageUrlHelp || 'Provide an image URL if no preview is loaded from the link above'}
+        <p id="add-gift-status" aria-live="polite" className="text-xs text-muted-foreground empty:hidden flex items-center gap-1">
+          {ogLoading && (
+            <>
+              <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+              {tForm.messages?.loadingPreview || 'Loading link preview...'}
+            </>
+          )}
+          {!ogLoading && isLinkMode && ogData &&
+            formatMessage(tForm.messages?.previewLoaded || 'Preview loaded: {{title}}', { title: ogData.title || item.link })}
+          {!ogLoading && isLinkMode && !ogData && item.link &&
+            (tForm.messages?.previewFailed || "Couldn't load a preview. Some shops block it, so add the name yourself.")}
         </p>
       </div>
-      
-      <div className="flex flex-col gap-3">
-        <Label>{t.addForm?.labels?.description || 'Description:'}:</Label>
-        <Textarea
-          placeholder={t.addForm?.placeholders?.description || 'Description (optional)'}
-          value={newItem.description}
-          onChange={(e) => setNewItem((prev) => ({ ...prev, description: e.target.value }))}
-          disabled={isSubmitting}
-        />
-      </div>
-      
-      {/* List Selector */}
-      <div className="flex flex-col w-full gap-3">
-        <Label>{t.addForm?.labels?.addToList || 'Add to List:'}:</Label>
-        <Select
-          value={newItem.selectedListId}
-          onValueChange={(value) => setNewItem((prev) => ({ ...prev, selectedListId: value }))}
-          disabled={isSubmitting}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder={t.addForm?.placeholders?.selectList || 'Select a list...'} />
-          </SelectTrigger>
-          <SelectContent>
-            {userLists.map((list) => (
-              <SelectItem key={list.id} value={list.id}>
-                {list.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      
-      <Button onClick={handleAddGiftItem} disabled={!newItem.name.trim() || isSubmitting || !newItem.selectedListId}>
-        {isSubmitting ? (
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-        ) : (
-          <Plus className="w-4 h-4 mr-2" />
-        )}
-        {isSubmitting ? (t.addForm?.buttons?.submitting || 'Adding...') : (t.addForm?.buttons?.submit || 'Add Gift Idea')}
-      </Button>
-    </div>
+
+      {isExpanded && (
+        <div className="space-y-4">
+          {isLinkMode && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="add-gift-name">{tQuick.nameLabel || 'Gift name'}</Label>
+              <Input
+                id="add-gift-name"
+                placeholder={tForm.placeholders?.gift || 'What is it?'}
+                value={item.name}
+                onChange={(e) => setItem((prev) => ({ ...prev, name: e.target.value }))}
+                disabled={isSubmitting}
+                required
+              />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <span id="add-gift-type-label" className="text-sm font-medium">{tQuick.typeLabel || 'Type'}</span>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={item.type}
+              onValueChange={(value) => { if (value) setItem((prev) => ({ ...prev, type: value as GiftType })) }}
+              aria-labelledby="add-gift-type-label"
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              <ToggleGroupItem value="item" className="flex-1 max-md:min-h-11">
+                <Gift className="size-4" aria-hidden="true" />
+                {tQuick.types?.item || 'Item'}
+              </ToggleGroupItem>
+              <ToggleGroupItem value="gift-card" className="flex-1 max-md:min-h-11">
+                <CreditCard className="size-4" aria-hidden="true" />
+                {tQuick.types?.giftCard || 'Gift card'}
+              </ToggleGroupItem>
+              <ToggleGroupItem value="group-gift" className="flex-1 max-md:min-h-11">
+                <Users className="size-4" aria-hidden="true" />
+                {tQuick.types?.groupGift || 'Group gift'}
+              </ToggleGroupItem>
+            </ToggleGroup>
+            {item.type === 'gift-card' && (
+              <p className="text-xs text-muted-foreground">
+                {tForm.messages?.giftCardHelp || 'Family members record what they put toward it. Leave the target blank for no limit.'}
+              </p>
+            )}
+            {item.type === 'group-gift' && (
+              <p className="text-xs text-muted-foreground">
+                {tForm.messages?.groupGiftHelp || "Family members can say they'd like to chip in, so you can coordinate who's in."}
+              </p>
+            )}
+          </div>
+
+          {item.type === 'gift-card' ? (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="add-gift-target">
+                {tForm.labels?.targetAmount || 'Target amount'} <span className="font-normal text-muted-foreground">({tQuick.optional || 'optional'})</span>
+              </Label>
+              <Input
+                id="add-gift-target"
+                placeholder={tForm.placeholders?.priceExample || 'e.g., 100.00'}
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.01"
+                value={item.giftCardTargetAmount}
+                onChange={(e) => setItem((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
+                disabled={isSubmitting}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="add-gift-price">
+                {tForm.labels?.price || 'Price'} <span className="font-normal text-muted-foreground">({tQuick.optional || 'optional'})</span>
+              </Label>
+              <Input
+                id="add-gift-price"
+                inputMode="decimal"
+                value={item.price}
+                onChange={(e) => setItem((prev) => ({ ...prev, price: e.target.value }))}
+                disabled={isSubmitting}
+              />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="add-gift-description">
+              {tForm.labels?.description || 'Description'} <span className="font-normal text-muted-foreground">({tQuick.optional || 'optional'})</span>
+            </Label>
+            <Textarea
+              id="add-gift-description"
+              value={item.description}
+              onChange={(e) => setItem((prev) => ({ ...prev, description: e.target.value }))}
+              disabled={isSubmitting}
+              rows={2}
+            />
+          </div>
+
+          {!ogData?.image && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="add-gift-image">
+                {tForm.labels?.imageUrl || 'Image URL'} <span className="font-normal text-muted-foreground">({tQuick.optional || 'optional'})</span>
+              </Label>
+              <Input
+                id="add-gift-image"
+                type="url"
+                inputMode="url"
+                value={item.imageUrl}
+                onChange={(e) => setItem((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                disabled={isSubmitting}
+                aria-describedby="add-gift-image-help"
+              />
+              <p id="add-gift-image-help" className="text-xs text-muted-foreground">
+                {tForm.messages?.imageUrlHelp || "Only needed if the link didn't give us a picture."}
+              </p>
+            </div>
+          )}
+
+          {userLists.length > 1 && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="add-gift-list">{tForm.labels?.addToList || 'Add to List'}</Label>
+              <Select
+                value={selectedListId}
+                onValueChange={(value) => setItem((prev) => ({ ...prev, selectedListId: value }))}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger id="add-gift-list" className="w-full">
+                  <SelectValue placeholder={tForm.placeholders?.selectList || 'Select a list...'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {userLists.map((list) => (
+                    <SelectItem key={list.id} value={list.id}>
+                      {list.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div className="flex gap-2 max-md:flex-col-reverse md:justify-end">
+            <Button type="button" variant="ghost" onClick={reset} disabled={isSubmitting}>
+              {tQuick.cancel || 'Cancel'}
+            </Button>
+            <Button type="submit" disabled={!canSubmit}>
+              {isSubmitting
+                ? <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                : <Plus className="size-4" aria-hidden="true" />}
+              {isSubmitting ? (tForm.buttons?.submitting || 'Adding…') : (tForm.buttons?.submit || 'Add Gift Idea')}
+            </Button>
+          </div>
+        </div>
+      )}
+    </form>
   )
 }

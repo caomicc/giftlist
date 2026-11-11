@@ -60,7 +60,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <Card className="container w-full max-w-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">{(register?.title as string) ?? 'Create Account'}</CardTitle>
@@ -124,7 +124,7 @@ export default function RegisterPage() {
             </div>
 
             {message && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+              <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md" role="alert">
                 {message}
               </div>
             )}

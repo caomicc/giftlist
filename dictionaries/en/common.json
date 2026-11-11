@@ -56,5 +56,14 @@
     "minutesAgo": "{{count}}m ago",
     "hoursAgo": "{{count}}h ago",
     "daysAgo": "{{count}}d ago"
+  },
+  "confirm": {
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "language": "Language",
+  "loadError": {
+    "title": "Couldn’t load your gift lists",
+    "body": "Check your connection, then try again."
   }
 }

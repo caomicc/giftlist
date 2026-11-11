@@ -4,8 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "./ui/avatar"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { Gift, Lightbulb } from 'lucide-react'
+import { Gift, Lightbulb, Eye, EyeOff } from 'lucide-react'
 import GiftItem from "./gift-item"
 import { useTranslation, formatMessage } from "./i18n-provider"
 
@@ -77,7 +76,7 @@ export default function FamilyGiftsList({
               <div className="flex items-center justify-between w-full pr-4">
                 <div className="flex items-center gap-3">
                   <Avatar className="size-9">
-                    <AvatarFallback className="bg-blue-100 text-blue-600">
+                    <AvatarFallback className="bg-secondary text-secondary-foreground">
                       {member.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
@@ -109,7 +108,7 @@ export default function FamilyGiftsList({
                         e.stopPropagation()
                         onSuggestGift(member.id)
                       }}
-                      className="text-yellow-600 border-yellow-400 hover:bg-yellow-50"
+                      className="text-suggestion border-suggestion/40 hover:bg-suggestion-soft"
                     >
                       <Lightbulb className="w-4 h-4 mr-1" />
                       {t.suggestions?.suggestGift || 'Suggest a Gift'}
@@ -125,26 +124,23 @@ export default function FamilyGiftsList({
                 ) : (
                   <Accordion type="single" collapsible className="w-full md:px-3">
                     {Object.entries(giftsByList).map(([listId, listData]: [string, any]) => (
-                      <AccordionItem key={listId} value={listId} className="w-full border-purple-200">
+                      <AccordionItem key={listId} value={listId} className="w-full">
                         <AccordionTrigger className="hover:no-underline items-center py-2">
                           <div className="flex items-start gap-1 flex-col">
                             <h4 className="font-medium text-sm">{listData.name}</h4>
-                            <div className="flex flex-row items-center gap-2">
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Badge
-                                    variant={listData.isPublic ? "default" : "secondary"}
-                                    className="text-xs cursor-help"
-                                  >
-                                    {listData.isPublic ? (t.familyGifts.purchaseTracking?.tracked || "Tracked") : (t.familyGifts.purchaseTracking?.surprise || "Surprise")}
-                                  </Badge>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{listData.isPublic
-                                    ? (t.familyGifts?.purchaseTracking?.trackedDescription || "Track Purchases: The list owner can see which items you've purchased")
-                                    : (t.familyGifts?.purchaseTracking?.surpriseDescription || "Keep Surprise: The list owner cannot see which items you've purchased")}</p>
-                                </TooltipContent>
-                              </Tooltip>
+                            <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-0.5">
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                {listData.isPublic
+                                  ? <Eye className="size-3.5" aria-hidden="true" />
+                                  : <EyeOff className="size-3.5" aria-hidden="true" />}
+                                {formatMessage(
+                                  listData.isPublic
+                                    ? (t.familyGifts?.purchaseTracking?.trackedLine || "{{name}} can see what you buy")
+                                    : (t.familyGifts?.purchaseTracking?.surpriseLine || "{{name}} won't see what you buy"),
+                                  { name: member.name }
+                                )}
+                              </span>
+                              <span aria-hidden="true" className="text-xs text-muted-foreground">·</span>
                               <span className="text-xs text-muted-foreground">
                                 {itemsTranslation(listData.items.length)}
                               </span>
@@ -152,7 +148,7 @@ export default function FamilyGiftsList({
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="pb-0">
-                          <div className="px-1 md:px-2 border-purple-200 divide divide-y divide-indigo-500">
+                          <div className="px-1 md:px-2 divide-y divide-border">
                             {listData.items.map((item: any) => {
                               const purchaserName = item.purchased_by
                                 ? users.find((u: any) => u.id === item.purchased_by)?.name

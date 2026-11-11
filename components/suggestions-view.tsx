@@ -32,6 +32,8 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation, formatMessage } from "./i18n-provider"
+import { useConfirm } from "./confirm-dialog"
+import { toast } from "sonner"
 import type { GiftSuggestion, List } from "@/lib/neon"
 
 interface SuggestionsViewProps {
@@ -54,6 +56,7 @@ export default function SuggestionsView({
   onDelete,
 }: SuggestionsViewProps) {
   const { t } = useTranslation("gifts")
+  const confirm = useConfirm()
   const [activeTab, setActiveTab] = useState("incoming")
   const [approveDialogOpen, setApproveDialogOpen] = useState(false)
   const [denyDialogOpen, setDenyDialogOpen] = useState(false)
@@ -86,6 +89,7 @@ export default function SuggestionsView({
       setSelectedSuggestion(null)
     } catch (error) {
       console.error("Failed to approve:", error)
+      toast.error(t.toasts?.saveFailed || "Couldn't save that. Try again.")
     } finally {
       setIsProcessing(false)
     }
@@ -101,17 +105,23 @@ export default function SuggestionsView({
       setDenialReason("")
     } catch (error) {
       console.error("Failed to deny:", error)
+      toast.error(t.toasts?.saveFailed || "Couldn't save that. Try again.")
     } finally {
       setIsProcessing(false)
     }
   }
 
   const handleDeleteClick = async (suggestion: GiftSuggestion) => {
-    if (!confirm(t.suggestions?.confirmDelete || "Are you sure you want to delete this suggestion?")) return
+    const ok = await confirm({
+      title: t.suggestions?.confirmDeleteTitle || "Delete this suggestion?",
+      description: t.suggestions?.confirmDelete,
+    })
+    if (!ok) return
     try {
       await onDelete(suggestion.id)
     } catch (error) {
       console.error("Failed to delete:", error)
+      toast.error(t.toasts?.saveFailed || "Couldn't save that. Try again.")
     }
   }
 
@@ -119,21 +129,21 @@ export default function SuggestionsView({
     switch (status) {
       case "pending":
         return (
-          <Badge variant="outline" className="text-yellow-600 border-yellow-400">
+          <Badge variant="outline" className="text-suggestion border-suggestion/40">
             <Clock className="w-3 h-3 mr-1" />
             {t.suggestions?.status?.pending || "Pending"}
           </Badge>
         )
       case "approved":
         return (
-          <Badge className="bg-green-100 text-green-800">
+          <Badge className="bg-success-soft text-success-soft-foreground">
             <CheckCircle2 className="w-3 h-3 mr-1" />
             {t.suggestions?.status?.approved || "Approved"}
           </Badge>
         )
       case "denied":
         return (
-          <Badge variant="outline" className="text-red-600 border-red-400">
+          <Badge variant="outline" className="text-destructive border-destructive/40">
             <XCircle className="w-3 h-3 mr-1" />
             {t.suggestions?.status?.denied || "Declined"}
           </Badge>
@@ -208,7 +218,7 @@ export default function SuggestionsView({
 
               {/* Denial reason for outgoing denied suggestions */}
               {variant === "outgoing" && suggestion.status === "denied" && suggestion.denial_reason && (
-                <p className="text-sm text-red-600 mt-2 italic">
+                <p className="text-sm text-destructive mt-2 italic">
                   {formatMessage(t.suggestions?.reasonGiven || "Reason: {{reason}}", {
                     reason: suggestion.denial_reason,
                   })}
@@ -231,7 +241,7 @@ export default function SuggestionsView({
                     <Button
                       variant="default"
                       size="sm"
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-success text-success-foreground hover:bg-success/90"
                       onClick={() => handleApproveClick(suggestion)}
                     >
                       <Check className="w-3 h-3 mr-1" />
@@ -240,7 +250,7 @@ export default function SuggestionsView({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-red-600 border-red-300 hover:bg-red-50"
+                      className="text-destructive border-destructive/40 hover:bg-destructive/10"
                       onClick={() => handleDenyClick(suggestion)}
                     >
                       <X className="w-3 h-3 mr-1" />
@@ -253,7 +263,7 @@ export default function SuggestionsView({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     onClick={() => handleDeleteClick(suggestion)}
                   >
                     <Trash2 className="w-3 h-3 mr-1" />
@@ -271,12 +281,12 @@ export default function SuggestionsView({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Lightbulb className="w-5 h-5 text-yellow-500" />
+        <Lightbulb className="w-5 h-5 text-suggestion" />
         <h2 className="text-xl font-semibold">
           {t.suggestions?.title || "Gift Suggestions"}
         </h2>
         {pendingCount > 0 && (
-          <Badge className="bg-red-500 text-white">{pendingCount}</Badge>
+          <Badge className="bg-destructive text-white">{pendingCount}</Badge>
         )}
       </div>
 
@@ -365,9 +375,9 @@ export default function SuggestionsView({
           </DialogHeader>
 
           <div className="py-4">
-            <Label>{t.suggestions?.selectList || "Select List"}:</Label>
+            <Label htmlFor="approve-list">{t.suggestions?.selectList || "Select List"}</Label>
             <Select value={selectedListId} onValueChange={setSelectedListId}>
-              <SelectTrigger className="mt-2">
+              <SelectTrigger id="approve-list" className="mt-2 w-full">
                 <SelectValue placeholder={t.suggestions?.selectListPlaceholder || "Choose a list..."} />
               </SelectTrigger>
               <SelectContent>
@@ -391,7 +401,7 @@ export default function SuggestionsView({
             <Button
               onClick={handleApproveConfirm}
               disabled={!selectedListId || isProcessing}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-success text-success-foreground hover:bg-success/90"
             >
               {isProcessing ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

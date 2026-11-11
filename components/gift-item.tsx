@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, ShoppingCart, ExternalLink, CreditCard, Archive, Users, ChevronRight, MessageCircle, Lightbulb } from 'lucide-react';
+import { Edit, Trash2, ExternalLink, CreditCard, Archive, Users, ChevronRight, MessageCircle, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
 import GiftItemDrawer from './gift-item-drawer';
+import { ClaimButton } from './claim-button';
 import { cn } from '@/lib/utils';
 import { useTranslation, formatMessage } from './i18n-provider';
 
@@ -98,7 +99,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
         onClick={handleRowClick}
         className={cn(
           'flex items-center gap-3 py-3 px-2 transition-colors cursor-pointer hover:bg-muted/50 group',
-          isArchived && 'bg-gray-100 opacity-75',
+          isArchived && 'bg-muted opacity-75',
         )}
       >
         {/* Thumbnail */}
@@ -106,7 +107,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
           <div className="shrink-0">
             <img
               src={previewImage}
-              alt={item.name}
+              alt=""
               className="size-12 object-cover rounded"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none'
@@ -121,26 +122,32 @@ const GiftItem: React.FC<GiftItemProps> = ({
             <h3
               className={cn(
                 'font-medium truncate text-sm md:text-base',
-                isArchived && 'line-through text-gray-500',
+                isArchived && 'line-through text-muted-foreground',
                 ((isPurchased && (!isMyGift || (isMyGift && item.is_public))) ||
                   (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))) &&
                   'line-through text-muted-foreground'
               )}
             >
-              {item.name}
+              <button
+                type="button"
+                onClick={() => setIsDrawerOpen(true)}
+                className="max-w-full truncate text-left rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                {item.name}
+              </button>
             </h3>
           </div>
 
           {/* Badges row */}
           <div className="flex items-center gap-1 mt-1 flex-wrap">
             {isArchived && (
-              <Badge variant="outline" className="text-xs text-gray-600 border-gray-400">
+              <Badge variant="outline" className="text-xs text-muted-foreground border-border">
                 <Archive className="w-3 h-3 mr-0.5" />
                 {t.giftItem?.badges?.archived || 'Archived'}
               </Badge>
             )}
             {isGroupGift && (
-              <Badge variant="outline" className="text-xs text-purple-600 border-purple-400">
+              <Badge variant="outline" className="text-xs text-group-gift border-group-gift/40">
                 <Users className="w-3 h-3 mr-0.5" />
                 {t.giftItem?.badges?.groupGift || 'Group Gift'}
               </Badge>
@@ -161,7 +168,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
             )}
             {/* Suggested by badge - visible to family members, not the owner */}
             {!isMyGift && item.suggested_by_name && (
-              <Badge variant="outline" className="text-xs text-yellow-600 border-yellow-400">
+              <Badge variant="outline" className="text-xs text-suggestion border-suggestion/40">
                 <Lightbulb className="w-3 h-3 mr-0.5" />
                 {formatMessage(t.giftItem?.badges?.suggestedBy || 'Suggested by {{name}}', { name: item.suggested_by_name })}
               </Badge>
@@ -169,7 +176,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
             {/* Purchase status badge - only show if not owner viewing private list */}
             {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) &&
               (!isMyGift || (isMyGift && item.is_public)) && (
-              <Badge className="text-xs bg-green-100 text-green-800">
+              <Badge className="text-xs bg-success-soft text-success-soft-foreground">
                 {isGiftCard
                   ? (t.giftItem?.buttons?.complete || 'Complete')
                   : (t.giftItem?.buttons?.purchased || 'Purchased')}
@@ -190,35 +197,27 @@ const GiftItem: React.FC<GiftItemProps> = ({
                     e.stopPropagation();
                     setIsGiftCardDialogOpen(true);
                   }}
-                  className={cn(isGiftCardComplete && 'bg-green-600 hover:bg-green-700')}
+                  className={cn(isGiftCardComplete && 'bg-success text-success-foreground hover:bg-success/90')}
                   disabled={isGiftCardComplete}
                 >
-                  <CreditCard className="size-3" />
-                  <span className="hidden md:inline ml-1">
-                    {isGiftCardComplete ? t.giftItem?.buttons?.complete : t.giftItem?.buttons?.addAmount}
-                  </span>
+                  <CreditCard className="size-3.5" aria-hidden="true" />
+                  {isGiftCardComplete ? t.giftItem?.buttons?.complete : t.giftItem?.buttons?.addAmount}
                 </Button>
               ) : (
-                <Button
-                  variant={isPurchased ? 'default' : 'secondary'}
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onTogglePurchase?.(item.id, item.purchased_by || null);
-                  }}
-                  className={cn(isPurchased && 'bg-green-600 hover:bg-green-700')}
-                >
-                  <ShoppingCart className="size-3" />
-                  <span className="hidden md:inline ml-1">
-                    {t.giftItem?.buttons?.[isPurchased ? 'purchased' : 'purchase']}
-                  </span>
-                </Button>
+                <ClaimButton
+                  itemId={item.id}
+                  purchasedBy={item.purchased_by}
+                  currentUserId={currentUserId}
+                  purchaserName={purchaserName}
+                  onToggle={onTogglePurchase}
+                />
               )}
             </>
           )}
 
+          {/* Owner actions: inline on desktop; on phones the row opens the drawer, which has the same actions labelled */}
           {isMyGift && (
-            <div className="flex gap-1">
+            <div className="hidden md:flex gap-1">
               <Button
                 variant="ghost"
                 size="icon"
@@ -226,10 +225,12 @@ const GiftItem: React.FC<GiftItemProps> = ({
                   e.stopPropagation();
                   onEdit?.(item);
                 }}
-                className="size-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                className="size-8 text-muted-foreground hover:text-foreground"
                 disabled={isArchived}
+                aria-label={t.giftItem?.buttons?.edit || 'Edit'}
+                title={t.giftItem?.buttons?.edit || 'Edit'}
               >
-                <Edit className="w-4 h-4" />
+                <Edit className="size-4" />
               </Button>
               <Button
                 variant="ghost"
@@ -238,15 +239,11 @@ const GiftItem: React.FC<GiftItemProps> = ({
                   e.stopPropagation();
                   onArchive?.(item.id);
                 }}
-                className={cn(
-                  'size-8',
-                  isArchived
-                    ? 'text-blue-600 hover:text-blue-700 hover:bg-blue-50'
-                    : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'
-                )}
-                title={isArchived ? 'Unarchive item' : 'Archive item'}
+                className="size-8 text-muted-foreground hover:text-foreground"
+                aria-label={isArchived ? (t.giftItem?.buttons?.unarchive || 'Unarchive item') : (t.giftItem?.buttons?.archive || 'Archive item')}
+                title={isArchived ? (t.giftItem?.buttons?.unarchive || 'Unarchive item') : (t.giftItem?.buttons?.archive || 'Archive item')}
               >
-                <Archive className="w-4 h-4" />
+                <Archive className="size-4" />
               </Button>
               <Button
                 variant="ghost"
@@ -255,15 +252,17 @@ const GiftItem: React.FC<GiftItemProps> = ({
                   e.stopPropagation();
                   onDelete?.(item.id);
                 }}
-                className="size-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                className="size-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                aria-label={t.giftItem?.buttons?.delete || 'Delete'}
+                title={t.giftItem?.buttons?.delete || 'Delete'}
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="size-4" />
               </Button>
             </div>
           )}
 
           {/* Chevron indicator for drawer */}
-          <ChevronRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          <ChevronRight className="size-4 text-muted-foreground md:opacity-0 md:group-hover:opacity-100 transition-opacity" aria-hidden="true" />
         </div>
       </div>
 

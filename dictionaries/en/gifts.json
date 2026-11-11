@@ -5,7 +5,10 @@
     "empty": "No gift ideas yet. Add some items above!",
     "archivedItems": "Archived Items",
     "trackPurchases": "Track Purchases",
-    "keepSurprise": "Keep Surprise"
+    "keepSurprise": "Keep Surprise",
+    "surpriseLine": "Surprise: you won’t see what’s been bought",
+    "trackedLine": "You can see what’s been bought",
+    "archivedList": "{{name}} (archived)"
   },
   "familyGifts": {
     "title": "Family Gift Lists",
@@ -18,7 +21,9 @@
       "tracked": "Tracked",
       "surprise": "Surprise",
       "trackedDescription": "Track Purchases: The list owner can see which items you've purchased",
-      "surpriseDescription": "Keep Surprise: The list owner cannot see which items you've purchased"
+      "surpriseDescription": "Keep Surprise: The list owner cannot see which items you've purchased",
+      "surpriseLine": "{{name}} won’t see what you buy",
+      "trackedLine": "{{name}} can see what you buy"
     }
   },
   "addForm": {
@@ -29,13 +34,13 @@
       "imageUrl": "Image URL",
       "description": "Description",
       "addToList": "Add to List",
-      "targetAmount": "Target Amount (optional)",
+      "targetAmount": "Target amount",
       "isGiftCard": "This is a gift card",
       "isGroupGift": "This is a group gift"
     },
     "placeholders": {
       "link": "Link (optional)",
-      "gift": "Gift item name *",
+      "gift": "What is it?",
       "price": "Price (optional)",
       "priceExample": "e.g., 100.00",
       "imageUrl": "Image URL (optional)",
@@ -44,15 +49,28 @@
     },
     "messages": {
       "loadingPreview": "Loading link preview...",
-      "previewLoaded": "✓ Link preview loaded: {{title}}",
-      "previewFailed": "⚠ Couldn't load preview (some sites block automated requests)",
-      "giftCardHelp": "Family members can purchase amounts toward this gift card. Leave blank for no target.",
-      "groupGiftHelp": "Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate.",
-      "imageUrlHelp": "Provide an image URL if no preview is loaded from the link above"
+      "previewLoaded": "Preview loaded: {{title}}",
+      "previewFailed": "Couldn’t load a preview. Some shops block it, so add the name yourself.",
+      "giftCardHelp": "Family members record what they put toward it. Leave the target blank for no limit.",
+      "groupGiftHelp": "Family members can say they’d like to chip in, so you can coordinate who’s in.",
+      "imageUrlHelp": "Only needed if the link didn’t give us a picture."
     },
     "buttons": {
       "submit": "Add Gift Idea",
-      "submitting": "Adding..."
+      "submitting": "Adding…"
+    },
+    "quick": {
+      "placeholder": "Paste a link or type a gift",
+      "label": "Add a gift idea",
+      "typeLabel": "Type",
+      "types": {
+        "item": "Item",
+        "giftCard": "Gift card",
+        "groupGift": "Group gift"
+      },
+      "cancel": "Cancel",
+      "nameLabel": "Gift name",
+      "optional": "optional"
     }
   },
   "editDialog": {
@@ -87,7 +105,14 @@
       "purchasedBy": "Purchased by {{name}}",
       "giftCardComplete": "Gift card complete"
     },
-    "unknownList": "Unknown List"
+    "unknownList": "Unknown List",
+    "claim": {
+      "claim": "I’ll get this",
+      "mine": "You’re getting this",
+      "claimedBy": "Claimed by {{name}}",
+      "claimed": "Claimed",
+      "releaseHint": "Tap to unmark"
+    }
   },
   "giftCard": {
     "title": "Gift Card Contributions",
@@ -102,13 +127,29 @@
     "editTooltip": "Edit your contribution",
     "deleteTooltip": "Delete your contribution",
     "purchaseDialog": {
-      "title": "Contribute to Gift Card",
-      "amountLabel": "Amount",
+      "title": "Record a contribution",
+      "amountLabel": "Your amount ({{currency}})",
       "amountPlaceholder": "e.g., 25.00",
       "submitButton": "Contribute",
-      "submittingButton": "Contributing...",
-      "cancelButton": "Cancel"
-    }
+      "submittingButton": "Saving…",
+      "cancelButton": "Cancel",
+      "description": "Record what you’re putting toward {{name}}. No payment happens here: you buy the card yourself.",
+      "totalLabel": "Contributed so far",
+      "targetLabel": "Target",
+      "remainingLabel": "Left to go",
+      "overRemaining": "That’s more than the {{amount}} left to go",
+      "submitWithAmount": "Record {{amount}}",
+      "success": "Contribution recorded"
+    },
+    "surpriseOwner": "Contributions are kept a surprise",
+    "showContributors": "Show contributors",
+    "hideContributors": "Hide contributors",
+    "yourContributionHidden": "Your contribution is hidden",
+    "contributorsLabel": "Contributors",
+    "noneVisible": "No contributions visible",
+    "deleteConfirmTitle": "Remove your contribution?",
+    "saveEdit": "Save",
+    "cancelEdit": "Cancel"
   },
   "groupGift": {
     "title": "Group Gift Interest",
@@ -130,7 +171,9 @@
     "addCommentPlaceholder": "Add a comment...",
     "postComment": "Post",
     "deleteComment": "Delete comment",
-    "viewDetails": "View details"
+    "viewDetails": "View details",
+    "close": "Close",
+    "sendComment": "Send comment"
   },
   "suggestions": {
     "title": "Gift Suggestions",
@@ -179,6 +222,19 @@
       "pending": "Pending",
       "approved": "Approved",
       "denied": "Declined"
-    }
+    },
+    "confirmDeleteTitle": "Delete this suggestion?"
+  },
+  "toasts": {
+    "claimed": "Marked as yours",
+    "claimedSurprise": "Marked as yours. {{name}} won’t see this.",
+    "released": "Unmarked. It’s open again.",
+    "alreadyClaimed": "Someone else already claimed this",
+    "saveFailed": "Couldn’t save that. Try again.",
+    "deleted": "Deleted “{{name}}”"
+  },
+  "deleteGift": {
+    "title": "Delete “{{name}}”?",
+    "description": "This removes it from your list for good. To hide it without losing it, archive it instead."
   }
 }

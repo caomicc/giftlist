@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
+import { getApiUser } from '@/lib/auth'
+import { unauthorized, forbidden } from '@/lib/gift-privacy'
+
+async function loadGiftItem(giftItemId: string) {
+  const [item] = await sql`
+    SELECT gi.id, gi.owner_id, gi.is_gift_card, gi.gift_card_target_amount,
+           gi.gift_card_total_purchased, l.is_public
+    FROM gift_items gi
+    JOIN lists l ON gi.list_id = l.id
+    WHERE gi.id = ${giftItemId}
+  `
+  return item ?? null
+}
 
 export async function GET(request: NextRequest) {
   try {
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
+
     const { searchParams } = new URL(request.url)
     const giftItemId = searchParams.get('gift_item_id')
 
@@ -11,6 +27,16 @@ export async function GET(request: NextRequest) {
         { error: 'Gift item ID is required' },
         { status: 400 }
       )
+    }
+
+    const item = await loadGiftItem(giftItemId)
+    if (!item) {
+      return NextResponse.json({ error: 'Gift item not found' }, { status: 404 })
+    }
+
+    // The owner of a "Keep Surprise" list never learns who contributed or how much
+    if (item.owner_id === currentUser.id && item.is_public === false) {
+      return NextResponse.json({ purchases: [] })
     }
 
     const purchases = await sql`
@@ -33,23 +59,43 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { gift_item_id, purchaser_id, amount } = await request.json()
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
 
-    if (!gift_item_id || !purchaser_id || !amount || amount <= 0) {
+    const { gift_item_id, amount } = await request.json()
+    const numericAmount = Number(amount)
+
+    if (!gift_item_id || !Number.isFinite(numericAmount) || numericAmount <= 0) {
       return NextResponse.json(
-        { error: 'Gift item ID, purchaser ID, and valid amount are required' },
+        { error: 'Gift item ID and a valid amount are required' },
         { status: 400 }
       )
     }
 
-    // Insert the purchase
+    const item = await loadGiftItem(gift_item_id)
+    if (!item || !item.is_gift_card) {
+      return NextResponse.json({ error: 'Gift card not found' }, { status: 404 })
+    }
+    if (item.owner_id === currentUser.id) {
+      return forbidden("You can't contribute to your own gift card")
+    }
+
+    const target = Number(item.gift_card_target_amount) || 0
+    const total = Number(item.gift_card_total_purchased) || 0
+    if (target > 0 && numericAmount > target - total + 0.005) {
+      return NextResponse.json(
+        { error: 'Amount is more than what is left to reach the target', remaining: Math.max(target - total, 0) },
+        { status: 400 }
+      )
+    }
+
+    // The contributor is always the signed-in user, never a value from the request
     const data = await sql`
       INSERT INTO gift_card_purchases (gift_item_id, purchaser_id, amount)
-      VALUES (${gift_item_id}, ${purchaser_id}, ${amount})
+      VALUES (${gift_item_id}, ${currentUser.id}, ${numericAmount})
       RETURNING *
     `
 
-    // Get the updated gift item with new total
     const giftItem = await sql`
       SELECT * FROM gift_items WHERE id = ${gift_item_id}
     `
@@ -69,6 +115,9 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
+
     const { searchParams } = new URL(request.url)
     const purchaseId = searchParams.get('id')
 
@@ -79,24 +128,22 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Get the gift item id before deleting
-    const purchase = await sql`
-      SELECT gift_item_id FROM gift_card_purchases WHERE id = ${purchaseId}
+    // Only the person who made a contribution can remove it
+    const deleted = await sql`
+      DELETE FROM gift_card_purchases
+      WHERE id = ${purchaseId} AND purchaser_id = ${currentUser.id}
+      RETURNING gift_item_id
     `
 
-    if (purchase.length === 0) {
+    if (deleted.length === 0) {
       return NextResponse.json(
-        { error: 'Purchase not found' },
+        { error: 'Contribution not found or not yours' },
         { status: 404 }
       )
     }
 
-    // Delete the purchase
-    await sql`DELETE FROM gift_card_purchases WHERE id = ${purchaseId}`
-
-    // Get the updated gift item
     const giftItem = await sql`
-      SELECT * FROM gift_items WHERE id = ${purchase[0].gift_item_id}
+      SELECT * FROM gift_items WHERE id = ${deleted[0].gift_item_id}
     `
 
     return NextResponse.json({
@@ -114,9 +161,13 @@ export async function DELETE(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
+
     const { searchParams } = new URL(request.url)
     const purchaseId = searchParams.get('id')
     const { amount } = await request.json()
+    const numericAmount = Number(amount)
 
     if (!purchaseId) {
       return NextResponse.json(
@@ -125,29 +176,28 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    if (!amount || amount <= 0) {
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
       return NextResponse.json(
         { error: 'Valid amount is required' },
         { status: 400 }
       )
     }
 
-    // Update the purchase amount
+    // Only the person who made a contribution can change it
     const updatedPurchase = await sql`
       UPDATE gift_card_purchases
-      SET amount = ${amount}
-      WHERE id = ${purchaseId}
+      SET amount = ${numericAmount}
+      WHERE id = ${purchaseId} AND purchaser_id = ${currentUser.id}
       RETURNING *
     `
 
     if (updatedPurchase.length === 0) {
       return NextResponse.json(
-        { error: 'Purchase not found' },
+        { error: 'Contribution not found or not yours' },
         { status: 404 }
       )
     }
 
-    // Get the updated gift item
     const giftItem = await sql`
       SELECT * FROM gift_items WHERE id = ${updatedPurchase[0].gift_item_id}
     `

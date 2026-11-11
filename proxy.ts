@@ -15,10 +15,16 @@ function getLocale(request: NextRequest): string {
   const negotiatorHeaders: Record<string, string> = {}
   request.headers.forEach((value, key) => (negotiatorHeaders[key] = value))
 
-  const languages = new Negotiator({ headers: negotiatorHeaders }).languages()
-  const locale = matchLocale(languages, locales as unknown as string[], defaultLocale)
+  // Requests with no Accept-Language (curl, bots) yield ["*"], which matchLocale rejects
+  const languages = new Negotiator({ headers: negotiatorHeaders })
+    .languages()
+    .filter((lang) => lang !== '*')
 
-  return locale
+  try {
+    return matchLocale(languages, locales as unknown as string[], defaultLocale)
+  } catch {
+    return defaultLocale
+  }
 }
 
 export default function proxy(request: NextRequest) {

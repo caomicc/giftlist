@@ -98,7 +98,7 @@ function LoginFormContent({
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">{(signin?.title as string) ?? 'Hi 😊'}</h1>
-                <p className="text-zinc-500 text-balance dark:text-zinc-400">
+                <p className="text-muted-foreground text-balance dark:text-muted-foreground">
                   {(signin?.subtitle as string) ?? 'Login to your Meep Giftlist account'}
                 </p>
               </div>
@@ -141,7 +141,7 @@ function LoginFormContent({
                     </div>
 
                     {message && (
-                      <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                      <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md" role="alert">
                         {message}
                       </div>
                     )}
@@ -156,7 +156,7 @@ function LoginFormContent({
 
                     <div className="text-center text-sm">
                       {(signin?.footer as Record<string, string>)?.noAccount ?? "Don't have an account?"}{" "}
-                      <a href={`/${locale}/auth/register`} className="underline underline-offset-4">
+                      <a href={`/${locale}/auth/register`} className="inline-flex min-h-11 items-center px-1 underline underline-offset-4 md:min-h-0">
                         {(signin?.footer as Record<string, string>)?.signUp ?? 'Sign up'}
                       </a>
                     </div>
@@ -178,7 +178,7 @@ function LoginFormContent({
                     </div>
 
                     {message && (
-                      <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                      <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md" role="alert">
                         {message}
                       </div>
                     )}
@@ -191,14 +191,14 @@ function LoginFormContent({
                       {isLoading ? ((signin?.magicLink as Record<string, string>)?.submittingButton ?? 'Sending...') : ((signin?.magicLink as Record<string, string>)?.submitButton ?? 'Send Magic Link')}
                     </Button>
 
-                    <p className="text-xs text-gray-500 text-center">
+                    <p className="text-xs text-muted-foreground text-center">
                       {(signin?.magicLink as Record<string, string>)?.description1 ?? "We'll send you a secure link to sign in instantly."}<br/>
                       {(signin?.magicLink as Record<string, string>)?.description2 ?? 'You can set a password later if you prefer.'}
                     </p>
 
                     <div className="text-center text-sm">
                       {(signin?.footer as Record<string, string>)?.noAccount ?? "Don't have an account?"}{" "}
-                      <a href={`/${locale}/auth/register`} className="underline underline-offset-4">
+                      <a href={`/${locale}/auth/register`} className="inline-flex min-h-11 items-center px-1 underline underline-offset-4 md:min-h-0">
                         {(signin?.footer as Record<string, string>)?.signUp ?? 'Sign up'}
                       </a>
                     </div>
@@ -207,17 +207,17 @@ function LoginFormContent({
               </Tabs>
             </div>
           </div>
-          <div className="bg-zinc-100 aspect-4/3 md:aspect-[unset] relative block dark:bg-zinc-800">
+          <div className="bg-muted aspect-4/3 md:aspect-[unset] relative block">
             <Image
               src="/baby.webp"
-              alt="Image"
+              alt=""
               fill
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
           </div>
         </CardContent>
       </Card>
-      {/* <div className="text-zinc-500 text-center text-xs text-balance dark:text-zinc-400">
+      {/* <div className="text-muted-foreground text-center text-xs text-balance dark:text-muted-foreground">
         By clicking continue, you agree to our{" "}
         <a href="#" className="underline underline-offset-4 hover:text-zinc-900 dark:hover:text-zinc-50">
           Terms of Service

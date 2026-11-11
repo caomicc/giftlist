@@ -105,7 +105,7 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
           size="sm"
           onClick={handleToggleInterest}
           disabled={loading}
-          className={isUserInterested ? "bg-blue-600 hover:bg-blue-700" : ""}
+          className={isUserInterested ? "bg-group-gift text-white hover:bg-group-gift/90" : ""}
         >
           {isUserInterested ? (
             <>
@@ -124,32 +124,35 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
       {/* Show interested users count */}
       {visibleInterests.length > 0 && (
         <div className="flex items-center gap-2">
-          <Badge
+          <Button
+            type="button"
             variant="outline"
-            className="flex items-center gap-1 cursor-pointer hover:bg-gray-100"
+            size="sm"
+            className="h-7 rounded-full text-xs"
+            aria-expanded={showDetails}
             onClick={() => setShowDetails(!showDetails)}
           >
-            <Users className="w-3 h-3" />
+            <Users className="size-3" aria-hidden="true" />
             {formatMessage(
               visibleInterests.length === 1 
                 ? (t.groupGift?.interested || '{{count}} person interested')
                 : (t.groupGift?.interestedPlural || '{{count}} people interested'),
               { count: visibleInterests.length }
             )}
-          </Badge>
+          </Button>
         </div>
       )}
 
       {/* Detailed list of interested users */}
       {showDetails && visibleInterests.length > 0 && (
-        <div className="mt-2 p-2 bg-gray-50 rounded text-xs space-y-1">
-          <div className="flex items-center gap-1 font-medium text-gray-700 mb-2">
+        <div className="mt-2 p-2 bg-muted rounded text-xs space-y-1">
+          <div className="flex items-center gap-1 font-medium text-foreground mb-2">
             <Users className="w-3 h-3" />
             {t.groupGift?.interestedIn || 'Interested in group gift:'}
           </div>
           {visibleInterests.map((interest) => (
             <div key={interest.id} className="flex justify-between items-center">
-              <span className="text-gray-600">{interest.user_name}</span>
+              <span className="text-muted-foreground">{interest.user_name}</span>
             </div>
           ))}
         </div>
@@ -157,7 +160,7 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
 
       {/* Message for owner if they are interested (hidden from count) */}
       {isOwner && interests.some(interest => interest.user_id === currentUserId) && (
-        <Badge variant="outline" className="text-xs text-gray-500">
+        <Badge variant="outline" className="text-xs text-muted-foreground">
           {t.groupGift?.hiddenFromOthers || 'Your interest is hidden from others'}
         </Badge>
       )}

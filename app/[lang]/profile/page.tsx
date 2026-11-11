@@ -191,9 +191,9 @@ export default function ProfilePage() {
                     type="email"
                     value={profile.email}
                     disabled
-                    className="mt-1 bg-gray-50"
+                    className="mt-1 bg-muted"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                  <p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
                 </div>
 
                 <div>
@@ -206,14 +206,14 @@ export default function ProfilePage() {
                     placeholder="Enter your name"
                     className="mt-1"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     This is the name that will be displayed to other family members
                   </p>
                 </div>
 
                 <div>
                   <Label>Member since</Label>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {new Date(profile.created_at).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -274,7 +274,7 @@ export default function ProfilePage() {
                   />
                 </div>
 
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Password must be at least 6 characters long.
                   {!hasPassword && ' Since you signed up with a magic link, setting a password will allow you to sign in faster in the future.'}
                 </p>

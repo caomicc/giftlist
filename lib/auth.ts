@@ -332,6 +332,13 @@ export async function signOut() {
   cookieStore.delete('session-token')
 }
 
+// For API routes: returns the signed-in user or null (never redirects).
+// proxy.ts does not run on /api, so every API handler must check this itself.
+export async function getApiUser(): Promise<User | null> {
+  const session = await getSession()
+  return session?.user ?? null
+}
+
 // Auth middleware
 export async function requireAuth(): Promise<User> {
   const session = await getSession()

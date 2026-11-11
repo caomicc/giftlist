@@ -23,7 +23,6 @@ import {
   Users,
   Edit,
   Trash2,
-  ShoppingCart,
   MessageCircle,
   Send,
   X,
@@ -31,6 +30,7 @@ import {
 import Link from 'next/link'
 import PriceTag from './price-tag'
 import GiftCardDetails from './gift-card-details'
+import { ClaimButton } from './claim-button'
 import GiftCardContributions from './gift-card-contributions'
 import GroupGiftInterest from './group-gift-interest'
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog'
@@ -167,7 +167,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                 <DrawerTitle
                   className={cn(
                     'text-lg',
-                    isArchived && 'line-through text-gray-500',
+                    isArchived && 'line-through text-muted-foreground',
                     ((isPurchased && (!isMyGift || (isMyGift && item.is_public))) ||
                       (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))) &&
                       'line-through text-muted-foreground'
@@ -177,13 +177,13 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                 </DrawerTitle>
                 <div className="flex flex-wrap gap-1 mt-2">
                   {isArchived && (
-                    <Badge variant="outline" className="text-gray-600 border-gray-400">
+                    <Badge variant="outline" className="text-muted-foreground border-border">
                       <Archive className="w-3 h-3 mr-1" />
                       {t.giftItem?.badges?.archived || 'Archived'}
                     </Badge>
                   )}
                   {isGroupGift && (
-                    <Badge variant="outline" className="text-purple-600 border-purple-400">
+                    <Badge variant="outline" className="text-group-gift border-group-gift/40">
                       <Users className="w-3 h-3 mr-1" />
                       {t.giftItem?.badges?.groupGift || 'Group Gift'}
                     </Badge>
@@ -198,8 +198,8 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                 </div>
               </div>
               <DrawerClose asChild>
-                <Button variant="ghost" size="icon" className="shrink-0">
-                  <X className="w-4 h-4" />
+                <Button variant="ghost" size="icon" className="shrink-0 size-10" aria-label={t.drawer?.close || 'Close'}>
+                  <X className="size-4" />
                 </Button>
               </DrawerClose>
             </div>
@@ -252,6 +252,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                     giftItemId={item.id}
                     currentUserId={currentUserId}
                     isOwner={isMyGift}
+                    isPublic={item.is_public === true}
                     totalPurchased={giftCardTotal}
                     targetAmount={giftCardTarget}
                   />
@@ -282,7 +283,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
               {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) &&
                 !isMyGift &&
                 purchaserName && (
-                  <Badge className="bg-green-100 text-green-800">
+                  <Badge className="bg-success-soft text-success-soft-foreground">
                     {formatMessage(
                       isGiftCard
                         ? t.giftItem?.status?.giftCardComplete ?? 'Gift Card Complete'
@@ -296,7 +297,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                 item.is_public &&
                 ((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) &&
                 purchaserName && (
-                  <Badge className="bg-green-100 text-green-800">
+                  <Badge className="bg-success-soft text-success-soft-foreground">
                     {formatMessage(
                       isGiftCard
                         ? t.giftItem?.status?.giftCardComplete ?? 'Gift Card Complete'
@@ -333,7 +334,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                     {comments.map((comment) => (
                       <div key={comment.id} className="flex gap-2 group">
                         <Avatar className="size-7 shrink-0">
-                          <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
+                          <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
                             {comment.user_name
                               ?.split(' ')
                               .map((n: string) => n[0])
@@ -351,11 +352,12 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-5 opacity-0 group-hover:opacity-100 transition-opacity ml-auto"
+                                className="size-8 ml-auto md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                                 onClick={() => handleDeleteComment(comment.id)}
                                 title={t.drawer?.deleteComment || 'Delete comment'}
+                                aria-label={t.drawer?.deleteComment || 'Delete comment'}
                               >
-                                <Trash2 className="size-3 text-red-500" />
+                                <Trash2 className="size-3.5 text-destructive" />
                               </Button>
                             )}
                           </div>
@@ -384,6 +386,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                     onClick={handleSubmitComment}
                     disabled={!newComment.trim() || isSubmitting}
                     className="shrink-0 self-end"
+                    aria-label={t.drawer?.sendComment || 'Send comment'}
                   >
                     <Send className="size-4" />
                   </Button>
@@ -410,22 +413,21 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                       variant={isGiftCardComplete ? 'default' : 'secondary'}
                       size="sm"
                       onClick={() => setIsGiftCardDialogOpen(true)}
-                      className={cn(isGiftCardComplete && 'bg-green-600 hover:bg-green-700', 'flex-1')}
+                      className={cn(isGiftCardComplete && 'bg-success text-success-foreground hover:bg-success/90', 'flex-1')}
                       disabled={isGiftCardComplete}
                     >
                       <CreditCard className="size-3 mr-1" />
                       {isGiftCardComplete ? t.giftItem?.buttons?.complete : t.giftItem?.buttons?.addAmount}
                     </Button>
                   ) : (
-                    <Button
-                      variant={isPurchased ? 'default' : 'secondary'}
-                      size="sm"
-                      onClick={() => onTogglePurchase?.(item.id, item.purchased_by || null)}
-                      className={cn(isPurchased && 'bg-green-600 hover:bg-green-700', 'flex-1')}
-                    >
-                      <ShoppingCart className="size-3 mr-1" />
-                      {t.giftItem?.buttons?.[isPurchased ? 'purchased' : 'purchase']}
-                    </Button>
+                    <ClaimButton
+                      itemId={item.id}
+                      purchasedBy={item.purchased_by}
+                      currentUserId={currentUserId}
+                      purchaserName={purchaserName}
+                      onToggle={onTogglePurchase}
+                      className="flex-1 justify-center"
+                    />
                   )}
                 </>
               )}
@@ -451,7 +453,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                       onArchive?.(item.id)
                       onOpenChange(false)
                     }}
-                    className={isArchived ? 'text-blue-600' : 'text-orange-600'}
+                    className={undefined}
                   >
                     <Archive className="w-4 h-4 mr-1" />
                     {isArchived
@@ -465,7 +467,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                       onDelete?.(item.id)
                       onOpenChange(false)
                     }}
-                    className="text-red-600"
+                    className="text-destructive"
                   >
                     <Trash2 className="w-4 h-4 mr-1" />
                     {t.giftItem?.buttons?.delete || 'Delete'}

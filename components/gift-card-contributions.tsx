@@ -5,6 +5,7 @@ import { Input } from './ui/input';
 import { Edit, Trash2, Check, X } from 'lucide-react';
 import { formatCurrency, getUserLocale, getUserCurrency } from '@/lib/currency';
 import { useTranslation, formatMessage } from './i18n-provider';
+import { useConfirm } from './confirm-dialog';
 
 interface GiftCardPurchase {
   id: string;
@@ -28,6 +29,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
   onPurchaseUpdate
 }) => {
   const { t } = useTranslation('gifts');
+  const confirm = useConfirm();
   const [purchases, setPurchases] = useState<GiftCardPurchase[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -95,9 +97,11 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
   };
 
   const handleDelete = async (purchaseId: string) => {
-    if (!confirm(t.giftCard?.deleteConfirm || 'Are you sure you want to delete this contribution?')) {
-      return;
-    }
+    const ok = await confirm({
+      title: t.giftCard?.deleteConfirmTitle || 'Remove your contribution?',
+      description: t.giftCard?.deleteConfirm,
+    });
+    if (!ok) return;
 
     try {
       const response = await fetch(`/api/gift-card-purchases?id=${purchaseId}`, {
@@ -136,7 +140,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
         return (
           <div
             key={purchase.id}
-            className="flex flex-col gap-3 md:flex-row items-center justify-between text-xs text-gray-600 bg-white/90 p-2 rounded-lg"
+            className="flex flex-col gap-3 md:flex-row items-center justify-between text-xs text-muted-foreground bg-background/90 p-2 rounded-lg"
           >
             <div className="flex items-center gap-2  justify-between w-full md:w-auto">
               <span>
@@ -169,18 +173,20 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-5 w-5 p-0 text-green-600 hover:text-green-700"
+                      className="size-8 p-0 text-muted-foreground hover:text-foreground"
                       onClick={() => handleEditSave(purchase.id)}
+                      aria-label={t.giftCard?.saveEdit || "Save"}
                     >
-                      <Check className="w-3 h-3" />
+                      <Check className="size-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-5 w-5 p-0 text-gray-600 hover:text-gray-700"
+                      className="size-8 p-0 text-muted-foreground hover:text-foreground"
                       onClick={handleEditCancel}
+                      aria-label={t.giftCard?.cancelEdit || "Cancel"}
                     >
-                      <X className="w-3 h-3" />
+                      <X className="size-4" />
                     </Button>
                   </>
                 ) : (
@@ -188,20 +194,22 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-5 w-5 p-0 text-blue-600 hover:text-blue-700"
+                      className="size-8 p-0 text-muted-foreground hover:text-foreground"
                       onClick={() => handleEditStart(purchase)}
+                      aria-label={t.giftCard?.editTooltip || "Edit your contribution"}
                       title={t.giftCard?.editTooltip || "Edit your contribution"}
                     >
-                      <Edit className="w-3 h-3" />
+                      <Edit className="size-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-5 w-5 p-0 text-red-600 hover:text-red-700"
+                      className="size-8 p-0 text-muted-foreground hover:text-destructive"
                       onClick={() => handleDelete(purchase.id)}
+                      aria-label={t.giftCard?.deleteTooltip || "Delete your contribution"}
                       title={t.giftCard?.deleteTooltip || "Delete your contribution"}
                     >
-                      <Trash2 className="w-3 h-3" />
+                      <Trash2 className="size-4" />
                     </Button>
                   </>
                 )}

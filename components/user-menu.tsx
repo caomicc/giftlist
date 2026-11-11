@@ -62,13 +62,16 @@ export function UserMenu({ user }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center space-x-2">
+        <button
+          type="button"
+          className="flex items-center gap-2 rounded-full pl-3 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        >
           <span>{t.nav?.myProfile || 'My Profile'}</span>
-          <ChevronDownIcon className="h-4 w-4" />
-          <Avatar className="size-12 bg-violet-200 no-underline group-hover:no-underline!">
-            <AvatarFallback className=''>{initials}</AvatarFallback>
+          <ChevronDownIcon className="size-4" aria-hidden="true" />
+          <Avatar className="size-12">
+            <AvatarFallback className="bg-secondary text-secondary-foreground">{initials}</AvatarFallback>
           </Avatar>
-        </div>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 ml-10" align="end" forceMount>
         <div className="flex flex-col space-y-1 p-2">

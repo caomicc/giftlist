@@ -58,6 +58,12 @@ export type GiftItem = {
   archived: boolean
   created_at: string
   updated_at: string
+  // Joined from lists/users by GET /api/gift-items
+  is_public?: boolean
+  list_name?: string
+  list_owner_id?: string
+  owner_name?: string
+  purchaser_name?: string | null
 }
 
 export type GiftCardPurchase = {

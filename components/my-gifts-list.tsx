@@ -2,8 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { Gift, Archive } from 'lucide-react'
+import { Gift, Archive, Eye, EyeOff } from 'lucide-react'
 import GiftItem from "./gift-item"
 import { useTranslation, formatMessage } from "./i18n-provider"
 
@@ -93,28 +92,24 @@ export default function MyGiftsList({
       <Accordion type="single" collapsible className="w-full">
         {Object.entries(itemsByList).map(([listId, listData]: [string, any]) => (
           <AccordionItem key={listId} value={listId}>
-            <AccordionTrigger className="hover:no-underline items-center relative">
+            <AccordionTrigger className="hover:no-underline items-center">
               <div className="flex items-center gap-3 w-full">
                 <div className="flex-1">
                   <h3 className="font-medium text-lg">{listData.name}</h3>
                   {listData.description && (
                     <p className="text-sm text-muted-foreground">{listData.description}</p>
                   )}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Badge variant={listData.isPublic ? "default" : "secondary"} className="text-xs absolute top-5 right-5 cursor-help">
-                        {listData.isPublic ? (t.myGifts?.trackPurchases || "Track Purchases") : (t.myGifts?.keepSurprise || "Keep Surprise")}
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{listData.isPublic
-                        ? (t.familyGifts?.purchaseTracking?.trackedDescription || "Track Purchases: You can see which items family members have purchased from this list")
-                        : (t.familyGifts?.purchaseTracking?.surpriseDescription || "Keep Surprise: You cannot see which items family members have purchased from this list")}</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    {listData.isPublic
+                      ? <Eye className="size-3.5" aria-hidden="true" />
+                      : <EyeOff className="size-3.5" aria-hidden="true" />}
+                    {listData.isPublic
+                      ? (t.myGifts?.trackedLine || "You can see what's been bought")
+                      : (t.myGifts?.surpriseLine || "Surprise: you won't see what's been bought")}
+                  </p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs text-muted-foreground">
-                      {formatMessage(listData.items.length > 1 ? tCommon.counts?.itemsPlural : tCommon.counts?.items || '{{count}} items', { count: listData.items.length })}
+                      {formatMessage((listData.items.length === 1 ? tCommon.counts?.items : tCommon.counts?.itemsPlural) || '{{count}} items', { count: listData.items.length })}
                     </span>
                     {listData.createdAt && (
                       <span className="text-xs text-muted-foreground">
@@ -126,7 +121,7 @@ export default function MyGiftsList({
               </div>
             </AccordionTrigger>
             <AccordionContent>
-              <div className="divide divide-indigo-500">
+              <div className="divide-y divide-border">
                 {listData.items.map((item: any) => (
                   <div key={item.id}>
                     <GiftItem
@@ -157,7 +152,7 @@ export default function MyGiftsList({
               <div key={`archived-${listId}`} className="space-y-3">
                 <div className="flex items-center gap-3 pb-2 border-b border-dashed">
                   <div className="flex-1">
-                    <h4 className="font-medium text-sm opacity-75">{listData.name} (Archived)</h4>
+                    <h4 className="font-medium text-sm opacity-75">{formatMessage(t.myGifts?.archivedList || "{{name}} (archived)", { name: listData.name })}</h4>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="outline" className="text-xs opacity-60">
                         {formatMessage(tCommon.counts?.archived || '{{count}} archived items', { count: listData.items.length })}
@@ -165,7 +160,7 @@ export default function MyGiftsList({
                     </div>
                   </div>
                 </div>
-                <div className="divide divide-indigo-500">
+                <div className="divide-y divide-border">
                   {listData.items.map((item: any) => (
                     <GiftItem
                       key={item.id}

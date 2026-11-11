@@ -9,7 +9,7 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
   const isDevelopment = process.env.NODE_ENV === 'development'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Check your email</CardTitle>
@@ -20,15 +20,15 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
         </CardHeader>
         <CardContent className="text-center space-y-4">
           {isDevelopment ? (
-            <div className="bg-blue-50 p-4 rounded-md text-sm">
-              <p className="font-medium text-blue-800 mb-2">🧪 Development Mode</p>
-              <p className="text-blue-700">
+            <div className="bg-secondary/40 p-4 rounded-md text-sm">
+              <p className="font-medium text-secondary-foreground mb-2">🧪 Development Mode</p>
+              <p className="text-secondary-foreground">
                 Check your terminal/console for the magic link!<br />
                 The link is logged there since email isn't configured yet.
               </p>
             </div>
           ) : (
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-muted-foreground">
               <p>Click the link in the email to sign in.</p>
               <p>The link will expire in 24 hours.</p>
             </div>
@@ -47,7 +47,7 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
 
 export default async function VerifyRequestPage({ searchParams }: { searchParams: Promise<{ email?: string }> }) {
   return (
-    <Suspense fallback={<div className='absolute top-0 left-0 flex h-screen w-screen justify-center items-center'><p className='font-heading text-2xl text-center text-pink-950'>Loading...</p></div>}>
+    <Suspense fallback={<div className='absolute top-0 left-0 flex h-screen w-screen justify-center items-center'><p className='text-2xl text-center text-foreground'>Loading...</p></div>}>
       <VerifyRequestContent searchParams={searchParams} />
     </Suspense>
   )

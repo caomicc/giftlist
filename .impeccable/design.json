@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T00:00:00Z",
+  "title": "Design System: Meep Family Wishlist",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Brand Violet", "canonical": "var(--color-violet-600)", "tonalRamp": ["#2f0d68", "#4d179a", "#5d0ec0", "#7008e7", "#7f22fe", "#8e51ff", "#c4b4ff", "#f5f3ff"] },
+      "primary-foreground": { "role": "primary", "displayName": "Violet Mist Text", "canonical": "oklch(0.969 0.016 293.756)" },
+      "secondary": { "role": "secondary", "displayName": "Soft Periwinkle", "canonical": "var(--color-indigo-200)", "tonalRamp": ["#312c85", "#432dd7", "#4f39f6", "#615fff", "#7c86ff", "#a3b3ff", "#c6d2ff", "#eef2ff"] },
+      "secondary-foreground": { "role": "secondary", "displayName": "Ink Soft", "canonical": "oklch(0.21 0.006 285.885)" },
+      "success": { "role": "tertiary", "displayName": "Claimed Green", "canonical": "var(--color-green-700)", "tonalRamp": ["#0d542b", "#016630", "#008138", "#00a63e", "#00c950", "#7bf1a8", "#dcfce7", "#f0fdf4"] },
+      "success-foreground": { "role": "tertiary", "displayName": "On Claimed Green", "canonical": "oklch(0.985 0 0)" },
+      "success-soft": { "role": "tertiary", "displayName": "Mint Wash", "canonical": "var(--color-green-50)" },
+      "success-soft-foreground": { "role": "tertiary", "displayName": "Deep Green Text", "canonical": "var(--color-green-800)" },
+      "group-gift": { "role": "tertiary", "displayName": "Group Violet", "canonical": "var(--color-violet-700)", "tonalRamp": ["#2f0d68", "#4d179a", "#5d0ec0", "#7008e7", "#7f22fe", "#8e51ff", "#c4b4ff", "#f5f3ff"] },
+      "group-gift-soft": { "role": "tertiary", "displayName": "Group Violet Wash", "canonical": "var(--color-violet-50)" },
+      "suggestion": { "role": "tertiary", "displayName": "Suggestion Amber", "canonical": "var(--color-amber-700)", "tonalRamp": ["#7b3306", "#973c00", "#bb4d00", "#e17100", "#fe9a00", "#ffd230", "#fef3c6", "#fffbeb"] },
+      "suggestion-soft": { "role": "tertiary", "displayName": "Amber Wash", "canonical": "var(--color-amber-50)" },
+      "destructive": { "role": "tertiary", "displayName": "Alert Red", "canonical": "oklch(0.577 0.245 27.325)", "tonalRamp": ["#82181a", "#c10007", "#e7000b", "#fb2c36", "#ffa2a2", "#ffc9c9", "#ffe2e2", "#fef2f2"] },
+      "destructive-foreground": { "role": "tertiary", "displayName": "On Alert Red", "canonical": "oklch(0.985 0 0)" },
+      "background": { "role": "neutral", "displayName": "Paper White", "canonical": "oklch(1 0 0)" },
+      "foreground": { "role": "neutral", "displayName": "Ink", "canonical": "oklch(0.141 0.005 285.823)", "tonalRamp": ["#09090b", "#27272a", "#3f3f46", "#71717b", "#9f9fa9", "#e4e4e7", "#f4f4f5", "#fafafa"] },
+      "card": { "role": "neutral", "displayName": "Paper White Card", "canonical": "oklch(1 0 0)" },
+      "muted": { "role": "neutral", "displayName": "Mist", "canonical": "oklch(0.967 0.001 286.375)" },
+      "muted-foreground": { "role": "neutral", "displayName": "Slate Grey", "canonical": "oklch(0.552 0.016 285.938)" },
+      "accent": { "role": "neutral", "displayName": "Mist Hover", "canonical": "oklch(0.967 0.001 286.375)" },
+      "border": { "role": "neutral", "displayName": "Hairline", "canonical": "oklch(0.92 0.004 286.32)" },
+      "backdrop-from": { "role": "neutral", "displayName": "Blush Backdrop", "canonical": "var(--color-red-100)" },
+      "backdrop-to": { "role": "neutral", "displayName": "Lavender Backdrop", "canonical": "var(--color-violet-300)" }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Headline", "purpose": "Page greeting only (\"Hi, {name}!\"). Medium weight, tight tracking." },
+      "title": { "displayName": "Title", "purpose": "List names in accordion headers." },
+      "item-title": { "displayName": "Item title", "purpose": "Gift row titles; 1rem at md+, 0.875rem on phones; truncated; the title is the drawer button." },
+      "body": { "displayName": "Body", "purpose": "Descriptions, form text, dialog copy. Inputs are 1rem on phones." },
+      "label": { "displayName": "Label", "purpose": "Badges, the Claimed-by chip, counts and inline privacy lines." }
+    },
+    "shadows": [
+      { "name": "control", "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)", "purpose": "shadow-xs on buttons, inputs and selects." },
+      { "name": "card", "value": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)", "purpose": "shadow-sm on the list card at md+ and the active tab; none on phones." },
+      { "name": "overlay", "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)", "purpose": "shadow-lg on dialogs, drawers and popovers (shadcn defaults)." },
+      { "name": "focus-ring", "value": "0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent)", "purpose": "Focus-visible ring on every interactive primitive, with a ring-coloured border." }
+    ],
+    "motion": [
+      { "name": "control-transition", "value": "all 150ms cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Tailwind default transition on buttons, inputs and row hover." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default action: violet fill, compact on desktop, 44px on phones.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">Add gift</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 8px 16px; border: 1px solid transparent; border-radius: calc(var(--radius, 0.65rem) - 2px); font: 500 14px/20px 'Geist', ui-sans-serif, system-ui, sans-serif; cursor: pointer; transition: all 150ms cubic-bezier(0.4,0,0.2,1); box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); outline: none; } .ds-btn-primary { background: var(--primary, oklch(54.1% 0.281 293.009)); color: var(--primary-foreground, oklch(0.969 0.016 293.756)); } .ds-btn-primary:hover { background: color-mix(in oklch, var(--primary, oklch(54.1% 0.281 293.009)) 90%, transparent); } .ds-btn:focus-visible { border-color: var(--ring, oklch(54.1% 0.281 293.009)); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, oklch(54.1% 0.281 293.009)) 50%, transparent); } @media (max-width: 767.98px) { .ds-btn { min-height: 44px; } }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Quiet periwinkle action; the resting claim state and gift-card 'Add amount'.",
+      "html": "<button class=\"ds-btn2\">Add amount</button>",
+      "css": ".ds-btn2 { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border: 1px solid transparent; border-radius: calc(var(--radius, 0.65rem) - 2px); background: var(--secondary, oklch(87% 0.065 274.039)); color: var(--secondary-foreground, oklch(0.21 0.006 285.885)); font: 500 14px/20px 'Geist', ui-sans-serif, system-ui, sans-serif; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); cursor: pointer; transition: all 150ms; outline: none; } .ds-btn2:hover { background: color-mix(in oklch, var(--secondary, oklch(87% 0.065 274.039)) 80%, transparent); } .ds-btn2:focus-visible { border-color: var(--ring, oklch(54.1% 0.281 293.009)); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, oklch(54.1% 0.281 293.009)) 50%, transparent); } @media (max-width: 767.98px) { .ds-btn2 { min-height: 44px; } }"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Confirm action in delete dialogs opened by useConfirm().",
+      "html": "<button class=\"ds-btn-danger\">Delete</button>",
+      "css": ".ds-btn-danger { display: inline-flex; align-items: center; height: 36px; padding: 8px 16px; border: 1px solid transparent; border-radius: calc(var(--radius, 0.65rem) - 2px); background: var(--destructive, oklch(0.577 0.245 27.325)); color: #fff; font: 500 14px/20px 'Geist', ui-sans-serif, system-ui, sans-serif; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); cursor: pointer; transition: all 150ms; outline: none; } .ds-btn-danger:hover { background: color-mix(in oklch, var(--destructive, oklch(0.577 0.245 27.325)) 90%, transparent); } .ds-btn-danger:focus-visible { box-shadow: 0 0 0 3px color-mix(in oklch, var(--destructive, oklch(0.577 0.245 27.325)) 20%, transparent); }"
+    },
+    {
+      "name": "Claim Button",
+      "kind": "custom",
+      "refersTo": "claim-open",
+      "description": "Three states: open ('I'll get this'), mine ('You're getting this', success green, aria-pressed), and a static 'Claimed by {name}' chip for someone else's claim.",
+      "html": "<div class=\"ds-claim-row\"><button class=\"ds-claim ds-claim-open\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"8\" cy=\"21\" r=\"1\"/><circle cx=\"19\" cy=\"21\" r=\"1\"/><path d=\"M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12\"/></svg>I'll get this</button><button class=\"ds-claim ds-claim-mine\" aria-pressed=\"true\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>You're getting this</button><span class=\"ds-claim-others\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Claimed by Anna</span></div>",
+      "css": ".ds-claim-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; } .ds-claim { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border: 1px solid transparent; border-radius: calc(var(--radius, 0.65rem) - 2px); font: 500 14px/20px inherit; font-family: inherit; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); cursor: pointer; transition: all 150ms; outline: none; } .ds-claim-open { background: var(--secondary, oklch(87% 0.065 274.039)); color: var(--secondary-foreground, oklch(0.21 0.006 285.885)); } .ds-claim-open:hover { background: color-mix(in oklch, var(--secondary, oklch(87% 0.065 274.039)) 80%, transparent); } .ds-claim-mine { background: var(--success, oklch(52.7% 0.154 150.069)); color: var(--success-foreground, oklch(0.985 0 0)); } .ds-claim-mine:hover { background: color-mix(in oklch, var(--success, oklch(52.7% 0.154 150.069)) 90%, transparent); } .ds-claim:focus-visible { border-color: var(--ring, oklch(54.1% 0.281 293.009)); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, oklch(54.1% 0.281 293.009)) 50%, transparent); } .ds-claim-others { display: inline-flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px; border-radius: calc(var(--radius, 0.65rem) - 2px); background: var(--muted, oklch(0.967 0.001 286.375)); color: var(--muted-foreground, oklch(0.552 0.016 285.938)); font-size: 12px; font-weight: 500; } @media (max-width: 767.98px) { .ds-claim { min-height: 44px; } }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Hairline field, violet focus ring and caret; 44px and 16px text on phones.",
+      "html": "<input class=\"ds-input\" placeholder=\"Paste a link or type a gift\" />",
+      "css": ".ds-input { width: 100%; height: 36px; padding: 4px 12px; border: 1px solid var(--input, oklch(0.92 0.004 286.32)); border-radius: calc(var(--radius, 0.65rem) - 2px); background: transparent; color: var(--foreground, oklch(0.141 0.005 285.823)); caret-color: var(--primary, oklch(54.1% 0.281 293.009)); font: 400 14px/20px 'Geist', ui-sans-serif, system-ui, sans-serif; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); transition: color 150ms, box-shadow 150ms; outline: none; } .ds-input::placeholder { color: var(--muted-foreground, oklch(0.552 0.016 285.938)); } .ds-input:focus-visible { border-color: var(--ring, oklch(54.1% 0.281 293.009)); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, oklch(54.1% 0.281 293.009)) 50%, transparent); } .ds-input[aria-invalid=true] { border-color: var(--destructive, oklch(0.577 0.245 27.325)); } @media (max-width: 767.98px) { .ds-input { min-height: 44px; font-size: 16px; } }"
+    },
+    {
+      "name": "State Badges",
+      "kind": "chip",
+      "refersTo": "badge-purchased",
+      "description": "12px label badges: outlined in the state hue for group gift and suggested-by, solid mint for purchased/complete, secondary for gift card.",
+      "html": "<div class=\"ds-badges\"><span class=\"ds-badge ds-badge-group\">Group Gift</span><span class=\"ds-badge ds-badge-card\">Gift Card</span><span class=\"ds-badge ds-badge-sugg\">Suggested by Mia</span><span class=\"ds-badge ds-badge-done\">Purchased</span></div>",
+      "css": ".ds-badges { display: flex; flex-wrap: wrap; gap: 4px; font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; } .ds-badge { display: inline-flex; align-items: center; padding: 2px 8px; border: 1px solid transparent; border-radius: calc(var(--radius, 0.65rem) - 2px); font-size: 12px; font-weight: 500; line-height: 16px; } .ds-badge-group { color: var(--group-gift, oklch(49.1% 0.27 292.581)); border-color: color-mix(in oklch, var(--group-gift, oklch(49.1% 0.27 292.581)) 40%, transparent); } .ds-badge-sugg { color: var(--suggestion, oklch(55.5% 0.163 48.998)); border-color: color-mix(in oklch, var(--suggestion, oklch(55.5% 0.163 48.998)) 40%, transparent); } .ds-badge-card { background: var(--secondary, oklch(87% 0.065 274.039)); color: var(--secondary-foreground, oklch(0.21 0.006 285.885)); } .ds-badge-done { background: var(--success-soft, oklch(98.2% 0.018 155.826)); color: var(--success-soft-foreground, oklch(44.8% 0.119 151.328)); }"
+    },
+    {
+      "name": "Tabs Navigation",
+      "kind": "nav",
+      "description": "Three full-width tabs on a Mist track; active tab turns white with a small shadow.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\"><button class=\"ds-tab\" role=\"tab\" aria-selected=\"true\">My Gift List</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">Family Lists</button><button class=\"ds-tab\" role=\"tab\" aria-selected=\"false\">Suggestions <span class=\"ds-tab-count\">2</span></button></div>",
+      "css": ".ds-tabs { display: grid; grid-template-columns: repeat(3, 1fr); height: 36px; padding: 3px; border-radius: var(--radius, 0.65rem); background: var(--muted, oklch(0.967 0.001 286.375)); font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; } .ds-tab { display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px solid transparent; border-radius: calc(var(--radius, 0.65rem) - 2px); background: transparent; color: var(--foreground, oklch(0.141 0.005 285.823)); font-size: 14px; font-weight: 500; cursor: pointer; transition: color 150ms, box-shadow 150ms; outline: none; } .ds-tab[aria-selected=true] { background: var(--background, #fff); box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); } .ds-tab:focus-visible { border-color: var(--ring, oklch(54.1% 0.281 293.009)); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, oklch(54.1% 0.281 293.009)) 50%, transparent); } .ds-tab-count { min-width: 18px; height: 18px; padding: 0 6px; border-radius: calc(var(--radius, 0.65rem) - 2px); background: var(--destructive, oklch(0.577 0.245 27.325)); color: var(--destructive-foreground, #fff); font-size: 12px; line-height: 18px; } @media (max-width: 767.98px) { .ds-tabs { height: 44px; } }"
+    },
+    {
+      "name": "List Card with Gift Row and Privacy Line",
+      "kind": "card",
+      "refersTo": "list-card",
+      "description": "White card on the gradient; list title, inline Eye/EyeOff privacy line, and a gift row whose title opens the drawer. On phones it becomes a 24px-top bottom sheet with no border or shadow.",
+      "html": "<div class=\"ds-backdrop\"><div class=\"ds-card\"><h3 class=\"ds-list-title\">Birthday</h3><p class=\"ds-privacy\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\"/><path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\"/><path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\"/><path d=\"m2 2 20 20\"/></svg>Surprise: you won't see what's been bought</p><div class=\"ds-row\"><div class=\"ds-row-main\"><button class=\"ds-row-title\">Wool scarf</button><span class=\"ds-row-badge\">Group Gift</span></div></div></div></div>",
+      "css": ".ds-backdrop { padding: 24px; background: linear-gradient(to bottom right, var(--backdrop-from, oklch(93.6% 0.032 17.717)), var(--backdrop-to, oklch(81.1% 0.111 293.571))); font-family: 'Geist', ui-sans-serif, system-ui, sans-serif; } .ds-card { max-width: 36rem; margin: 0 auto; padding: 24px 12px; background: var(--card, #fff); color: var(--card-foreground, oklch(0.141 0.005 285.823)); border: 1px solid var(--border, oklch(0.92 0.004 286.32)); border-radius: calc(var(--radius, 0.65rem) + 4px); box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); } .ds-list-title { margin: 0; font-size: 18px; line-height: 28px; font-weight: 500; } .ds-privacy { margin: 4px 0 8px; display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 16px; color: var(--muted-foreground, oklch(0.552 0.016 285.938)); } .ds-row { display: flex; align-items: center; gap: 12px; padding: 12px 8px; transition: background 150ms; cursor: pointer; } .ds-row:hover { background: color-mix(in oklch, var(--muted, oklch(0.967 0.001 286.375)) 50%, transparent); } .ds-row-main { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; } .ds-row-title { padding: 0; border: 0; background: none; color: inherit; font: 500 16px/24px inherit; font-family: inherit; text-align: left; border-radius: calc(var(--radius, 0.65rem) - 4px); cursor: pointer; outline: none; } .ds-row-title:focus-visible { box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring, oklch(54.1% 0.281 293.009)) 50%, transparent); } .ds-row-badge { padding: 2px 8px; font-size: 12px; font-weight: 500; color: var(--group-gift, oklch(49.1% 0.27 292.581)); border: 1px solid color-mix(in oklch, var(--group-gift, oklch(49.1% 0.27 292.581)) 40%, transparent); border-radius: calc(var(--radius, 0.65rem) - 2px); } @media (max-width: 767.98px) { .ds-backdrop { padding: 24px 0 0; } .ds-card { padding: 24px; border: 0; box-shadow: none; border-radius: 24px 24px 0 0; } .ds-row-title { font-size: 14px; line-height: 20px; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Coordinator",
+    "overview": "A private family utility that sits on a warm red-to-violet wash and keeps the real work on one white card. The system is shadcn/ui on Radix, re-pointed at a single token set: violet is the brand, and every gifting state (claimed, group gift, suggestion, destructive) has its own semantic colour pair so state reads at a glance without the interface getting loud. The name comes from the app's own metadata line, \"quietly coordinate who's getting what\": the design's job is to let relatives claim, contribute and suggest without spoiling the surprise.\n\nDensity is app-like and calm. Lists are rows, not tiles: a small thumbnail, a medium-weight title, a wrap of small outlined badges, and one action on the right. Desktop is a centred narrow column (max 36rem) inside a card; on phones that card becomes a bottom sheet with a 24px top radius that runs to the bottom of the screen. Controls grow to 44px on phones and stay at their compact shadcn sizes on desktop.\n\nFeedback is non-modal by default. Successes and failures arrive as toasts at the bottom centre; only destructive actions interrupt, and they use an in-app alert dialog. Privacy is stated inline in plain words with an eye or crossed-eye icon, never hidden behind a tooltip.",
+    "keyCharacteristics": [
+      "One token set in `styles/tailwind.css`; components use semantic token utilities, not palette steps.",
+      "Violet primary, periwinkle secondary, green for \"claimed / purchased / complete\", amber for suggestions, deep violet for group gifts.",
+      "White card on a diagonal red-100 to violet-300 page gradient.",
+      "Geist Sans at medium weight for every heading; small (14px) body and 12px labels.",
+      "Phone-first ergonomics: 44px controls below 768px, bottom-sheet card, owner actions moved into a drawer.",
+      "Light only in practice: a `.dark` set exists but nothing applies the `.dark` class yet."
+    ],
+    "rules": [
+      { "name": "The Semantic-Only Rule", "body": "Components never use raw Tailwind palette classes (`bg-green-600`, `text-violet-700`). A new state gets a new token pair in `styles/tailwind.css` (solid plus soft) and is consumed by name.", "section": "colors" },
+      { "name": "The State Owns The Hue Rule", "body": "Green means claimed, purchased or complete; amber means suggestion; deep violet means group gift; red means destructive or error. Don't reuse a state hue for decoration.", "section": "colors" },
+      { "name": "The Medium Weight Rule", "body": "App headings are medium (500), not bold. The greeting, list titles and section headers all use 500.", "section": "typography" },
+      { "name": "The Flat Phone Rule", "body": "On phones the sheet card has no border and no shadow; edges and radius alone separate it from the backdrop.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use semantic token utilities (`bg-primary`, `bg-success`, `text-suggestion`, `bg-success-soft`) and add a solid + soft token pair in `styles/tailwind.css` for any new state.",
+      "Do give every icon-only button an `aria-label` (and a matching `title` on desktop icon actions); mark decorative icons `aria-hidden`.",
+      "Do keep touch targets at 44px below 768px by putting `max-md:min-h-11` on the primitive, not on each call site.",
+      "Do report mutation results through a sonner toast and leave the list on screen.",
+      "Do ask for destructive confirmation with `useConfirm()`.",
+      "Do state list privacy inline with Eye/EyeOff and plain words.",
+      "Do keep app headings at medium weight (500)."
+    ],
+    "donts": [
+      "Don't use raw Tailwind palette classes (`text-green-700`, `bg-violet-50`) in components.",
+      "Don't call `window.confirm` or `alert`.",
+      "Don't set the app-level error screen from a failed mutation; it is for initial-load failure only.",
+      "Don't reveal purchase status, purchaser names, contributed amounts or contributors to the owner of an `is_public = false` list. The API scrubs them (`lib/gift-privacy.ts`); the UI must not reconstruct or hint at them.",
+      "Don't hide privacy or state explanations in tooltips.",
+      "Don't reuse a state hue (green, amber, deep violet, red) for decoration."
+    ]
+  }
+}

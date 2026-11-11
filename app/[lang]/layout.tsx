@@ -4,12 +4,14 @@ import { locales } from "@/lib/i18n-config";
 import { UserMenuWrapper } from "@/components/user-menu-wrapper";
 import { I18nProvider } from "@/components/i18n-provider";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { Toaster } from "@/components/ui/sonner";
+import { ConfirmProvider } from "@/components/confirm-dialog";
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
 
 export const metadata: Metadata = {
   title: "Meep Family Wishlist",
-  description: "Hi",
+  description: "Share gift ideas with your family and quietly coordinate who's getting what.",
 };
 
 export async function generateStaticParams() {
@@ -33,25 +35,23 @@ export default async function LangLayout({
         <style>{`
           html {
             font-family: ${GeistSans.style.fontFamily};
-            --font-sans: ${GeistSans.variable};
-            --font-mono: ${GeistMono.variable};
+            --font-sans: ${GeistSans.style.fontFamily};
+            --font-mono: ${GeistMono.style.fontFamily};
           }
         `}
         </style>
       </head>
 
-      <body className={"bg-gradient-to-br from-red-100 to-violet-300 min-h-screen"}>
+      <body className={"bg-linear-to-br from-backdrop-from to-backdrop-to min-h-screen"}>
         <I18nProvider locale={lang} translations={translations}>
           <div className="absolute top-4 left-4 z-50">
             <LocaleSwitcher />
           </div>
-          <UserMenuWrapper />
-          <div className="relative z-10">{children}</div>
-          <div
-            className={
-              "absolute h-[50vh] bg-white block md:hidden bottom-0 left-0 right-0 z-1 w-full"
-            }
-          ></div>
+          <ConfirmProvider>
+            <UserMenuWrapper />
+            <div className="relative z-10">{children}</div>
+          </ConfirmProvider>
+          <Toaster position="bottom-center" richColors closeButton />
         </I18nProvider>
       </body>
     </html>

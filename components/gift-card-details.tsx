@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Eye, EyeOff, Users } from 'lucide-react';
+import { Eye, EyeOff, Gift, Users } from 'lucide-react';
 import { formatCurrency, getUserLocale, getUserCurrency } from '@/lib/currency';
+import { useTranslation } from './i18n-provider';
 
 interface GiftCardPurchase {
   id: string;
@@ -16,6 +17,8 @@ interface GiftCardDetailsProps {
   giftItemId: string;
   currentUserId: string;
   isOwner: boolean;
+  /** false = "Keep Surprise" list: the owner must not see totals or contributors */
+  isPublic?: boolean;
   totalPurchased: number;
   targetAmount?: number | null;
 }
@@ -24,20 +27,22 @@ const GiftCardDetails: React.FC<GiftCardDetailsProps> = ({
   giftItemId,
   currentUserId,
   isOwner,
+  isPublic = false,
   totalPurchased,
   targetAmount
 }) => {
+  const { t } = useTranslation('gifts');
+  const tCard = t.giftCard || {};
   const [purchases, setPurchases] = useState<GiftCardPurchase[]>([]);
   const [showDetails, setShowDetails] = useState(false);
-  const [loading, setLoading] = useState(false);
 
   const locale = getUserLocale();
   const currency = getUserCurrency(locale);
 
-  const fetchPurchases = async () => {
-    if (loading) return;
+  // Default to surprise when visibility is unknown: hiding too much is recoverable, leaking is not
+  const isSurpriseOwner = isOwner && !isPublic;
 
-    setLoading(true);
+  const fetchPurchases = useCallback(async () => {
     try {
       const response = await fetch(`/api/gift-card-purchases?gift_item_id=${giftItemId}`);
       if (response.ok) {
@@ -46,87 +51,93 @@ const GiftCardDetails: React.FC<GiftCardDetailsProps> = ({
       }
     } catch (error) {
       console.error('Failed to fetch gift card purchases:', error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [giftItemId]);
 
   useEffect(() => {
-    if (showDetails && purchases.length === 0) {
-      fetchPurchases();
-    }
-  }, [showDetails]);
+    if (isOwner && !isSurpriseOwner) fetchPurchases();
+  }, [isOwner, isSurpriseOwner, fetchPurchases]);
 
-  // Filter out current user's own purchases if they're the owner
-  const visiblePurchases = isOwner
-    ? purchases.filter(purchase => purchase.purchaser_id !== currentUserId)
-    : purchases;
+  if (isSurpriseOwner) {
+    return (
+      <Badge variant="secondary" className="flex items-center gap-2">
+        <Gift className="size-3" aria-hidden="true" />
+        {tCard.surpriseOwner || 'Contributions are kept a surprise'}
+      </Badge>
+    );
+  }
 
-  // Calculate totals
-  const visibleTotal = visiblePurchases.reduce((sum, purchase) => sum + parseFloat(purchase.amount), 0);
-  const currentUserTotal = isOwner
-    ? purchases.filter(purchase => purchase.purchaser_id === currentUserId).reduce((sum, purchase) => sum + parseFloat(purchase.amount), 0)
-    : 0;
+  if (!isOwner) {
+    return (
+      <Badge variant="secondary">
+        {formatCurrency(totalPurchased, currency, locale)}
+      </Badge>
+    );
+  }
 
-  // Group purchases by purchaser for better display
+  // Owner of a "Track Purchases" list
+  const visiblePurchases = purchases.filter(p => p.purchaser_id !== currentUserId);
+  const visibleTotal = visiblePurchases.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+  const ownTotal = purchases
+    .filter(p => p.purchaser_id === currentUserId)
+    .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
   const groupedPurchases = visiblePurchases.reduce((groups, purchase) => {
     const key = purchase.purchaser_name;
-    if (!groups[key]) {
-      groups[key] = { name: key, total: 0, purchases: [] };
-    }
+    if (!groups[key]) groups[key] = { name: key, total: 0 };
     groups[key].total += parseFloat(purchase.amount);
-    groups[key].purchases.push(purchase);
     return groups;
-  }, {} as Record<string, { name: string; total: number; purchases: GiftCardPurchase[] }>);
+  }, {} as Record<string, { name: string; total: number }>);
 
-  const displayTotal = isOwner ? visibleTotal : totalPurchased;
+  const toggleLabel = showDetails
+    ? (tCard.hideContributors || 'Hide contributors')
+    : (tCard.showContributors || 'Show contributors');
 
   return (
     <div className="space-y-2">
-      {/* Main total badge */}
-      <Badge variant="secondary" className="flex items-center gap-2">
-        {!isOwner
-          ? formatCurrency(displayTotal, currency, locale)
-          : targetAmount && targetAmount > 0
-        ? `${formatCurrency(displayTotal, currency, locale)} / ${formatCurrency(targetAmount, currency, locale)}`
-        : '$ --'}
-        {visiblePurchases.length > 0 && isOwner && (
+      <div className="flex items-center gap-1">
+        <Badge variant="secondary">
+          {targetAmount && targetAmount > 0
+            ? `${formatCurrency(visibleTotal, currency, locale)} / ${formatCurrency(targetAmount, currency, locale)}`
+            : formatCurrency(visibleTotal, currency, locale)}
+        </Badge>
+        {visiblePurchases.length > 0 && (
           <Button
-        variant="ghost"
-        size="sm"
-        className="h-4 w-4 p-0 ml-1"
-        onClick={() => setShowDetails(!showDetails)}
-        title={showDetails ? "Hide contributors" : "Show contributors"}
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            onClick={() => setShowDetails(!showDetails)}
+            aria-label={toggleLabel}
+            aria-expanded={showDetails}
+            title={toggleLabel}
           >
-        {showDetails ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+            {showDetails ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </Button>
         )}
-      </Badge>
+      </div>
 
-      {/* Hidden own contribution indicator for owners */}
-      {isOwner && currentUserTotal > 0 && (
-        <Badge variant="outline" className="text-xs text-gray-500">
-          Your contribution hidden
+      {ownTotal > 0 && (
+        <Badge variant="outline" className="text-xs text-muted-foreground">
+          {tCard.yourContributionHidden || 'Your contribution is hidden'}
         </Badge>
       )}
 
-      {/* Detailed breakdown */}
-      {showDetails && visiblePurchases.length > 0 && (
-        <div className="mt-2 p-2 bg-gray-50 rounded text-xs space-y-1">
-          <div className="flex items-center gap-1 font-medium text-gray-700 mb-2">
-            <Users className="w-3 h-3" />
-            Contributors:
+      {showDetails && (
+        <div className="mt-2 p-2 bg-muted rounded text-xs space-y-1">
+          <div className="flex items-center gap-1 font-medium text-foreground mb-2">
+            <Users className="size-3" aria-hidden="true" />
+            {tCard.contributorsLabel || 'Contributors'}
           </div>
           {Object.values(groupedPurchases).map((group) => (
             <div key={group.name} className="flex justify-between items-center">
-              <span className="text-gray-600">{group.name}</span>
+              <span className="text-muted-foreground">{group.name}</span>
               <Badge variant="outline" className="text-xs">
                 {formatCurrency(group.total, currency, locale)}
               </Badge>
             </div>
           ))}
           {visiblePurchases.length === 0 && (
-            <div className="text-gray-500 italic">No contributions visible</div>
+            <div className="text-muted-foreground italic">{tCard.noneVisible || 'No contributions visible'}</div>
           )}
         </div>
       )}

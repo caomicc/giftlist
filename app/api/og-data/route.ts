@@ -1,3 +1,5 @@
+import { getApiUser } from '@/lib/auth'
+import { unauthorized } from '@/lib/gift-privacy'
 import { NextRequest, NextResponse } from 'next/server'
 import * as cheerio from 'cheerio'
 import { fetchAmazonProduct } from '@/lib/amazon'
@@ -39,6 +41,9 @@ function extractBasicDataFromUrl(url: URL) {
 }
 
 export async function POST(request: NextRequest) {
+  const currentUser = await getApiUser()
+  if (!currentUser) return unauthorized()
+
   try {
     const { url } = await request.json()
 

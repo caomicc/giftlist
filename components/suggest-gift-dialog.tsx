@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { Loader2, Gift, UserX } from 'lucide-react'
 import { useTranslation, formatMessage } from "./i18n-provider"
+import { toast } from "sonner"
 
 interface User {
   id: string
@@ -136,6 +137,7 @@ export default function SuggestGiftDialog({
       onClose()
     } catch (error) {
       console.error('Failed to submit suggestion:', error)
+      toast.error(t.toasts?.saveFailed || "Couldn't save that. Try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -163,13 +165,13 @@ export default function SuggestGiftDialog({
           {/* Target User Selector */}
           {!targetUserId && (
             <div className="flex flex-col gap-2">
-              <Label>{t.suggestions?.suggestTo || 'Suggest to'}:</Label>
+              <Label htmlFor="suggest-target">{t.suggestions?.suggestTo || 'Suggest to'}</Label>
               <Select
                 value={formData.targetUserId}
                 onValueChange={(value) => setFormData((prev) => ({ ...prev, targetUserId: value }))}
                 disabled={isSubmitting}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger id="suggest-target" className="w-full">
                   <SelectValue placeholder={t.suggestions?.selectMember || 'Select a family member...'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -185,21 +187,24 @@ export default function SuggestGiftDialog({
 
           {/* Link Input */}
           <div className="flex flex-col gap-2">
-            <Label>{t.addForm?.labels?.link || 'Link'}:</Label>
+            <Label htmlFor="suggest-link">{t.addForm?.labels?.link || 'Link'}</Label>
             <Input
+              id="suggest-link"
+              type="url"
+              inputMode="url"
               placeholder={t.suggestions?.linkPlaceholder || 'Paste a product link...'}
               value={formData.link}
               onChange={(e) => handleLinkChange(e.target.value)}
               disabled={isSubmitting}
             />
             {ogLoading && (
-              <div className="text-xs text-blue-600 flex items-center gap-1">
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 {t.addForm?.messages?.loadingPreview || 'Loading link preview...'}
               </div>
             )}
             {!ogLoading && ogData && (
-              <div className="text-xs text-green-600 flex items-center gap-1">
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
                 {formatMessage(t.addForm?.messages?.previewLoaded || '✓ Preview loaded: {{title}}', { title: ogData.title || 'Data found' })}
               </div>
             )}
@@ -207,8 +212,9 @@ export default function SuggestGiftDialog({
 
           {/* Name Input */}
           <div className="flex flex-col gap-2">
-            <Label>{t.addForm?.labels?.gift || 'Gift name'}:</Label>
+            <Label htmlFor="suggest-name">{t.addForm?.labels?.gift || 'Gift name'}</Label>
             <Input
+              id="suggest-name"
               placeholder={t.suggestions?.namePlaceholder || 'Gift name (or auto-filled from link)'}
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
@@ -218,8 +224,10 @@ export default function SuggestGiftDialog({
 
           {/* Price Input */}
           <div className="flex flex-col gap-2">
-            <Label>{t.addForm?.labels?.price || 'Price'} ({t.suggestions?.optional || 'optional'}):</Label>
+            <Label htmlFor="suggest-price">{t.addForm?.labels?.price || 'Price'} ({t.suggestions?.optional || 'optional'})</Label>
             <Input
+              id="suggest-price"
+              inputMode="decimal"
               placeholder={t.addForm?.placeholders?.price || 'Price'}
               value={formData.price}
               onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
@@ -229,8 +237,9 @@ export default function SuggestGiftDialog({
 
           {/* Description/Message */}
           <div className="flex flex-col gap-2">
-            <Label>{t.suggestions?.message || 'Message'} ({t.suggestions?.optional || 'optional'}):</Label>
+            <Label htmlFor="suggest-message">{t.suggestions?.message || 'Message'} ({t.suggestions?.optional || 'optional'})</Label>
             <Textarea
+              id="suggest-message"
               placeholder={t.suggestions?.messagePlaceholder || 'Add a note about why you think they\'d like this...'}
               value={formData.description}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
@@ -240,7 +249,7 @@ export default function SuggestGiftDialog({
           </div>
 
           {/* Anonymous Toggle */}
-          <div className="flex items-center space-x-2 p-3 border rounded-lg bg-gray-50">
+          <div className="flex items-center space-x-2 p-3 border rounded-lg bg-muted">
             <Checkbox
               id="isAnonymous"
               checked={formData.isAnonymous}
@@ -262,10 +271,10 @@ export default function SuggestGiftDialog({
           {/* Preview Image */}
           {(ogData?.image || formData.imageUrl) && (
             <div className="flex flex-col gap-2">
-              <Label>{t.suggestions?.preview || 'Preview'}:</Label>
+              <span className="text-sm font-medium">{t.suggestions?.preview || 'Preview'}</span>
               <img
                 src={ogData?.image || formData.imageUrl}
-                alt="Preview"
+                alt=""
                 className="w-full h-32 object-cover rounded-md border"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none'

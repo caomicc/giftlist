@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
-import { requireAuth } from '@/lib/auth'
+import { getApiUser } from '@/lib/auth'
+import { scrubForViewer, unauthorized, forbidden } from '@/lib/gift-privacy'
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,8 +9,8 @@ export async function GET(request: NextRequest) {
     const listId = searchParams.get('list_id')
     const userId = searchParams.get('user_id')
 
-    // Get current user from authentication
-    const currentUser = await requireAuth()
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
 
     let giftItems;
 
@@ -59,6 +60,9 @@ export async function GET(request: NextRequest) {
         ORDER BY gi.created_at DESC
       `
     } else if (userId) {
+      // This branch applies no list-permission filter, so only allow it for your own items.
+      if (userId !== currentUser.id) return forbidden()
+
       // Get all items owned by a specific user across all their lists
       giftItems = await sql`
         SELECT 
@@ -133,6 +137,9 @@ export async function GET(request: NextRequest) {
       `
     }
 
+    // Never tell the owner of a surprise list what has been bought
+    giftItems = giftItems.map((row: any) => scrubForViewer(row, currentUser.id))
+
     return NextResponse.json({ giftItems })
   } catch (error) {
     console.error('Failed to fetch gift items:', error)
@@ -161,6 +168,12 @@ export async function POST(request: NextRequest) {
       og_image,
       og_site_name
     } = await request.json()
+
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
+
+    // You can only add items to your own lists
+    if (owner_id !== currentUser.id) return forbidden()
 
     if (!list_id) {
       return NextResponse.json(
@@ -228,7 +241,20 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    await sql`DELETE FROM gift_items WHERE id = ${itemId}`
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
+
+    const deleted = await sql`
+      DELETE FROM gift_items
+      WHERE id = ${itemId} AND owner_id = ${currentUser.id}
+      RETURNING id
+    `
+    if (deleted.length === 0) {
+      return NextResponse.json(
+        { error: 'Item not found or access denied' },
+        { status: 404 }
+      )
+    }
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Failed to delete gift item:', error)
@@ -260,30 +286,58 @@ export async function PUT(request: NextRequest) {
       archived
     } = await request.json()
 
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
+
+    const [existing] = await sql`
+      SELECT gi.owner_id, gi.purchased_by, l.is_public
+      FROM gift_items gi
+      JOIN lists l ON gi.list_id = l.id
+      WHERE gi.id = ${id}
+    `
+    if (!existing) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 })
+    }
+    const isOwner = existing.owner_id === currentUser.id
+    // Responses to the owner go through the surprise-list scrub
+    const respond = (row: any) =>
+      NextResponse.json({ giftItem: scrubForViewer(row, currentUser.id, existing.is_public) })
+
     // If updating archive status only
     if (archived !== undefined && !name && !description && !price && !link && !image_url && !list_id && !is_gift_card && is_group_gift === undefined && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && purchased_by === undefined) {
+      if (!isOwner) return forbidden()
       const data = await sql`
         UPDATE gift_items
         SET archived = ${archived}, updated_at = NOW()
         WHERE id = ${id}
         RETURNING *
       `
-      return NextResponse.json({ giftItem: data[0] })
+      return respond(data[0])
     }
 
     // If updating purchase status (regular items)
     if (purchased_by !== undefined && !name && !description && !price && !link && !image_url && !list_id && !is_gift_card && is_group_gift === undefined && !gift_card_target_amount && !og_title && !og_description && !og_image && !og_site_name && archived === undefined) {
+      // You can't claim your own gift
+      if (isOwner) return forbidden()
+      // You can only claim for yourself
+      if (purchased_by !== null && purchased_by !== currentUser.id) return forbidden()
+      // Only the person who claimed it can release or change the claim
+      if (existing.purchased_by && existing.purchased_by !== currentUser.id) {
+        return forbidden('Already claimed by someone else')
+      }
       const data = await sql`
         UPDATE gift_items
         SET purchased_by = ${purchased_by}
         WHERE id = ${id}
         RETURNING *
       `
-      return NextResponse.json({ giftItem: data[0] })
+      return respond(data[0])
     }
 
     // If updating gift item details
     if (name || description || price || link || image_url || list_id || is_gift_card !== undefined || is_group_gift !== undefined || gift_card_target_amount !== undefined || og_title || og_description || og_image || og_site_name || archived !== undefined) {
+      if (!isOwner) return forbidden()
+
       // If list_id is being updated, verify ownership
       if (list_id) {
         const [listCheck] = await sql`
@@ -323,7 +377,7 @@ export async function PUT(request: NextRequest) {
         WHERE id = ${id}
         RETURNING *
       `
-      return NextResponse.json({ giftItem: data[0] })
+      return respond(data[0])
     }
 
     return NextResponse.json(

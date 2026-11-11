@@ -1,7 +1,12 @@
+import { getApiUser } from '@/lib/auth'
+import { unauthorized } from '@/lib/gift-privacy'
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
 
 export async function GET() {
+  const currentUser = await getApiUser()
+  if (!currentUser) return unauthorized()
+
   try {
     const users = await sql`SELECT id, name, email, created_at FROM users ORDER BY name`
     return NextResponse.json({ users })

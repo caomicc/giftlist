@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Edit, Loader2, CreditCard, Users } from 'lucide-react'
+import { Edit, Loader2, CreditCard, Users, Gift } from 'lucide-react'
 import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
@@ -174,18 +174,18 @@ export default function EditGiftDialog({
                 disabled={isSubmitting}
               />
               {editFormOGLoading && (
-                <div className="text-xs text-blue-600 flex items-center gap-1">
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
                   <Loader2 className="w-3 h-3 animate-spin" />
                   {t.addForm?.messages?.loadingPreview || "Loading link preview..."}
                 </div>
               )}
               {!editFormOGLoading && editFormOGData && (
-                <div className="text-xs text-green-600 flex items-center gap-1">
+                <div className="text-xs text-success flex items-center gap-1">
                   {formatMessage(t.addForm?.messages?.previewLoaded || "✓ Link preview loaded: {{title}}", { title: editFormOGData.title || 'Data found' })}
                 </div>
               )}
               {!editFormOGLoading && editForm.link && editForm.link.startsWith('http') && !editFormOGData && (
-                <div className="text-xs text-orange-600 flex items-center gap-1">
+                <div className="text-xs text-muted-foreground flex items-center gap-1">
                   {t.addForm?.messages?.previewFailed || "⚠ Couldn't load preview (some sites block automated requests)"}
                 </div>
               )}
@@ -238,67 +238,65 @@ export default function EditGiftDialog({
           </div>
 
 
-          {/* Gift Card Section */}
-          <div className="flex flex-col gap-4 p-4 border rounded-lg bg-gray-50">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="edit-isGiftCard"
-                checked={editForm.isGiftCard}
-                onCheckedChange={(checked) => setEditForm((prev) => ({
+          {/* Gift type: one choice, matching the add form */}
+          <div className="flex flex-col gap-2">
+            <span id="edit-type-label" className="text-sm font-medium">{t.addForm?.quick?.typeLabel || "Type"}</span>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={editForm.isGiftCard ? "gift-card" : editForm.isGroupGift ? "group-gift" : "item"}
+              onValueChange={(value) => {
+                if (!value) return
+                setEditForm((prev) => ({
                   ...prev,
-                  isGiftCard: checked === true,
-                  price: checked === true ? "" : prev.price // Clear price if gift card
-                }))}
-                disabled={isSubmitting}
-              />
-              <Label htmlFor="edit-isGiftCard" className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4" />
-                {t.addForm?.labels?.isGiftCard || "This is a gift card"}
-              </Label>
-            </div>
-            {editForm.isGiftCard && (
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="edit-giftCardTargetAmount">{t.addForm?.labels?.targetAmount || "Target Amount (optional)"}</Label>
-                <Input
-                  id="edit-giftCardTargetAmount"
-                  placeholder={t.addForm?.placeholders?.priceExample || "e.g., 100.00"}
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={editForm.giftCardTargetAmount}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
-                  disabled={isSubmitting}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t.addForm?.messages?.giftCardHelp || "Family members can purchase amounts toward this gift card. Leave blank for no target."}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Group Gift Section */}
-          <div className="flex flex-col gap-4 p-4 border rounded-lg bg-purple-50">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="edit-isGroupGift"
-                checked={editForm.isGroupGift}
-                onCheckedChange={(checked) => setEditForm((prev) => ({
-                  ...prev,
-                  isGroupGift: checked === true
-                }))}
-                disabled={isSubmitting}
-              />
-              <Label htmlFor="edit-isGroupGift" className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                {t.addForm?.labels?.groupGift || "This is a group gift"}
-              </Label>
-            </div>
+                  isGiftCard: value === "gift-card",
+                  isGroupGift: value === "group-gift",
+                  price: value === "gift-card" ? "" : prev.price,
+                }))
+              }}
+              aria-labelledby="edit-type-label"
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              <ToggleGroupItem value="item" className="flex-1 max-md:min-h-11">
+                <Gift className="size-4" aria-hidden="true" />
+                {t.addForm?.quick?.types?.item || "Item"}
+              </ToggleGroupItem>
+              <ToggleGroupItem value="gift-card" className="flex-1 max-md:min-h-11">
+                <CreditCard className="size-4" aria-hidden="true" />
+                {t.addForm?.quick?.types?.giftCard || "Gift card"}
+              </ToggleGroupItem>
+              <ToggleGroupItem value="group-gift" className="flex-1 max-md:min-h-11">
+                <Users className="size-4" aria-hidden="true" />
+                {t.addForm?.quick?.types?.groupGift || "Group gift"}
+              </ToggleGroupItem>
+            </ToggleGroup>
             {editForm.isGroupGift && (
               <p className="text-xs text-muted-foreground">
-                {t.addForm?.messages?.groupGiftHelp || "Family members can express interest in contributing to this group gift. This helps coordinate who wants to participate."}
+                {t.addForm?.messages?.groupGiftHelp || "Family members can say they'd like to chip in, so you can coordinate who's in."}
               </p>
             )}
           </div>
+
+          {editForm.isGiftCard && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-giftCardTargetAmount">{t.addForm?.labels?.targetAmount || "Target amount"}</Label>
+              <Input
+                id="edit-giftCardTargetAmount"
+                placeholder={t.addForm?.placeholders?.priceExample || "e.g., 100.00"}
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.01"
+                value={editForm.giftCardTargetAmount}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
+                disabled={isSubmitting}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t.addForm?.messages?.giftCardHelp || "Family members record what they put toward it. Leave the target blank for no limit."}
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex justify-end gap-3">
           <Button

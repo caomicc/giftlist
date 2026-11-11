@@ -1,7 +1,11 @@
+import { guardDebugRoute } from '@/lib/debug-guard'
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
 
 export async function POST(request: NextRequest) {
+  const blocked = guardDebugRoute()
+  if (blocked) return blocked
+
   try {
     const { action } = await request.json()
 

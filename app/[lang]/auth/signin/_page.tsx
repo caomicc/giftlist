@@ -132,7 +132,7 @@ function SignInPageContent() {
                 </div>
 
                 {message && (
-                  <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                  <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md" role="alert">
                     {message}
                   </div>
                 )}
@@ -169,7 +169,7 @@ function SignInPageContent() {
                 </div>
 
                 {message && (
-                  <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+                  <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md" role="alert">
                     {message}
                   </div>
                 )}
@@ -182,7 +182,7 @@ function SignInPageContent() {
                   {isLoading ? 'Sending...' : 'Send Magic Link'}
                 </Button>
 
-                <p className="text-xs text-gray-500 text-center">
+                <p className="text-xs text-muted-foreground text-center">
                   We'll send you a secure link to sign in instantly.<br/>
                   You can set a password later if you prefer.
                 </p>
@@ -197,7 +197,7 @@ function SignInPageContent() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className='absolute top-0 left-0 flex h-screen w-screen justify-center items-center'><p className='font-heading text-2xl text-center text-pink-950'>Loading...</p></div>}>
+    <Suspense fallback={<div className='absolute top-0 left-0 flex h-screen w-screen justify-center items-center'><p className='text-2xl text-center text-foreground'>Loading...</p></div>}>
       <SignInPageContent />
     </Suspense>
   )

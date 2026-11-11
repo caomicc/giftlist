@@ -24,7 +24,7 @@ const localeFlags: Record<string, string> = {
 export function LocaleSwitcher() {
   const pathname = usePathname();
   const router = useRouter();
-  const { locale } = useI18n();
+  const { locale, translations } = useI18n();
 
   const handleLocaleChange = (newLocale: string) => {
     // Get the current path without the locale prefix
@@ -43,7 +43,7 @@ export function LocaleSwitcher() {
 
   return (
     <Select value={locale} onValueChange={handleLocaleChange}>
-      <SelectTrigger className="w-[140px] shadow-none border-0">
+      <SelectTrigger className="w-[140px] shadow-none border-0" aria-label={translations?.common?.language || "Language"}>
         <SelectValue placeholder="Language" />
       </SelectTrigger>
       <SelectContent>

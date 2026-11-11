@@ -188,8 +188,8 @@ export default function ListManagement({
       {/* Manage Lists Dialog */}
       <Dialog open={isManageListsDialogOpen} onOpenChange={setIsManageListsDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-            <Settings className="h-4 w-4" />
+          <Button variant="outline" size="icon" className="size-10 md:size-8" aria-label={t.management?.title || 'Manage Lists'} title={t.management?.title || 'Manage Lists'}>
+            <Settings className="size-4" />
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[600px]">
@@ -268,8 +268,8 @@ export default function ListManagement({
       {/* Create New List Dialog */}
       <Dialog open={isCreateListDialogOpen} onOpenChange={setIsCreateListDialogOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-            <Plus className="h-4 w-4" />
+          <Button variant="outline" size="icon" className="size-10 md:size-8" aria-label={t.createDialog?.title || 'Create New List'} title={t.createDialog?.title || 'Create New List'}>
+            <Plus className="size-4" />
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
@@ -305,8 +305,8 @@ export default function ListManagement({
                 <Label htmlFor="list-privacy">{t.form?.purchaseVisibility}</Label>
                 <p className="text-sm text-muted-foreground">
                   {newListForm.isPublic
-                    ? (t.form?.trackPurchases || "Track Purchases")
-                    : (t.form?.keepSurprise || "Keep Surprise")}
+                    ? (t.form?.trackPurchasesHelp || "You'll see which gifts have been bought.")
+                    : (t.form?.keepSurpriseHelp || "Kept a surprise: you won't see what's been bought.")}
                 </p>
               </div>
               <Switch
@@ -456,8 +456,8 @@ export default function ListManagement({
                   <Label htmlFor="edit-list-privacy">{t.form?.purchaseVisibility}</Label>
                   <p className="text-sm text-muted-foreground">
                     {editListForm.isPublic
-                      ? (t.form?.trackPurchases || "Track Purchases")
-                      : (t.form?.keepSurprise || "Keep Surprise")}
+                      ? (t.form?.trackPurchasesHelp || "You'll see which gifts have been bought.")
+                      : (t.form?.keepSurpriseHelp || "Kept a surprise: you won't see what's been bought.")}
                   </p>
                 </div>
                 <Switch

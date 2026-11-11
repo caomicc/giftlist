@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Meep Family Wishlist',
-  description: 'Welcome!',
+  description: "Share gift ideas with your family and quietly coordinate who's getting what.",
 }
 
 // Root layout just renders children and sets base metadata.

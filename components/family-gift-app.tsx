@@ -3,14 +3,15 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-import { Gift, AlertCircle, Database, Lightbulb } from 'lucide-react'
+import { Gift, AlertCircle } from 'lucide-react'
 import { useGiftData } from "@/hooks/useGiftData"
 import { useSuggestionData } from "@/hooks/useSuggestionData"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
+import { useConfirm } from "./confirm-dialog"
 import { useI18n, formatMessage } from "./i18n-provider"
 
 // Import our new components
@@ -43,6 +44,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const { translations } = useI18n()
   const t = translations.common || {}
   const tGifts = translations.gifts || {}
+  const confirm = useConfirm()
 
   const {
     users,
@@ -141,6 +143,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await addGiftItem(itemData)
     } catch (err) {
       console.error("Failed to add gift item", err)
+      toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
+      throw err
     } finally {
       setIsSubmitting(false)
     }
@@ -160,33 +164,69 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       setEditingItem(null)
     } catch (err) {
       console.error("Failed to update gift item", err)
+      toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleRemoveGiftItem = async (itemId: string) => {
+    const name = giftItems.find((g: any) => g.id === itemId)?.name || ''
+    const ok = await confirm({
+      title: formatMessage(tGifts.deleteGift?.title || 'Delete "{{name}}"?', { name }),
+      description: tGifts.deleteGift?.description || 'This removes it from your list for good. To hide it without losing it, archive it instead.',
+    })
+    if (!ok) return
+
     try {
       await removeGiftItem(itemId)
+      toast(formatMessage(tGifts.toasts?.deleted || 'Deleted "{{name}}"', { name }))
     } catch (err) {
       console.error("Failed to remove gift item", err)
+      toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
     }
   }
 
   const handleTogglePurchase = async (itemId: string, currentPurchasedBy: string | null) => {
+    const tToasts = tGifts.toasts || {}
+    // Only the person who claimed a gift can release it
+    if (currentPurchasedBy && currentPurchasedBy !== currentUser.id) return
+
+    const isClaiming = !currentPurchasedBy
     try {
-      const newPurchasedBy = currentPurchasedBy ? null : currentUser.id
-      await togglePurchaseStatus(itemId, newPurchasedBy)
-    } catch (err) {
+      await togglePurchaseStatus(itemId, isClaiming ? currentUser.id : null)
+
+      if (!isClaiming) {
+        toast(tToasts.released || "Unmarked. It's open again.")
+        return
+      }
+      const item = giftItems.find((g: any) => g.id === itemId)
+      const ownerName = users.find((u: any) => u.id === item?.owner_id)?.name
+      if (item && item.is_public === false && ownerName) {
+        toast.success(formatMessage(tToasts.claimedSurprise || "Marked as yours. {{name}} won't see this.", { name: ownerName }))
+      } else {
+        toast.success(tToasts.claimed || 'Marked as yours')
+      }
+    } catch (err: any) {
       console.error("Failed to toggle purchase status", err)
+      if (err?.status === 403) {
+        toast.error(tToasts.alreadyClaimed || 'Someone else already claimed this')
+        refetchGifts()
+      } else {
+        toast.error(tToasts.saveFailed || "Couldn't save that. Try again.")
+      }
     }
   }
 
   const handleGiftCardPurchase = async (itemId: string, amount: number) => {
     try {
       await addGiftCardPurchase(itemId, currentUser.id, amount)
+      toast.success(tGifts.giftCard?.purchaseDialog?.success || 'Contribution recorded')
     } catch (err) {
       console.error("Failed to add gift card purchase", err)
+      toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
+      // Rethrow so the contribution dialog stays open with the amount intact
+      throw err
     }
   }
 
@@ -195,6 +235,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await toggleArchiveStatus(itemId)
     } catch (err) {
       console.error("Failed to toggle archive status", err)
+      toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
     }
   }
 
@@ -272,6 +313,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await fetchUserLists()
     } catch (err) {
       console.error("Failed to create list", err)
+      toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -309,6 +351,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await fetchUserLists()
     } catch (err) {
       console.error("Failed to update list", err)
+      toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -316,7 +359,11 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
   const handleDeleteList = async (listId: string) => {
     const tLists = translations.lists || {}
-    if (!confirm(tLists.deleteConfirm?.message || 'Are you sure you want to delete this list? Note: Lists with items cannot be deleted - you must move or delete all items first.')) return
+    const ok = await confirm({
+      title: tLists.deleteConfirm?.title || 'Delete this list?',
+      description: tLists.deleteConfirm?.message || "Lists that still have gifts can't be deleted. Move or delete the gifts first.",
+    })
+    if (!ok) return
 
     setIsSubmitting(true)
     try {
@@ -326,14 +373,15 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        alert(formatMessage(tLists.deleteConfirm?.errorWithDetails || tLists.deleteConfirm?.error || 'Failed to delete list', { error: error.error || '' }))
+        toast.error(error.error || tLists.deleteConfirm?.error || 'Failed to delete list')
         return
       }
 
       await fetchUserLists()
+      toast(tLists.deleteConfirm?.deleted || 'List deleted')
     } catch (err) {
       console.error("Failed to delete list", err)
-      alert(tLists.deleteConfirm?.error || 'Failed to delete list')
+      toast.error(tLists.deleteConfirm?.error || 'Failed to delete list')
     } finally {
       setIsSubmitting(false)
     }
@@ -350,43 +398,42 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const getActiveMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id && !item.archived)
   const getArchivedMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id && item.archived)
 
-  // Loading state
+  // Loading state: the skeleton mirrors the real layout (greeting, then the list card)
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-4 w-full max-w-xl mx-auto">
-        <Card className={'w-full bg-card text-card-foreground flex flex-col gap-6 rounded-none md:rounded-xl border-none md:border py-6 shadow-none md:shadow-sm'}>
-          <CardContent className="text-center">
-            <div className="mx-auto mb-4 w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-              <Database className="w-8 h-8 text-blue-600 animate-pulse" />
-            </div>
-            <Skeleton className="h-8 w-48 mx-auto mb-2" />
-            <Skeleton className="h-4 w-64 mx-auto" />
-            <div className="space-y-3 mt-6">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
+      <div className="container mx-auto max-w-xl w-full" aria-busy="true">
+        <span className="sr-only">{t.loading || 'Loading...'}</span>
+        <div className="flex items-end mb-4 md:mb-6 px-4 md:px-0 min-h-[100px] md:min-h-auto">
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+        <Card className="rounded-t-3xl rounded-b-none md:rounded-xl border-none md:border py-6 shadow-none md:shadow-sm">
+          <CardContent className="px-6 md:px-3 space-y-4">
+            <Skeleton className="h-11 md:h-9 w-full" />
+            {[...Array(4)].map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
           </CardContent>
         </Card>
       </div>
     )
   }
 
-  // Error state
+  // Error state (initial load only; failed saves show a toast instead)
   if (error) {
     return (
-      <div className="container mx-auto max-w-xl w-full">
-        <Card className={'w-full bg-card text-card-foreground flex flex-col gap-6 rounded-none md:rounded-xl border-none md:border py-6 shadow-none md:shadow-sm'}>
-          <CardContent className="text-center">
-            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h2 className="text-2xl text-red-600 mb-2">Database Connection Error</h2>
-            <p className="text-muted-foreground mb-4">Unable to connect to Neon database</p>
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+      <div className="container mx-auto max-w-xl w-full px-4 md:px-0">
+        <Card className="rounded-xl py-6">
+          <CardContent className="text-center space-y-4">
+            <AlertCircle className="size-10 text-destructive mx-auto" aria-hidden="true" />
+            <div className="space-y-1">
+              <h2 className="text-xl font-medium">{t.loadError?.title || "Couldn't load your gift lists"}</h2>
+              <p className="text-muted-foreground">{t.loadError?.body || 'Check your connection, then try again.'}</p>
+            </div>
             <Button className="w-full" onClick={() => window.location.reload()}>
-              Try Again
+              {t.retry || 'Try Again'}
             </Button>
           </CardContent>
         </Card>
@@ -405,7 +452,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         <div className="flex items-end justify-between mb-4 md:mb-6 px-4 md:px-0 min-h-[100px] md:min-h-auto">
           <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-2xl font-heading font-medium tracking-wide">
+              <h1 className="text-2xl font-medium tracking-tight text-balance">
                 {formatMessage(t.welcome || "Hi, {{name}}!", { name: currentMember?.name || '' })}
               </h1>
               <p>{t.welcomeBack || 'Welcome back 😊'}</p>
@@ -422,7 +469,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                 <TabsTrigger value="suggestions" className="flex items-center gap-1">
                   <span className="inline truncate">{t.tabs?.suggestions || 'Suggestions'}</span>
                   {pendingCount > 0 && (
-                    <Badge className="bg-red-500 text-white text-xs px-1.5 py-0 min-w-[18px] h-[18px]">
+                    <Badge className="bg-destructive text-destructive-foreground text-xs px-1.5 py-0 min-w-[18px] h-[18px]">
                       {pendingCount}
                     </Badge>
                   )}
@@ -432,10 +479,10 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
               {/* My Gift List Tab */}
               <TabsContent value="my-list" className="space-y-6 mb-0 md:mb-6">
                 <div className="flex items-center justify-between mb-2 px-1">
-                  <div className="flex items-center gap-2">
-                    <Gift className="w-5 h-5" />
+                  <h2 className="flex items-center gap-2 font-medium">
+                    <Gift className="size-5" aria-hidden="true" />
                     {tGifts.myGifts?.title || 'My Gift Ideas'}
-                  </div>
+                  </h2>
                   <ListManagement
                     userLists={userLists}
                     otherMembers={getOtherMembers()}
@@ -473,10 +520,10 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
               {/* Family Lists Tab */}
               <TabsContent value="family-lists" className="space-y-6 mb-0 md:mb-6">
                 <div className="flex items-center justify-between mb-2 px-1">
-                  <div className="flex items-center gap-2 h-8">
-                    <Gift className="w-5 h-5" />
+                  <h2 className="flex items-center gap-2 h-8 font-medium">
+                    <Gift className="size-5" aria-hidden="true" />
                     {tGifts.familyGifts?.title || "Family Gift Lists"}
-                  </div>
+                  </h2>
                 </div>
 
                 <p className="text-sm text-muted-foreground">
