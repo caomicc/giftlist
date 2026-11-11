@@ -17,8 +17,10 @@ export function UserMenuWrapper() {
   // const router = useRouter()
   const pathname = usePathname()
 
-  // Check if we're on an auth page where we shouldn't show the user menu
-  const isAuthPage = pathname.startsWith('/auth') || pathname.startsWith('/login')
+  // Check if we're on an auth page where we shouldn't show the user menu.
+  // Paths carry a locale prefix (/en/auth/signin), so strip it before matching.
+  const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(?=\/|$)/, '') || '/'
+  const isAuthPage = pathWithoutLocale.startsWith('/auth') || pathWithoutLocale.startsWith('/login')
 
   useEffect(() => {
     const checkUser = async () => {
