@@ -43,7 +43,7 @@ export default function MyGiftsList({
   const { t } = useTranslation('gifts')
   const { t: tCommon } = useTranslation('common')
   
-  if (activeMyGifts.length === 0 && archivedMyGifts.length === 0) {
+  if (userLists.length === 0 && activeMyGifts.length === 0 && archivedMyGifts.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <Gift className="w-12 h-12 mx-auto mb-3 opacity-50" />
@@ -52,39 +52,31 @@ export default function MyGiftsList({
     )
   }
 
-  // Group items by list
-  const itemsByList = activeMyGifts.reduce((acc: any, item: any) => {
-    const listId = item.list_id || 'unknown'
-    if (!acc[listId]) {
-      const listInfo = userLists.find(l => l.id === listId)
-      acc[listId] = {
-        name: listInfo?.name || (t.giftItem?.unknownList || 'Unknown List'),
-        description: listInfo?.description || '',
-        isPublic: listInfo?.is_public || false,
-        createdAt: listInfo?.created_at || null,
-        items: []
-      }
+  const listGroup = (listId: string) => {
+    const listInfo = userLists.find(l => l.id === listId)
+    return {
+      name: listInfo?.name || (t.giftItem?.unknownList || 'Unknown List'),
+      description: listInfo?.description || '',
+      isPublic: listInfo?.is_public || false,
+      createdAt: listInfo?.created_at || null,
+      items: [] as any[]
     }
-    acc[listId].items.push(item)
-    return acc
-  }, {})
+  }
+
+  // Group items by list; seed with every list so empty (new) lists still show
+  const itemsByList: Record<string, ReturnType<typeof listGroup>> =
+    Object.fromEntries(userLists.map(l => [l.id, listGroup(l.id)]))
+  for (const item of activeMyGifts) {
+    const listId = item.list_id || 'unknown'
+    ;(itemsByList[listId] ??= listGroup(listId)).items.push(item)
+  }
 
   // Group archived items by list
-  const archivedByList = archivedMyGifts.reduce((acc: any, item: any) => {
+  const archivedByList: Record<string, ReturnType<typeof listGroup>> = {}
+  for (const item of archivedMyGifts) {
     const listId = item.list_id || 'unknown'
-    if (!acc[listId]) {
-      const listInfo = userLists.find(l => l.id === listId)
-      acc[listId] = {
-        name: listInfo?.name || (t.giftItem?.unknownList || 'Unknown List'),
-        description: listInfo?.description || '',
-        isPublic: listInfo?.is_public || false,
-        createdAt: listInfo?.created_at || null,
-        items: []
-      }
-    }
-    acc[listId].items.push(item)
-    return acc
-  }, {})
+    ;(archivedByList[listId] ??= listGroup(listId)).items.push(item)
+  }
 
   return (
     <div className="space-y-6">
@@ -121,6 +113,11 @@ export default function MyGiftsList({
               </div>
             </AccordionTrigger>
             <AccordionContent>
+              {listData.items.length === 0 && (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  {t.myGifts?.empty || 'No gift ideas yet. Add some items above!'}
+                </p>
+              )}
               <div className="divide-y divide-border">
                 {listData.items.map((item: any) => (
                   <div key={item.id}>
