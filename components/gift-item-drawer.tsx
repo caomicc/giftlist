@@ -86,7 +86,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
   onGiftCardPurchase,
 }) => {
   const { t } = useTranslation('gifts')
-  const { t: tCommon } = useTranslation('common')
+  const { t: tCommon, locale } = useTranslation('common')
   const [isGiftCardDialogOpen, setIsGiftCardDialogOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const [newComment, setNewComment] = useState('')
@@ -148,13 +148,6 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
     } catch (error) {
       console.error('Failed to delete comment:', error)
     }
-  }
-
-  const timeAgoTranslations = {
-    justNow: tCommon.timeAgo?.justNow,
-    minutesAgo: tCommon.timeAgo?.minutesAgo,
-    hoursAgo: tCommon.timeAgo?.hoursAgo,
-    daysAgo: tCommon.timeAgo?.daysAgo,
   }
 
   return (
@@ -346,7 +339,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">{comment.user_name}</span>
                             <span className="text-xs text-muted-foreground">
-                              {formatRelativeTime(comment.created_at, timeAgoTranslations)}
+                              {formatRelativeTime(comment.created_at, locale)}
                             </span>
                             {comment.user_id === currentUserId && (
                               <Button

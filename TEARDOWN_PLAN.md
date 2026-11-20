@@ -67,7 +67,7 @@ Also: failed saves no longer replace the app with the full-screen "Database Conn
 
 ## Phase 8: Cleanup and documentation
 - [x] Deleted the unused `components/navigation-bar.tsx` (it held shadcn docs demo data).
-- [ ] **Left for you:** remove unused dependencies. Not done, because the repo has both `pnpm-lock.yaml` and an untracked `package-lock.json`, and the deploy's package manager is unclear.
+- [x] Unused dependencies removed; npm (`package-lock.json`) is the package manager. ~~Left for you:~~ Not done, because the repo has both `pnpm-lock.yaml` and an untracked `package-lock.json`, and the deploy's package manager is unclear.
   - Unused anywhere: `next-auth`, `@auth/neon-adapter`, `zod`, `@hookform/resolvers`, `date-fns`, `recharts`, `tailwindcss-animate`, and the placeholder `fs` / `path` packages.
   - Used only by unimported shadcn components: `cmdk`, `embla-carousel-react`, `input-otp`, `react-day-picker`, `react-resizable-panels`, `react-hook-form`.
 - [x] DESIGN.md and `.impeccable/design.json` written from the code as it now stands (North Star: "The Quiet Coordinator").

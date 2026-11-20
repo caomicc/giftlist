@@ -25,7 +25,7 @@ const currentUser = await requireAuth(); // Redirects if not authenticated
 
 - **Connection**: Direct SQL via `lib/neon.ts` - import `{ sql }` and write parameterized queries
 - **No ORM**: Use raw SQL with template literals for type safety: `sql\`SELECT \* FROM users WHERE id = ${userId}\``
-- **Migrations**: Manual SQL scripts in `scripts/neon/` - run with node scripts (`migrate.js`, `migrate-lists.js`, etc.)
+- **Migrations**: Manual SQL scripts in `scripts/neon/` - initial schema via `node migrate.js`, later files via `psql -f`
 - **Types**: Define in `lib/neon.ts` - exported types like `User`, `GiftItem`, `List`, `ListPermission`
 
 ## Key Data Models & Features
@@ -169,18 +169,17 @@ Access as: `t.section?.subsection?.key`
 ## Development Workflow
 
 ```bash
-pnpm install              # Install dependencies
-pnpm dev                  # Start dev server on localhost:3000
-pnpm build                # Production build
-pnpm lint                 # Run ESLint (currently ignores errors)
+npm install               # Install dependencies
+npm run dev                # Start dev server on localhost:3000
+npm run build              # Production build
+npm run lint               # Run ESLint (currently ignores errors)
 ```
 
 ### Running Migrations
 
 ```bash
 node migrate.js                    # Initial schema
-node migrate-lists.js              # Add lists support
-node run-group-gift-migration.js   # Add group gifts
+psql "$NEON_DATABASE_URL" -f scripts/neon/<NN>-*.sql  # Later migrations
 ```
 
 ### Environment Variables (Required)

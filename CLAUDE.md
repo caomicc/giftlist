@@ -84,7 +84,7 @@ lib/
 
 ## Database Migration
 - Use `migrate.js` for schema setup
-- `migrate-gift-cards.js` for gift card feature migration
+- Later migrations are SQL files in `scripts/neon/` (run with `psql -f`)
 - `cleanup-seed-data.sql` for development data cleanup
 
 ## UI Framework
