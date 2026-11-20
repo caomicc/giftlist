@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useI18n } from "./i18n-provider";
 import { locales } from "@/lib/i18n-config";
 import {
@@ -23,7 +23,6 @@ const localeFlags: Record<string, string> = {
 
 export function LocaleSwitcher() {
   const pathname = usePathname();
-  const router = useRouter();
   const { locale, translations } = useI18n();
 
   const handleLocaleChange = (newLocale: string) => {
@@ -37,8 +36,9 @@ export function LocaleSwitcher() {
     document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=${60 * 60 * 24 * 365}`;
 
     // Navigate to the new path
-    router.push(newPath);
-    router.refresh();
+    // Full load, not router.push: a client navigation remounts <html> (new [lang] layout),
+    // which drops data-season/data-theme and can't re-run the inline season script.
+    window.location.assign(newPath);
   };
 
   return (

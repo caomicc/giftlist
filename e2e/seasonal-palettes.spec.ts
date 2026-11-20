@@ -66,6 +66,18 @@ for (const [theme, base] of [['seasonal-light', 'light'], ['seasonal-dark', 'dar
   })
 }
 
+for (const theme of ['light', 'dark', 'seasonal-light', 'seasonal-dark']) {
+  test(`${theme}: text on group-gift meets WCAG AA`, async ({ page }) => {
+    const read = await paletteReader(page, theme)
+    for (const season of theme.startsWith('seasonal') ? SEASONS.map(s => s.name) : [null]) {
+      const p = await read(season, ['--group-gift', '--group-gift-foreground'])
+      expect(p['--group-gift-foreground'], 'token defined').not.toBe('')
+      const ratio = await contrast(page, p['--group-gift-foreground'], p['--group-gift'])
+      expect(ratio, `${theme}/${season}`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+}
+
 test('semantic state colours do not change with the season', async ({ browser }) => {
   const SEMANTIC = ['--success', '--suggestion', '--destructive']
   const seasonal = await paletteReader(await browser.newPage(), 'seasonal-light')

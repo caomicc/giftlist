@@ -7,5 +7,5 @@ import nextTs from 'eslint-config-next/typescript'
 // ships plugins that support ESLint 10.
 export default [
   ...fixupConfigRules([...nextVitals, ...nextTs]),
-  { ignores: ['.next/**', 'node_modules/**', 'next-env.d.ts'] },
+  { ignores: ['.next/**', '.next-e2e/**', 'node_modules/**', 'next-env.d.ts'] },
 ]

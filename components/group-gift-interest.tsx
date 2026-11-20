@@ -105,7 +105,7 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
           size="sm"
           onClick={handleToggleInterest}
           disabled={loading}
-          className={isUserInterested ? "bg-group-gift text-white hover:bg-group-gift/90" : ""}
+          className={isUserInterested ? "bg-group-gift text-group-gift-foreground hover:bg-group-gift/90" : ""}
         >
           {isUserInterested ? (
             <>

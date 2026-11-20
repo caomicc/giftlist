@@ -16,6 +16,7 @@ export default defineConfig({
     command: `npx next dev -p ${PORT}`,
     url: `http://localhost:${PORT}/en/auth/signin`,
     reuseExistingServer: !process.env.CI,
+    env: { NEXT_DIST_DIR: '.next-e2e' },
     timeout: 120_000,
   },
 })

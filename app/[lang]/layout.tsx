@@ -51,6 +51,7 @@ export default async function LangLayout({
           themes={['light', 'dark', 'seasonal-light', 'seasonal-dark']}
           defaultTheme="light"
           enableSystem={false}
+          enableColorScheme={false}
           disableTransitionOnChange
         >
         <I18nProvider locale={lang} translations={translations}>

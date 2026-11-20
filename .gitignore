@@ -30,6 +30,7 @@ next-env.d.ts
 .DS_Store
 
 # playwright
+/.next-e2e/
 /test-results/
 /playwright-report/
 /blob-report/

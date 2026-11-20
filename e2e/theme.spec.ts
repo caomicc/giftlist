@@ -28,6 +28,7 @@ for (const theme of ['dark', 'seasonal-dark']) {
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme)
     expect(await token(page, '--background')).not.toMatch(LIGHT_BACKGROUND)
     await expect(page.locator('img.object-cover').first()).toHaveCSS('filter', /brightness\(0\.2\)/)
+    await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark')
   })
 }
 
@@ -42,6 +43,19 @@ test('theme and season attributes cause no hydration errors', async ({ page }) =
   await openWithTheme(page, 'seasonal-dark')
   await page.waitForLoadState('networkidle')
   expect(errors.filter(e => /hydrat/i.test(e))).toEqual([])
+})
+
+test('switching language keeps theme and season, with no console errors', async ({ page }) => {
+  const errors: string[] = []
+  page.on('console', m => { if (m.type() === 'error') errors.push(m.text()) })
+  await openWithTheme(page, 'seasonal-dark')
+  await page.getByRole('combobox', { name: 'Language' }).click()
+  await page.getByRole('option', { name: /Русский/ }).click()
+  await expect(page).toHaveURL(/\/ru\/auth\/signin$/)
+  await expect(page.locator('html')).toHaveAttribute('data-season', seasonForMonth(new Date().getMonth()))
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'seasonal-dark')
+  await page.waitForLoadState('networkidle')
+  expect(errors).toEqual([])
 })
 
 test('sets data-season from the local date before paint', async ({ page }) => {

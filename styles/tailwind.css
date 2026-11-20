@@ -11,7 +11,9 @@
  *   suggestion  gift suggestions
  * Each comes as a solid (text/button) and a soft (badge background) pair.
  */
+/* next-themes runs with enableColorScheme={false}; it only knows "light"/"dark" by name. */
 :root {
+  color-scheme: light;
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -38,6 +40,7 @@
   --success-soft: var(--color-green-50);
   --success-soft-foreground: var(--color-green-800);
   --group-gift: var(--color-violet-700);
+  --group-gift-foreground: oklch(0.985 0 0);
   --group-gift-soft: var(--color-violet-50);
   --suggestion: var(--color-amber-700);
   --suggestion-soft: var(--color-amber-50);
@@ -64,6 +67,7 @@
 /* Themes (data-theme on <html>): light, dark, seasonal-light, seasonal-dark. Seasonal accents follow below. */
 [data-theme="dark"],
 [data-theme="seasonal-dark"] {
+  color-scheme: dark;
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
@@ -89,6 +93,7 @@
   --success-soft: oklch(0.627 0.194 149.214 / 15%);
   --success-soft-foreground: var(--color-green-300);
   --group-gift: var(--color-violet-300);
+  --group-gift-foreground: oklch(0.141 0.005 285.823);
   --group-gift-soft: oklch(0.606 0.25 292.717 / 15%);
   --suggestion: var(--color-amber-300);
   --suggestion-soft: oklch(0.769 0.188 70.08 / 15%);
@@ -221,6 +226,7 @@
   --color-success-soft: var(--success-soft);
   --color-success-soft-foreground: var(--success-soft-foreground);
   --color-group-gift: var(--group-gift);
+  --color-group-gift-foreground: var(--group-gift-foreground);
   --color-group-gift-soft: var(--group-gift-soft);
   --color-suggestion: var(--suggestion);
   --color-suggestion-soft: var(--suggestion-soft);
