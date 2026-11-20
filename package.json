@@ -5,7 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "eslint .",
     "start": "next start"
   },
   "dependencies": {
@@ -50,11 +50,12 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@eslint/compat": "^2.1.1",
     "@types/negotiator": "^0.6.4",
     "@types/node": "^24",
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
-    "eslint": "9.39.1",
+    "eslint": "^10.15.0",
     "eslint-config-next": "16.0.7",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.17",
