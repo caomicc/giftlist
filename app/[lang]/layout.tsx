@@ -8,6 +8,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { ConfirmProvider } from "@/components/confirm-dialog";
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
+import { ThemeProvider } from "@/components/theme-provider";
+import { seasonScript } from "@/lib/seasons";
 
 export const metadata: Metadata = {
   title: "Meep Family Wishlist",
@@ -30,7 +32,7 @@ export default async function LangLayout({
   const translations = await getAllDictionaries(lang);
 
   return (
-    <html lang={lang}>
+    <html lang={lang} suppressHydrationWarning>
       <head>
         <style>{`
           html {
@@ -40,9 +42,17 @@ export default async function LangLayout({
           }
         `}
         </style>
+        <script dangerouslySetInnerHTML={{ __html: seasonScript }} />
       </head>
 
       <body className={"bg-linear-to-br from-backdrop-from to-backdrop-to min-h-screen"}>
+        <ThemeProvider
+          attribute="data-theme"
+          themes={['light', 'dark', 'seasonal-light', 'seasonal-dark']}
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
         <I18nProvider locale={lang} translations={translations}>
           <div className="absolute top-4 left-4 z-50">
             <LocaleSwitcher />
@@ -53,6 +63,7 @@ export default async function LangLayout({
           </ConfirmProvider>
           <Toaster position="bottom-center" richColors closeButton />
         </I18nProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -7,7 +7,8 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
-    "test": "node --test lib/*.test.ts"
+    "test": "node --test lib/*.test.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.2",
@@ -52,6 +53,7 @@
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.1",
+    "@playwright/test": "^1.65.1",
     "@types/negotiator": "^0.6.4",
     "@types/node": "^24",
     "@types/react": "19.2.7",
