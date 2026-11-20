@@ -111,6 +111,91 @@
   --sidebar-ring: oklch(0.541 0.281 293.009);
 }
 
+/*
+ * Seasonal accents (data-season, set from lib/seasons.ts). Only accent tokens change;
+ * success / suggestion / destructive keep their meaning year-round. Must come after the dark block.
+ */
+
+[data-theme="seasonal-light"][data-season="winter"] {
+  --primary: var(--color-cyan-700);
+  --ring: var(--color-cyan-700);
+  --secondary: var(--color-sky-200);
+  --group-gift: var(--color-cyan-800);
+  --group-gift-soft: var(--color-cyan-50);
+  --backdrop-from: var(--color-sky-100);
+  --backdrop-to: var(--color-indigo-300);
+}
+
+[data-theme="seasonal-light"][data-season="spring"] {
+  --primary: var(--color-emerald-700);
+  --ring: var(--color-emerald-700);
+  --secondary: var(--color-pink-200);
+  --group-gift: var(--color-emerald-800);
+  --group-gift-soft: var(--color-emerald-50);
+  --backdrop-from: var(--color-pink-100);
+  --backdrop-to: var(--color-emerald-200);
+}
+
+[data-theme="seasonal-light"][data-season="summer"] {
+  --primary: var(--color-orange-700);
+  --ring: var(--color-orange-700);
+  --secondary: var(--color-amber-200);
+  --group-gift: var(--color-orange-800);
+  --group-gift-soft: var(--color-orange-50);
+  --backdrop-from: var(--color-amber-100);
+  --backdrop-to: var(--color-rose-300);
+}
+
+[data-theme="seasonal-light"][data-season="fall"] {
+  --primary: var(--color-orange-800);
+  --ring: var(--color-orange-800);
+  --secondary: var(--color-orange-200);
+  --group-gift: var(--color-red-800);
+  --group-gift-soft: var(--color-red-50);
+  --backdrop-from: var(--color-orange-100);
+  --backdrop-to: var(--color-red-300);
+}
+
+[data-theme="seasonal-dark"][data-season="winter"] {
+  --primary: var(--color-cyan-400);
+  --primary-foreground: oklch(0.141 0.005 285.823);
+  --ring: var(--color-cyan-400);
+  --group-gift: var(--color-cyan-300);
+  --group-gift-soft: color-mix(in oklch, var(--color-cyan-400) 15%, transparent);
+  --backdrop-from: oklch(0.21 0.006 285.885);
+  --backdrop-to: var(--color-cyan-950);
+}
+
+[data-theme="seasonal-dark"][data-season="spring"] {
+  --primary: var(--color-emerald-400);
+  --primary-foreground: oklch(0.141 0.005 285.823);
+  --ring: var(--color-emerald-400);
+  --group-gift: var(--color-emerald-300);
+  --group-gift-soft: color-mix(in oklch, var(--color-emerald-400) 15%, transparent);
+  --backdrop-from: oklch(0.21 0.006 285.885);
+  --backdrop-to: var(--color-emerald-950);
+}
+
+[data-theme="seasonal-dark"][data-season="summer"] {
+  --primary: var(--color-orange-400);
+  --primary-foreground: oklch(0.141 0.005 285.823);
+  --ring: var(--color-orange-400);
+  --group-gift: var(--color-orange-300);
+  --group-gift-soft: color-mix(in oklch, var(--color-orange-400) 15%, transparent);
+  --backdrop-from: oklch(0.21 0.006 285.885);
+  --backdrop-to: var(--color-rose-950);
+}
+
+[data-theme="seasonal-dark"][data-season="fall"] {
+  --primary: var(--color-amber-400);
+  --primary-foreground: oklch(0.141 0.005 285.823);
+  --ring: var(--color-amber-400);
+  --group-gift: var(--color-amber-300);
+  --group-gift-soft: color-mix(in oklch, var(--color-amber-400) 15%, transparent);
+  --backdrop-from: oklch(0.21 0.006 285.885);
+  --backdrop-to: var(--color-orange-950);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
