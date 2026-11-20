@@ -20,6 +20,13 @@
     "familyGiftlists": "Списки семьи",
     "myProfile": "Мой профиль"
   },
+  "theme": {
+    "label": "Тема",
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "seasonalLight": "Сезонная светлая",
+    "seasonalDark": "Сезонная тёмная"
+  },
   "userMenu": {
     "profileSettings": "Настройки профиля",
     "setPassword": "Установить пароль",

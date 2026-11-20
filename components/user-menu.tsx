@@ -6,10 +6,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { User, Lock, LogOut, Settings, ChevronDownIcon } from 'lucide-react'
+import { Lock, LogOut, Settings, ChevronDownIcon, Palette } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 import React, { useState, useEffect } from 'react'
 import { useI18n } from './i18n-provider'
@@ -26,6 +32,13 @@ export function UserMenu({ user }: UserMenuProps) {
   const { locale, translations } = useI18n()
   const t = translations.common || {}
   const [hasPassword, setHasPassword] = useState<boolean | null>(null)
+  const { theme, setTheme } = useTheme()
+  const themes = [
+    ['light', t.theme?.light || 'Light'],
+    ['dark', t.theme?.dark || 'Dark'],
+    ['seasonal-light', t.theme?.seasonalLight || 'Seasonal light'],
+    ['seasonal-dark', t.theme?.seasonalDark || 'Seasonal dark'],
+  ]
 
   useEffect(() => {
     // Check if user has a password
@@ -83,6 +96,19 @@ export function UserMenu({ user }: UserMenuProps) {
           <Settings className="mr-2 h-4 w-4" />
           <span>{t.userMenu?.profileSettings || 'Profile Settings'}</span>
         </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Palette className="mr-2 h-4 w-4" />
+            <span>{t.theme?.label || 'Theme'}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
+              {themes.map(([value, label]) => (
+                <DropdownMenuRadioItem key={value} value={value}>{label}</DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         {hasPassword === false && (
           <DropdownMenuItem onClick={handleSetPassword}>
             <Lock className="mr-2 h-4 w-4" />
