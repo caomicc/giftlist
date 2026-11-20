@@ -7,7 +7,7 @@ import { test as base, type Page } from '@playwright/test'
  */
 export async function fakeSignIn(page: Page, user = { id: 'e2e-user', email: 'e2e@example.com', name: 'Test User' }) {
   await page.context().addCookies([{ name: 'session-token', value: 'e2e', url: 'http://localhost:3100' }])
-  await page.route('**/api/user/profile', route => route.fulfill({ json: { ...user, created_at: new Date().toISOString() } }))
+  await page.route('**/api/user/profile', route => route.fulfill({ json: { ...user, hasPassword: true, created_at: new Date().toISOString() } }))
   await page.route('**/api/auth/check-password', route => route.fulfill({ json: { hasPassword: true } }))
 }
 

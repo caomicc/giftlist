@@ -13,7 +13,9 @@ A Next.js family gift wishlist application that allows family members to create 
 npm run dev          # Start development server on localhost:3000
 npm run build        # Build for production
 npm run start        # Start production server
-npm run lint         # Run ESLint (currently configured to ignore errors)
+npm run lint         # Run ESLint (flat config, ESLint 10)
+npm test             # Unit tests (node --test lib/*.test.ts)
+npm run test:e2e     # Playwright e2e (starts next dev on :3100)
 ```
 
 ## Architecture

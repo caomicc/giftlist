@@ -67,7 +67,7 @@ Also: failed saves no longer replace the app with the full-screen "Database Conn
 
 ## Phase 8: Cleanup and documentation
 - [x] Deleted the unused `components/navigation-bar.tsx` (it held shadcn docs demo data).
-- [x] Unused dependencies removed; npm (`package-lock.json`) is the package manager. ~~Left for you:~~ Not done, because the repo has both `pnpm-lock.yaml` and an untracked `package-lock.json`, and the deploy's package manager is unclear.
+- [x] Unused dependencies removed; npm (`package-lock.json`) is the package manager. Removed:
   - Unused anywhere: `next-auth`, `@auth/neon-adapter`, `zod`, `@hookform/resolvers`, `date-fns`, `recharts`, `tailwindcss-animate`, and the placeholder `fs` / `path` packages.
   - Used only by unimported shadcn components: `cmdk`, `embla-carousel-react`, `input-otp`, `react-day-picker`, `react-resizable-panels`, `react-hook-form`.
 - [x] DESIGN.md and `.impeccable/design.json` written from the code as it now stands (North Star: "The Quiet Coordinator").
@@ -78,7 +78,6 @@ Also: failed saves no longer replace the app with the full-screen "Database Conn
   - `--font-sans` / `--font-mono` held class names instead of font families
 - [ ] Known drift, not fixed:
   - auth and profile card titles use `font-bold` while the app uses 500 weight
-  - the old Radix toast files sit alongside sonner
   - `group-gift-soft` is defined but unused
 
 ## Phase 9: Polish and re-score
@@ -92,3 +91,9 @@ Also: failed saves no longer replace the app with the full-screen "Database Conn
 - [x] "Save to Meep" bookmarklet card on the profile page (drag to bookmarks bar). Falls back to the same tab when popups are blocked.
 - [x] Fixed `UserMenuWrapper` treating `/en/auth/...` as a non-auth page; it was causing the 401 on sign-in.
 - [ ] Next: PWA manifest with `share_target` → `/add` (Android share sheet), and an iOS Shortcut recipe.
+
+## Follow-up: local database for development and tests
+- [ ] `docker-compose.yml` with a local Postgres so auth, development and e2e tests never touch the production Neon database.
+  - The app talks to Neon through `@neondatabase/serverless`, which speaks HTTP/WebSocket rather than the Postgres wire protocol. The compose file also needs the Neon proxy (`local-neon-http-proxy`), or `lib/neon.ts` needs to switch drivers when `NEON_DATABASE_URL` points at localhost.
+  - Seed the schema from `migrate.js` + `scripts/neon/*.sql`, plus a known test user (password sign-in) for e2e.
+  - Then add Playwright tests for the DB-backed workflows that are uncovered today: sign in for real, add / edit / delete a gift, claim a gift, gift-card contributions, suggestions. Today `e2e/` only covers flows that can be stubbed (sign-in UI, locale, profile, themes).
