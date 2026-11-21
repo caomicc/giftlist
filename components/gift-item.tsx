@@ -94,7 +94,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
           <div className="flex items-center gap-2">
             <h3
               className={cn(
-                'font-medium truncate text-sm md:text-base',
+                'font-medium line-clamp-2 text-sm md:text-base',
                 isArchived && 'line-through text-muted-foreground',
                 ((isPurchased && (!isMyGift || (isMyGift && item.is_public))) ||
                   (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))) &&
@@ -104,7 +104,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
               <button
                 type="button"
                 onClick={() => setIsDrawerOpen(true)}
-                className="max-w-full truncate text-left rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className="max-w-full line-clamp-2 text-left rounded-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
               >
                 {item.name}
               </button>
@@ -146,9 +146,9 @@ const GiftItem: React.FC<GiftItemProps> = ({
                 {formatMessage(t.giftItem?.badges?.suggestedBy || 'Suggested by {{name}}', { name: item.suggested_by_name })}
               </Badge>
             )}
-            {/* Purchase status badge - only show if not owner viewing private list */}
+            {/* Purchase status badge: only for the owner of a tracked list. Family see the claim chip / gift-card button instead. */}
             {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) &&
-              (!isMyGift || (isMyGift && item.is_public)) && (
+              isMyGift && item.is_public && (
               <Badge className="text-xs bg-success-soft text-success-soft-foreground">
                 {isGiftCard
                   ? (t.giftItem?.buttons?.complete || 'Complete')

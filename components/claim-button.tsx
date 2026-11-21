@@ -36,17 +36,19 @@ export function ClaimButton({
   const isOthers = !!purchasedBy && !isMine
 
   if (isOthers) {
+    const label = purchaserName
+      ? formatMessage(labels.claimedBy || 'Claimed by {{name}}', { name: purchaserName })
+      : (labels.claimed || 'Claimed')
     return (
       <span
+        title={label}
         className={cn(
-          'inline-flex h-8 items-center gap-1 rounded-md bg-muted px-2.5 text-xs font-medium text-muted-foreground',
+          'inline-flex h-8 min-w-0 items-center gap-1 rounded-md bg-muted px-2.5 text-xs font-medium text-muted-foreground max-md:max-w-36',
           className
         )}
       >
-        <Check className="size-3.5" aria-hidden="true" />
-        {purchaserName
-          ? formatMessage(labels.claimedBy || 'Claimed by {{name}}', { name: purchaserName })
-          : (labels.claimed || 'Claimed')}
+        <Check className="size-3.5 shrink-0" aria-hidden="true" />
+        <span className="truncate">{label}</span>
       </span>
     )
   }

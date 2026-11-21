@@ -123,3 +123,18 @@ test.describe('claiming', () => {
     }
   })
 })
+
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  test('a claimed gift shows its full name and one status', async ({ page }) => {
+    await signInAs(page, SEED.alex.email)
+    await page.getByRole('tab', { name: 'Family Lists' }).click()
+    await page.getByRole('button', { name: `${SEED.jordan.name}'s Gift Lists` }).click()
+    const title = page.getByRole('button', { name: 'Board game: Wingspan' })
+    await expect(title).toBeVisible()
+    expect(await title.evaluate(el => el.scrollWidth <= el.clientWidth && el.scrollHeight <= el.clientHeight)).toBe(true)
+    await expect(page.getByText(`Claimed by ${SEED.riley.name}`)).toBeVisible()
+    await expect(page.getByText('Purchased', { exact: true })).toHaveCount(0)
+  })
+})
