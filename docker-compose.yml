@@ -1,0 +1,33 @@
+# Local database for development and e2e tests (never production).
+#   npm run db:up | db:down | db:reset   — see CLAUDE.md "Local database".
+# The app reaches Postgres only through the Neon HTTP proxy (:4444), the same driver path as production.
+services:
+  postgres:
+    image: postgres:17-alpine # matches production (17.x)
+    environment:
+      POSTGRES_DB: main
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432" # for psql only; 5433 avoids clashing with a Postgres already on 5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d main"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  neon-proxy:
+    image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+    environment:
+      PG_CONNECTION_STRING: postgres://postgres:postgres@postgres:5432/main
+    ports:
+      - "4444:4444"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:

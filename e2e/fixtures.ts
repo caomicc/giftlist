@@ -13,3 +13,23 @@ export async function fakeSignIn(page: Page, user = { id: 'e2e-user', email: 'e2
 
 export const test = base
 export { expect } from '@playwright/test'
+
+/** Seeded users in db/seed.sql (local database only). */
+const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
+export const SEED_PASSWORD = 'password123'
+export const SEED = {
+  alex: { id: id(1), email: 'alex@example.com', name: 'Alex Rivera' },
+  sam: { id: id(2), email: 'sam@example.com', name: 'Sam Chen' },
+  jordan: { id: id(3), email: 'jordan@example.com', name: 'Jordan Patel' },
+  riley: { id: id(4), email: 'riley@example.com', name: 'Riley Okafor' },
+}
+export const SEED_GIFTS = { castIronSkillet: { id: id(201), name: 'Cast iron skillet' } }
+
+/** Real password sign-in against the local database. */
+export async function signInAs(page: Page, email: string) {
+  await page.goto('/en/auth/signin')
+  await page.getByLabel('Email').fill(email)
+  await page.getByPlaceholder('Enter your password').fill(SEED_PASSWORD)
+  await page.getByRole('button', { name: 'Login' }).click()
+  await page.waitForURL(/\/en$/)
+}

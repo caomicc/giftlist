@@ -4,12 +4,15 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "dev": "node scripts/dev-local.mjs",
     "lint": "eslint .",
     "start": "next start",
     "test": "node --test lib/*.test.ts scripts/*.test.mjs",
     "test:e2e": "playwright test",
-    "db:reset": "node scripts/db-reset.mjs"
+    "db:reset": "node scripts/db-reset.mjs",
+    "dev:prod": "next dev",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.2",

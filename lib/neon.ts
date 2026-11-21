@@ -1,8 +1,13 @@
-import { neon } from '@neondatabase/serverless'
+import { neon, neonConfig } from '@neondatabase/serverless'
 
 function createSQL() {
   if (!process.env.NEON_DATABASE_URL) {
     throw new Error('NEON_DATABASE_URL is not set')
+  }
+  // Local database (docker compose, see db/local.env): route the HTTP driver to the Neon proxy.
+  // Sent to localhost, not db.localtest.me: some DNS resolvers refuse names that point at 127.0.0.1.
+  if (new URL(process.env.NEON_DATABASE_URL).hostname === 'db.localtest.me') {
+    neonConfig.fetchEndpoint = 'http://localhost:4444/sql'
   }
   return neon(process.env.NEON_DATABASE_URL)
 }
