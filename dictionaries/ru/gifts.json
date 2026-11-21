@@ -111,8 +111,7 @@
       "claim": "Я подарю",
       "mine": "Вы дарите это",
       "claimedBy": "Занято: {{name}}",
-      "claimed": "Занято",
-      "releaseHint": "Нажмите, чтобы отменить"
+      "claimed": "Занято"
     }
   },
   "giftCard": {
@@ -235,7 +234,9 @@
     "alreadyClaimed": "Этот подарок уже кто-то выбрал",
     "saveFailed": "Не удалось сохранить. Попробуйте ещё раз.",
     "deleted": "«{{name}}» удалён",
-    "added": "Добавлено в «{{list}}»"
+    "added": "Добавлено в «{{list}}»",
+    "archived": "«{{name}}» в архиве",
+    "unarchived": "«{{name}}» восстановлен"
   },
   "deleteGift": {
     "title": "Удалить «{{name}}»?",

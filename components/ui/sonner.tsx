@@ -15,6 +15,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
+          // An open drawer or dialog sets pointer-events: none on <body>; toasts (Undo) must stay clickable
+          pointerEvents: "auto",
         } as React.CSSProperties
       }
       {...props}

@@ -56,6 +56,17 @@ test.describe('my list', () => {
     await deleteGift(page, name)
   })
 
+  test('archiving can be undone', async ({ page }) => {
+    const knife = SEED_GIFTS.chefsKnife.name
+    await myGiftRow(page, knife).getByRole('button', { name: 'Archive item' }).click()
+    await expect(page.getByText(`Archived "${knife}"`)).toBeVisible()
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(page.getByText(`Restored "${knife}"`)).toBeVisible()
+    await page.reload() // the undo must reach the server, not just the screen
+    await expect(myGiftRow(page, knife).getByRole('button', { name: 'Archive item' })).toBeVisible()
+    await expect(myGiftRow(page, knife).getByRole('button', { name: 'Unarchive item' })).toHaveCount(0)
+  })
+
   test('deletes a gift', async ({ page }) => {
     const name = uniqueName()
     await addGift(page, name)
@@ -96,6 +107,29 @@ test.describe('claiming', () => {
       await page.getByRole('button', { name: 'You’re getting this' }).click()
       await expect(page.getByRole('button', { name: 'I’ll get this' })).toBeVisible()
     }
+  })
+
+  test('releasing a claim can be undone', async ({ page }) => {
+    await signInAs(page, SEED.riley.email)
+    await openSkillet(page)
+    await page.getByRole('button', { name: 'I’ll get this' }).click()
+    await page.getByRole('button', { name: 'You’re getting this' }).click()
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(page.getByRole('button', { name: 'You’re getting this' })).toBeVisible()
+    await page.getByRole('button', { name: 'You’re getting this' }).click() // cleanup
+    await expect(page.getByRole('button', { name: 'I’ll get this' })).toBeVisible()
+  })
+
+  test('undoing a release after someone else claimed it says so', async ({ page }) => {
+    await signInAs(page, SEED.riley.email)
+    await openSkillet(page)
+    await page.getByRole('button', { name: 'I’ll get this' }).click()
+    await page.getByRole('button', { name: 'You’re getting this' }).click()
+    await expect(page.getByRole('button', { name: 'I’ll get this' })).toBeVisible()
+    await page.route('**/api/gift-items*', route =>
+      route.request().method() === 'PUT' ? route.fulfill({ status: 403, json: {} }) : route.fallback())
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(page.getByText('Someone else already claimed this')).toBeVisible()
   })
 
   test('another member sees who claimed it; the owner of a surprise list sees nothing', async ({ page, browser }) => {

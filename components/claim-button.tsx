@@ -58,7 +58,6 @@ export function ClaimButton({
       variant={isMine ? 'default' : 'secondary'}
       size="sm"
       aria-pressed={isMine}
-      title={isMine ? (labels.releaseHint || 'Tap to unmark') : undefined}
       onClick={(e) => {
         e.stopPropagation()
         onToggle?.(itemId, purchasedBy || null)

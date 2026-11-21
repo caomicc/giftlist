@@ -149,18 +149,18 @@ export function useGiftData() {
   }
 
   // Archive/unarchive item
-  const toggleArchiveStatus = async (itemId: string) => {
+  /** Archives or restores a gift. Pass `archived` to set it explicitly (undo does: its closure may hold stale items). */
+  const toggleArchiveStatus = async (itemId: string, archived?: boolean) => {
     try {
-      // Get current item to toggle its archive status
       const currentItem = giftItems.find(item => item.id === itemId)
-      if (!currentItem) throw new Error('Item not found')
+      if (!currentItem && archived === undefined) throw new Error('Item not found')
 
       const response = await fetch('/api/gift-items', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ id: itemId, archived: !currentItem.archived }),
+        body: JSON.stringify({ id: itemId, archived: archived ?? !currentItem?.archived }),
       })
 
       if (!response.ok) throw new Error('Failed to update archive status')

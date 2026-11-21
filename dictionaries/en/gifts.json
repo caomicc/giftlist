@@ -111,8 +111,7 @@
       "claim": "I’ll get this",
       "mine": "You’re getting this",
       "claimedBy": "Claimed by {{name}}",
-      "claimed": "Claimed",
-      "releaseHint": "Tap to unmark"
+      "claimed": "Claimed"
     }
   },
   "giftCard": {
@@ -235,7 +234,9 @@
     "alreadyClaimed": "Someone else already claimed this",
     "saveFailed": "Couldn’t save that. Try again.",
     "deleted": "Deleted “{{name}}”",
-    "added": "Added to {{list}}"
+    "added": "Added to {{list}}",
+    "archived": "Archived \"{{name}}\"",
+    "unarchived": "Restored \"{{name}}\""
   },
   "deleteGift": {
     "title": "Delete “{{name}}”?",

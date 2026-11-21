@@ -182,7 +182,10 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       await togglePurchaseStatus(itemId, isClaiming ? currentUser.id : null)
 
       if (!isClaiming) {
-        toast(tToasts.released || "Unmarked. It's open again.")
+        // Undo goes back through this handler, so a gift someone claimed meanwhile gets the 403 toast
+        toast(tToasts.released || "Unmarked. It's open again.", {
+          action: { label: t.undo || 'Undo', onClick: () => handleTogglePurchase(itemId, null) },
+        })
         return
       }
       const item = giftItems.find(g => g.id === itemId)
@@ -215,9 +218,18 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     }
   }
 
-  const handleArchiveItem = async (itemId: string) => {
+  const handleArchiveItem = async (itemId: string, archived?: boolean) => {
+    const item = giftItems.find(g => g.id === itemId)
+    // Explicit target state: the undo below runs from a closure whose items are already stale
+    const next = archived ?? !item?.archived
     try {
-      await toggleArchiveStatus(itemId)
+      await toggleArchiveStatus(itemId, next)
+      const message = next
+        ? (tGifts.toasts?.archived || 'Archived "{{name}}"')
+        : (tGifts.toasts?.unarchived || 'Restored "{{name}}"')
+      toast(formatMessage(message, { name: item?.name || '' }), {
+        action: { label: t.undo || 'Undo', onClick: () => handleArchiveItem(itemId, !next) },
+      })
     } catch (err) {
       console.error("Failed to toggle archive status", err)
       toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")

@@ -66,5 +66,6 @@
   "loadError": {
     "title": "Couldn’t load your gift lists",
     "body": "Check your connection, then try again."
-  }
+  },
+  "undo": "Undo"
 }
