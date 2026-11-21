@@ -95,19 +95,22 @@ test.describe('claiming', () => {
     await openSkillet(page)
     await page.getByRole('button', { name: 'I’ll get this' }).click()
     await expect(page.getByRole('button', { name: 'You’re getting this' })).toBeVisible()
+    // Separate contexts: each member needs their own session cookie.
+    const others = [await browser.newContext(), await browser.newContext()]
     try {
-      const jordan = await browser.newPage()
+      const jordan = await others[0].newPage()
       await signInAs(jordan, SEED.jordan.email)
       await openSkillet(jordan)
       await expect(jordan.getByText(`Claimed by ${SEED.riley.name}`).first()).toBeVisible()
 
-      const sam = await browser.newPage() // Sam's list keeps purchases hidden from Sam (is_public = false)
+      const sam = await others[1].newPage() // Sam's list keeps purchases hidden from Sam (is_public = false)
       await signInAs(sam, SEED.sam.email)
       await expand(sam, "Sam's wishlist")
       await expect(sam.getByText(skillet, { exact: true })).toBeVisible()
       await expect(sam.getByText('Purchased', { exact: true })).toHaveCount(0)
       await expect(sam.getByText(SEED.riley.name)).toHaveCount(0)
     } finally {
+      await Promise.all(others.map(context => context.close()))
       await page.getByRole('button', { name: 'You’re getting this' }).click()
       await expect(page.getByRole('button', { name: 'I’ll get this' })).toBeVisible()
     }
