@@ -137,4 +137,15 @@ test.describe('on a phone', () => {
     await expect(page.getByText(`Claimed by ${SEED.riley.name}`)).toBeVisible()
     await expect(page.getByText('Purchased', { exact: true })).toHaveCount(0)
   })
+
+  test('the gift drawer opens from the bottom on phones, without repeating the claim', async ({ page }) => {
+    await signInAs(page, SEED.alex.email)
+    await page.getByRole('tab', { name: 'Family Lists' }).click()
+    await page.getByRole('button', { name: `${SEED.jordan.name}'s Gift Lists` }).click()
+    await page.getByRole('button', { name: 'Board game: Wingspan' }).click()
+    const drawer = page.getByRole('dialog', { name: 'Board game: Wingspan' })
+    await expect(drawer).toHaveAttribute('data-vaul-drawer-direction', 'bottom')
+    await expect(drawer.getByText(`Purchased by ${SEED.riley.name}`)).toHaveCount(0)
+    await expect(drawer.getByText(`Claimed by ${SEED.riley.name}`)).toBeVisible()
+  })
 })

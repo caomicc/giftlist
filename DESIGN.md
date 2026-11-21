@@ -199,7 +199,7 @@ A single centred column: the list card is `max-width: 36rem` within a `max-w-7xl
 - **Phones (below 768px):** the card loses its border and shadow, takes a 24px top radius and sits flush to the screen edges as a bottom sheet; a fixed card-coloured fill (`bg-card`, bottom 50vh) behind it hides the gradient under short lists. Card padding is 24px horizontal. Buttons, inputs, selects and quick-add toggle items reach a 44px minimum; the tabs track grows to 44px (its triggers sit inside 3px padding, so about 37px).
 - **Desktop (768px and up):** the card is fully rounded with a hairline border and a small shadow; horizontal padding tightens to 12px. Owner row actions (edit, archive, delete) appear inline as 32px ghost icon buttons.
 - **Rhythm:** tab panels stack at 24px (`space-y-6`); rows are 12px vertical by 8px horizontal with 12px gaps; badges wrap with 4px gaps.
-- **Overlays:** the gift detail uses a drawer (vaul) and all confirmations use a centred alert dialog.
+- **Overlays:** the gift detail uses a drawer (vaul): a right-hand panel at md+, a bottom sheet (24px top radius, max 85vh) on phones. Its title is never struck through, and the claim shows once (in the footer). All confirmations use a centred alert dialog.
 
 ## Elevation & Depth
 

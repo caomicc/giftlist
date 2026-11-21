@@ -36,6 +36,7 @@ import GiftCardContributions from './gift-card-contributions'
 import GroupGiftInterest from './group-gift-interest'
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog'
 import { useGiftItemComments } from '@/hooks/useGiftItemComments'
+import { useIsDesktop } from '@/hooks/useIsDesktop'
 import { useTranslation, formatMessage } from './i18n-provider'
 import { cn, formatRelativeTime } from '@/lib/utils'
 
@@ -72,6 +73,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
   const [refreshKey, setRefreshKey] = useState(0)
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isDesktop = useIsDesktop()
 
   const {
     comments,
@@ -134,20 +136,18 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
 
   return (
     <>
-      <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-        <DrawerContent className="sm:max-w-lg overflow-y-scroll overflow-x-hidden flex flex-col h-full">
+      {/* A side panel on desktop; a bottom sheet on phones, like the rest of the phone layout */}
+      <Drawer open={open} onOpenChange={onOpenChange} direction={isDesktop ? 'right' : 'bottom'}>
+        <DrawerContent
+          className={cn(
+            'overflow-y-auto overflow-x-hidden flex flex-col',
+            isDesktop ? 'sm:max-w-lg h-full' : 'max-h-[85vh] rounded-t-3xl'
+          )}
+        >
           <DrawerHeader className="border-b">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <DrawerTitle
-                  className={cn(
-                    'text-lg',
-                    isArchived && 'line-through text-muted-foreground',
-                    ((isPurchased && (!isMyGift || (isMyGift && item.is_public))) ||
-                      (isGiftCard && isGiftCardComplete && (!isMyGift || (isMyGift && item.is_public)))) &&
-                      'line-through text-muted-foreground'
-                  )}
-                >
+                <DrawerTitle className="text-lg">
                   {item.name}
                 </DrawerTitle>
                 <div className="flex flex-wrap gap-1 mt-2">
@@ -256,20 +256,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                 />
               )}
 
-              {/* Purchase Status */}
-              {((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) &&
-                !isMyGift &&
-                purchaserName && (
-                  <Badge className="bg-success-soft text-success-soft-foreground">
-                    {formatMessage(
-                      isGiftCard
-                        ? t.giftItem?.status?.giftCardComplete ?? 'Gift Card Complete'
-                        : t.giftItem?.status?.purchasedBy ?? `Purchased by ${purchaserName}`,
-                      { name: purchaserName }
-                    )}
-                  </Badge>
-                )}
-
+              {/* Purchase status for the owner of a tracked list. Family see it on the footer's claim chip / Complete button. */}
               {isMyGift &&
                 item.is_public &&
                 ((isPurchased && !isGiftCard) || (isGiftCard && isGiftCardComplete)) &&
