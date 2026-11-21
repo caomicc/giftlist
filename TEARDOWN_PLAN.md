@@ -93,7 +93,9 @@ Also: failed saves no longer replace the app with the full-screen "Database Conn
 - [ ] Next: PWA manifest with `share_target` → `/add` (Android share sheet), and an iOS Shortcut recipe.
 
 ## Follow-up: local database for development and tests
-- [ ] `docker-compose.yml` with a local Postgres so auth, development and e2e tests never touch the production Neon database.
+- [x] `docker-compose.yml` with a local Postgres + Neon HTTP proxy, seeded fake family; `npm run dev` and e2e use it, `npm run dev:prod` uses `.env`. Gift add / edit / delete / claim e2e tests added.
   - The app talks to Neon through `@neondatabase/serverless`, which speaks HTTP/WebSocket rather than the Postgres wire protocol. The compose file also needs the Neon proxy (`local-neon-http-proxy`), or `lib/neon.ts` needs to switch drivers when `NEON_DATABASE_URL` points at localhost.
   - Seed the schema from `migrate.js` + `scripts/neon/*.sql`, plus a known test user (password sign-in) for e2e.
   - Then add Playwright tests for the DB-backed workflows that are uncovered today: sign in for real, add / edit / delete a gift, claim a gift, gift-card contributions, suggestions. Today `e2e/` only covers flows that can be stubbed (sign-in UI, locale, profile, themes).
+- [ ] E2E coverage still missing: gift-card contributions and suggestions (the seed already has data for both).
+- [ ] Bug: `family-gift-app.tsx` can create a duplicate "Default wishlist" for users who already have lists when gifts finish loading before lists (`userLists.length === 0 && !loading`).

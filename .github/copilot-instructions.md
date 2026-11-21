@@ -170,9 +170,13 @@ Access as: `t.section?.subsection?.key`
 
 ```bash
 npm install               # Install dependencies
-npm run dev                # Start dev server on localhost:3000
+npm run db:up              # Start the local database (Docker)
+npm run dev                # Dev server on localhost:3000 against the local database
+npm run dev:prod           # Dev server against .env (production database)
 npm run build              # Production build
-npm run lint               # Run ESLint (currently ignores errors)
+npm run lint               # Run ESLint
+npm test                   # Unit tests
+npm run test:e2e           # Playwright e2e (local database)
 ```
 
 ### Running Migrations
