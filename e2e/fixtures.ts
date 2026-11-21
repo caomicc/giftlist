@@ -1,4 +1,5 @@
 import { test as base, type Page } from '@playwright/test'
+export type { Page } from '@playwright/test'
 
 /**
  * Signs in a fake user without touching the database: the proxy only checks that a
@@ -23,7 +24,10 @@ export const SEED = {
   jordan: { id: id(3), email: 'jordan@example.com', name: 'Jordan Patel' },
   riley: { id: id(4), email: 'riley@example.com', name: 'Riley Okafor' },
 }
-export const SEED_GIFTS = { castIronSkillet: { id: id(201), name: 'Cast iron skillet' } }
+export const SEED_GIFTS = {
+  castIronSkillet: { id: id(201), name: 'Cast iron skillet' },
+  chefsKnife: { id: id(206), name: "Chef's knife" },
+}
 
 /** Real password sign-in against the local database. */
 export async function signInAs(page: Page, email: string) {
