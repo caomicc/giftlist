@@ -158,6 +158,17 @@ test.describe('claiming', () => {
   })
 })
 
+test('a group gift offers “I’m in” and “I’ll organize it”', async ({ page }) => {
+  await signInAs(page, SEED.riley.email)
+  await page.getByRole('tab', { name: 'Family Lists' }).click()
+  await page.getByRole('button', { name: `${SEED.alex.name}'s Gift Lists` }).click()
+  await page.getByRole('button', { name: SEED_GIFTS.twoPersonTent.name }).click()
+  const drawer = page.getByRole('dialog', { name: SEED_GIFTS.twoPersonTent.name })
+  await expect(drawer.getByRole('button', { name: 'I’m in' })).toBeVisible()
+  await expect(drawer.getByRole('button', { name: 'I’ll organize it' })).toBeVisible()
+  await expect(drawer.getByText('2 people are in')).toBeVisible()
+})
+
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 

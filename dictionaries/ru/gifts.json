@@ -107,7 +107,10 @@
       "claim": "Я подарю",
       "mine": "Вы дарите это",
       "claimedBy": "Занято: {{name}}",
-      "claimed": "Занято"
+      "claimed": "Занято",
+      "organize": "Я организую",
+      "organizing": "Вы организуете",
+      "organizedBy": "Организует {{name}}"
     }
   },
   "giftCard": {
@@ -149,13 +152,13 @@
   },
   "groupGift": {
     "title": "Интерес к групповому подарку",
-    "interested": "{{count}} человек заинтересован",
-    "interestedPlural": "{{count}} человек заинтересовано",
+    "interested": "Участвует: {{count}}",
+    "interestedPlural": "Участвуют: {{count}}",
     "interestedList": "Заинтересованы",
-    "interestedIn": "Заинтересованы в групповом подарке:",
+    "interestedIn": "Участвуют в подарке:",
     "noInterest": "Никто еще не выразил заинтересованность",
-    "expressInterest": "Интересует групповой подарок?",
-    "alreadyInterested": "Интересует",
+    "expressInterest": "Я участвую",
+    "alreadyInterested": "Вы участвуете",
     "removeInterest": "Не интересно",
     "hiddenFromOthers": "Ваш интерес скрыт от других"
   },

@@ -12,6 +12,8 @@ type ClaimButtonProps = {
   currentUserId: string
   purchaserName?: string
   onToggle?: (itemId: string, currentPurchasedBy: string | null) => void
+  /** Group gifts: claiming means organizing the purchase for everyone who's in */
+  isGroupGift?: boolean
   className?: string
 }
 
@@ -27,6 +29,7 @@ export function ClaimButton({
   currentUserId,
   purchaserName,
   onToggle,
+  isGroupGift,
   className,
 }: ClaimButtonProps) {
   const { t } = useTranslation('gifts')
@@ -37,7 +40,10 @@ export function ClaimButton({
 
   if (isOthers) {
     const label = purchaserName
-      ? formatMessage(labels.claimedBy || 'Claimed by {{name}}', { name: purchaserName })
+      ? formatMessage(
+          isGroupGift ? (labels.organizedBy || 'Organized by {{name}}') : (labels.claimedBy || 'Claimed by {{name}}'),
+          { name: purchaserName }
+        )
       : (labels.claimed || 'Claimed')
     return (
       <span
@@ -65,7 +71,9 @@ export function ClaimButton({
       className={cn(isMine && 'bg-success text-success-foreground hover:bg-success/90', className)}
     >
       {isMine ? <Check className="size-3.5" aria-hidden="true" /> : <ShoppingCart className="size-3.5" aria-hidden="true" />}
-      {isMine ? (labels.mine || "You're getting this") : (labels.claim || "I'll get this")}
+      {isGroupGift
+        ? (isMine ? (labels.organizing || 'You’re organizing this') : (labels.organize || 'I’ll organize it'))
+        : (isMine ? (labels.mine || "You're getting this") : (labels.claim || "I'll get this"))}
     </Button>
   )
 }

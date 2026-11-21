@@ -183,6 +183,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                   currentUserId={currentUserId}
                   purchaserName={purchaserName}
                   onToggle={onTogglePurchase}
+                  isGroupGift={isGroupGift}
                 />
               )}
             </>

@@ -107,7 +107,10 @@
       "claim": "I’ll get this",
       "mine": "You’re getting this",
       "claimedBy": "Claimed by {{name}}",
-      "claimed": "Claimed"
+      "claimed": "Claimed",
+      "organize": "I’ll organize it",
+      "organizing": "You’re organizing this",
+      "organizedBy": "Organized by {{name}}"
     }
   },
   "giftCard": {
@@ -149,13 +152,13 @@
   },
   "groupGift": {
     "title": "Group Gift Interest",
-    "interested": "{{count}} person interested",
-    "interestedPlural": "{{count}} people interested",
+    "interested": "{{count}} person is in",
+    "interestedPlural": "{{count}} people are in",
     "interestedList": "Interested",
-    "interestedIn": "Interested in group gift:",
+    "interestedIn": "In on this gift:",
     "noInterest": "No one has expressed interest yet",
-    "expressInterest": "Interested in Group Gift?",
-    "alreadyInterested": "Interested",
+    "expressInterest": "I’m in",
+    "alreadyInterested": "You’re in",
     "removeInterest": "Not Interested",
     "hiddenFromOthers": "Your interest is hidden from others"
   },

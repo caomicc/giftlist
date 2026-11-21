@@ -399,6 +399,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                       currentUserId={currentUserId}
                       purchaserName={purchaserName}
                       onToggle={onTogglePurchase}
+                      isGroupGift={isGroupGift}
                       className="flex-1 justify-center"
                     />
                   )}

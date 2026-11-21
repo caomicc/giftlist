@@ -96,17 +96,18 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
           size="sm"
           onClick={handleToggleInterest}
           disabled={loading}
+          aria-pressed={isUserInterested}
           className={isUserInterested ? "bg-group-gift text-group-gift-foreground hover:bg-group-gift/90" : ""}
         >
           {isUserInterested ? (
             <>
               <UserMinus className="size-3" />
-              {t.groupGift?.alreadyInterested || 'Interested'}
+              {t.groupGift?.alreadyInterested || 'You’re in'}
             </>
           ) : (
             <>
               <UserPlus className="size-3" />
-              {t.groupGift?.expressInterest || 'Interested in Group Gift?'}
+              {t.groupGift?.expressInterest || 'I’m in'}
             </>
           )}
         </Button>
@@ -126,8 +127,8 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
             <Users className="size-3" aria-hidden="true" />
             {formatMessage(
               visibleInterests.length === 1 
-                ? (t.groupGift?.interested || '{{count}} person interested')
-                : (t.groupGift?.interestedPlural || '{{count}} people interested'),
+                ? (t.groupGift?.interested || '{{count}} person is in')
+                : (t.groupGift?.interestedPlural || '{{count}} people are in'),
               { count: visibleInterests.length }
             )}
           </Button>
