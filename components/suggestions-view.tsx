@@ -203,7 +203,8 @@ export default function SuggestionsView({
                       })}
                     </p>
                   )}
-                {getStatusBadge(suggestion.status)}
+                {/* Incoming pending cards sit under "Pending Review": the badge would only repeat it */}
+                {!(variant === "incoming" && isPending) && getStatusBadge(suggestion.status)}
               </div>
 
               {suggestion.description && (
@@ -241,7 +242,6 @@ export default function SuggestionsView({
                     <Button
                       variant="default"
                       size="sm"
-                      className="bg-success text-success-foreground hover:bg-success/90"
                       onClick={() => handleApproveClick(suggestion)}
                     >
                       <Check className="w-3 h-3 mr-1" />
@@ -391,7 +391,6 @@ export default function SuggestionsView({
             <Button
               onClick={handleApproveConfirm}
               disabled={!selectedListId || isProcessing}
-              className="bg-success text-success-foreground hover:bg-success/90"
             >
               {isProcessing ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
