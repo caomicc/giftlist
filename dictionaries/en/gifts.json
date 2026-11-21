@@ -173,7 +173,9 @@
     "deleteComment": "Delete comment",
     "viewDetails": "View details",
     "close": "Close",
-    "sendComment": "Send comment"
+    "sendComment": "Send comment",
+    "commentsHiddenFromYou": "Family comments stay hidden until you archive this gift.",
+    "commentsHiddenFromOwner": "{{name}} can’t read comments until they archive this gift."
   },
   "suggestions": {
     "title": "Gift Suggestions",

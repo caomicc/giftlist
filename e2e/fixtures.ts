@@ -27,6 +27,8 @@ export const SEED = {
 export const SEED_GIFTS = {
   castIronSkillet: { id: id(201), name: 'Cast iron skillet' },
   chefsKnife: { id: id(206), name: "Chef's knife" },
+  twoPersonTent: { id: id(205), name: 'Two-person tent' },
+  bookshopGiftCard: { id: id(204), name: 'Bookshop gift card' },
 }
 
 /** Real password sign-in against the local database. */
@@ -37,3 +39,13 @@ export async function signInAs(page: Page, email: string) {
   await page.getByRole('button', { name: 'Login' }).click()
   await page.waitForURL(/\/en$/)
 }
+
+/** Opens a collapsed accordion (lists and family members) whose label contains `label`. */
+export async function expand(page: Page, label: string) {
+  const trigger = page.getByRole('button', { name: label }).first()
+  if ((await trigger.getAttribute('aria-expanded')) !== 'true') await trigger.click()
+}
+
+/** The row of one gift on my own list, which carries its Edit/Delete buttons. */
+export const myGiftRow = (page: Page, name: string) =>
+  page.getByText(name, { exact: true }).locator('xpath=ancestor::*[.//button[@aria-label="Delete"]][1]')

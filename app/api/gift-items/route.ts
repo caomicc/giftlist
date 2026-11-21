@@ -29,9 +29,9 @@ export async function GET(request: NextRequest) {
             WHEN gi.suggested_by_id IS NOT NULL AND gi.is_anonymous_suggestion = TRUE AND l.owner_id = ${currentUser.id} THEN NULL
             ELSE u_suggester.name
           END as suggested_by_name,
-          -- Comment count: for private lists, owner only sees their own comments count
+          -- Comment count: the gift's owner only counts their own comments until the gift is archived
           CASE 
-            WHEN l.is_public = FALSE AND l.owner_id = ${currentUser.id} THEN
+            WHEN gi.owner_id = ${currentUser.id} AND gi.archived = FALSE THEN
               (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id AND c.user_id = ${currentUser.id})
             ELSE
               (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id)
@@ -76,9 +76,9 @@ export async function GET(request: NextRequest) {
             WHEN gi.suggested_by_id IS NOT NULL AND gi.is_anonymous_suggestion = TRUE AND l.owner_id = ${currentUser.id} THEN NULL
             ELSE u_suggester.name
           END as suggested_by_name,
-          -- Comment count: for private lists, owner only sees their own comments count
+          -- Comment count: the gift's owner only counts their own comments until the gift is archived
           CASE 
-            WHEN l.is_public = FALSE AND l.owner_id = ${currentUser.id} THEN
+            WHEN gi.owner_id = ${currentUser.id} AND gi.archived = FALSE THEN
               (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id AND c.user_id = ${currentUser.id})
             ELSE
               (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id)
@@ -106,9 +106,9 @@ export async function GET(request: NextRequest) {
             WHEN gi.suggested_by_id IS NOT NULL AND gi.is_anonymous_suggestion = TRUE AND l.owner_id = ${currentUser.id} THEN NULL
             ELSE u_suggester.name
           END as suggested_by_name,
-          -- Comment count: for private lists, owner only sees their own comments count
+          -- Comment count: the gift's owner only counts their own comments until the gift is archived
           CASE 
-            WHEN l.is_public = FALSE AND l.owner_id = ${currentUser.id} THEN
+            WHEN gi.owner_id = ${currentUser.id} AND gi.archived = FALSE THEN
               (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id AND c.user_id = ${currentUser.id})
             ELSE
               (SELECT COUNT(*) FROM gift_item_comments c WHERE c.gift_item_id = gi.id)

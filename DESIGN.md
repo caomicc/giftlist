@@ -268,6 +268,7 @@ Three full-width tabs on a Mist track (My Gift List, Family Lists, Suggestions);
 
 ### Privacy Lines (signature)
 Under each list title, a 12px Slate Grey line with an Eye icon ("You can see what's been bought") or an EyeOff icon ("Surprise: you won't see what's been bought"). On surprise lists, gift-card details show the owner only "Contributions are kept a surprise"; amounts and contributors aren't fetched. Visibility defaults to surprise when unknown.
+- **Comments:** a gift's owner reads only their own comments until the gift is archived, whatever the list's surprise setting (the API filters comments and the row's comment count). Under the comment box, an EyeOff line says so: "Family comments stay hidden until you archive this gift." to the owner, "{Name} can't read comments until they archive this gift." to everyone else.
 
 ## Do's and Don'ts
 

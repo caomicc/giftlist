@@ -26,6 +26,7 @@ import {
   MessageCircle,
   Send,
   X,
+  EyeOff,
 } from 'lucide-react'
 import Link from 'next/link'
 import PriceTag from './price-tag'
@@ -365,6 +366,15 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                     <Send className="size-4" />
                   </Button>
                 </div>
+                {/* Who can read comments: the owner only once the gift is archived */}
+                {!(isMyGift && isArchived) && (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <EyeOff className="size-3.5 shrink-0" aria-hidden="true" />
+                    {isMyGift
+                      ? (t.drawer?.commentsHiddenFromYou || 'Family comments stay hidden until you archive this gift.')
+                      : formatMessage(t.drawer?.commentsHiddenFromOwner || '{{name}} can’t read comments until they archive this gift.', { name: item.owner_name || '' })}
+                  </p>
+                )}
               </div>
             </div>
           </ScrollArea>

@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
       SELECT 
         gi.id,
         gi.owner_id,
+        gi.archived,
         l.id as list_id,
         l.is_public,
         l.owner_id as list_owner_id
@@ -46,13 +47,12 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // For private lists, the owner should only see their own comments
-    // (other comments are hidden to maintain surprise)
-    const isOwnerViewingPrivateList = !giftItem.is_public && giftItem.list_owner_id === currentUser.id
+    // The gift's owner only sees their own comments until the gift is archived,
+    // so family can coordinate without spoiling the surprise
+    const ownerBeforeArchive = giftItem.owner_id === currentUser.id && !giftItem.archived
 
     let comments
-    if (isOwnerViewingPrivateList) {
-      // Owner of private list only sees their own comments
+    if (ownerBeforeArchive) {
       comments = await sql`
         SELECT 
           c.id,

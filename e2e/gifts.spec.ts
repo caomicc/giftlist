@@ -1,20 +1,10 @@
-import { test, expect, signInAs, SEED, SEED_GIFTS, type Page } from './fixtures'
+import { test, expect, signInAs, expand, myGiftRow, SEED, SEED_GIFTS, type Page } from './fixtures'
 
 // Real database flows (local DB). Serial: claim tests share a seeded gift.
 test.describe.configure({ mode: 'serial' })
 
 const uniqueName = () => `E2E ${test.info().testId} ${Date.now()}`
 const ALEX_LIST = "Alex's wishlist"
-
-/** Opens a collapsed accordion (lists and family members) whose label contains `label`. */
-async function expand(page: Page, label: string) {
-  const trigger = page.getByRole('button', { name: label }).first()
-  if ((await trigger.getAttribute('aria-expanded')) !== 'true') await trigger.click()
-}
-
-/** The row of one gift on my own list, which carries its Edit/Delete buttons. */
-const myGiftRow = (page: Page, name: string) =>
-  page.getByText(name, { exact: true }).locator('xpath=ancestor::*[.//button[@aria-label="Delete"]][1]')
 
 async function addGift(page: Page, name: string) {
   await page.getByPlaceholder('Paste a link or type a gift').fill(name)
