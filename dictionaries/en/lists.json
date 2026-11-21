@@ -55,5 +55,7 @@
     "error": "Failed to delete list",
     "errorWithDetails": "{{error}}",
     "deleted": "List deleted"
-  }
+  },
+  "defaultName": "{{name}}'s list",
+  "defaultNameNoName": "My list"
 }

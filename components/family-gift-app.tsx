@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-import { Gift, AlertCircle } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import { useGiftData, type NewGiftItem, type GiftItemUpdate } from "@/hooks/useGiftData"
 import type { GiftItem, List } from "@/lib/neon"
 import { useSuggestionData } from "@/hooks/useSuggestionData"
@@ -44,6 +44,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const [userLists, setUserLists] = useState<(List & { item_count?: number })[]>([]) // GET /api/lists rows
   // Lists load separately from gifts; only a successful lists fetch can say "this user has none".
   const [listsLoaded, setListsLoaded] = useState(false)
+  // The first lists fetch has finished, either way (gifts can't be grouped under their lists before that)
+  const [listsSettled, setListsSettled] = useState(false)
   const creatingDefaultList = useRef(false)
   const [listsReload, setListsReload] = useState(0) // bump to refetch lists after a change
   const reloadLists = () => setListsReload(n => n + 1)
@@ -64,6 +66,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const { translations } = useI18n()
   const t = translations.common || {}
   const tGifts = translations.gifts || {}
+  const tLists = translations.lists || {}
   const confirm = useConfirm()
 
   const {
@@ -106,6 +109,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         setListsLoaded(true)
       })
       .catch(err => console.warn("Failed to fetch lists", err))
+      .finally(() => { if (!ignore) setListsSettled(true) })
     return () => { ignore = true }
   }, [listsReload])
 
@@ -118,8 +122,10 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
-        name: `${currentUser.name || 'My'}'s List`,
-        description: 'Default wishlist',
+        name: currentUser.name
+          ? formatMessage(tLists.defaultName || "{{name}}'s list", { name: currentUser.name })
+          : (tLists.defaultNameNoName || 'My list'),
+        description: null,
         is_public: false,
         is_visible: true
       }),
@@ -131,7 +137,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       })
       .then(newList => { if (newList) setUserLists([newList]) })
       .catch(err => console.warn("Failed to create default list", err))
-  }, [listsLoaded, userLists.length, currentUser.name])
+  }, [listsLoaded, userLists.length, currentUser.name, tLists.defaultName, tLists.defaultNameNoName])
 
   const handleAddGiftItem = async (itemData: NewGiftItem) => {
     setIsSubmitting(true)
@@ -369,7 +375,6 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   }
 
   const handleDeleteList = async (listId: string) => {
-    const tLists = translations.lists || {}
     const ok = await confirm({
       title: tLists.deleteConfirm?.title || 'Delete this list?',
       description: tLists.deleteConfirm?.message || "Lists that still have gifts can't be deleted. Move or delete the gifts first.",
@@ -466,7 +471,6 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
               <h1 className="text-2xl font-medium tracking-tight text-balance">
                 {formatMessage(t.welcome || "Hi, {{name}}!", { name: currentMember?.name || '' })}
               </h1>
-              <p>{t.welcomeBack || 'Welcome back 😊'}</p>
             </div>
           </div>
         </div>
@@ -474,11 +478,12 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         <Card className={'bg-card text-card-foreground flex flex-col gap-6 rounded-t-3xl h-full rounded-b-none md:rounded-b-xl md:rounded-xl border-none md:border py-6 md:py-4 shadow-none md:shadow-sm'}>
           <CardContent className="px-6 md:px-3">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="my-list">{t.tabs?.myGiftList || 'My Gift List'}</TabsTrigger>
-                <TabsTrigger value="family-lists">{t.tabs?.familyLists || 'Family Lists'}</TabsTrigger>
-                <TabsTrigger value="suggestions" className="flex items-center gap-1">
-                  <span className="inline truncate">{t.tabs?.suggestions || 'Suggestions'}</span>
+              {/* Content-sized tabs, so "Suggestions" and its count fit on a phone */}
+              <TabsList className="flex w-full">
+                <TabsTrigger value="my-list" className="flex-auto">{t.tabs?.myGiftList || 'My Gift List'}</TabsTrigger>
+                <TabsTrigger value="family-lists" className="flex-auto">{t.tabs?.familyLists || 'Family Lists'}</TabsTrigger>
+                <TabsTrigger value="suggestions" className="flex-auto flex items-center gap-1">
+                  <span>{t.tabs?.suggestions || 'Suggestions'}</span>
                   {pendingCount > 0 && (
                     <Badge className="bg-destructive text-destructive-foreground text-xs px-1.5 py-0 min-w-[18px] h-[18px]">
                       {pendingCount}
@@ -489,11 +494,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
               {/* My Gift List Tab */}
               <TabsContent value="my-list" className="space-y-6 mb-0 md:mb-6">
-                <div className="flex items-center justify-between mb-2 px-1">
-                  <h2 className="flex items-center gap-2 font-medium">
-                    <Gift className="size-5" aria-hidden="true" />
-                    {tGifts.myGifts?.title || 'My Gift Ideas'}
-                  </h2>
+                {/* The tab names this panel; no heading that repeats it */}
+                <div className="flex justify-end">
                   <ListManagement
                     userLists={userLists}
                     otherMembers={getOtherMembers()}
@@ -504,10 +506,6 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                     isSubmitting={isSubmitting}
                   />
                 </div>
-
-                <p className="text-sm text-muted-foreground">
-                  {tGifts.myGifts?.description || "Add and manage your personal gift ideas here."}
-                </p>
 
                 <AddGiftForm
                   currentUser={currentUser}
@@ -520,6 +518,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                 <MyGiftsList
                   currentUser={currentUser}
                   userLists={userLists}
+                  listsLoading={!listsSettled}
                   activeMyGifts={activeMyGifts}
                   archivedMyGifts={archivedMyGifts}
                   onEdit={handleEditGiftItem}
@@ -530,16 +529,6 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
               {/* Family Lists Tab */}
               <TabsContent value="family-lists" className="space-y-6 mb-0 md:mb-6">
-                <div className="flex items-center justify-between mb-2 px-1">
-                  <h2 className="flex items-center gap-2 h-8 font-medium">
-                    <Gift className="size-5" aria-hidden="true" />
-                    {tGifts.familyGifts?.title || "Family Gift Lists"}
-                  </h2>
-                </div>
-
-                <p className="text-sm text-muted-foreground">
-                  {tGifts.familyGifts?.description || "Click on a family member to view and purchase their gifts."}
-                </p>
 
                 <FamilyGiftsList
                   currentUser={currentUser}

@@ -1,7 +1,6 @@
 {
   "appName": "My Giftlist",
   "welcome": "Hi, {{name}}!",
-  "welcomeBack": "Welcome back 😊",
   "loading": "Loading...",
   "cancel": "Cancel",
   "delete": "Delete",

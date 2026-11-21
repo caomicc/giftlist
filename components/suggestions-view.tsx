@@ -28,7 +28,6 @@ import {
   Loader2,
   UserX,
   Trash2,
-  Lightbulb,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslation, formatMessage } from "./i18n-provider"
@@ -281,16 +280,6 @@ export default function SuggestionsView({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Lightbulb className="w-5 h-5 text-suggestion" />
-        <h2 className="text-xl font-semibold">
-          {t.suggestions?.title || "Gift Suggestions"}
-        </h2>
-        {pendingCount > 0 && (
-          <Badge className="bg-destructive text-white">{pendingCount}</Badge>
-        )}
-      </div>
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="incoming" className="flex items-center gap-2">

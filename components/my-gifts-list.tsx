@@ -1,6 +1,7 @@
 "use client"
 
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Gift, Archive, Eye, EyeOff } from 'lucide-react'
 import GiftItem from "./gift-item"
@@ -26,6 +27,8 @@ interface UserList {
 interface MyGiftsListProps {
   currentUser: User
   userLists: UserList[]
+  /** Lists haven't loaded yet: show placeholders rather than gifts under an "Unknown List" */
+  listsLoading?: boolean
   activeMyGifts: GiftItemData[]
   archivedMyGifts: GiftItemData[]
   onEdit: (item: GiftItemData) => void
@@ -36,6 +39,7 @@ interface MyGiftsListProps {
 export default function MyGiftsList({
   currentUser,
   userLists,
+  listsLoading,
   activeMyGifts,
   archivedMyGifts,
   onEdit,
@@ -47,6 +51,15 @@ export default function MyGiftsList({
   // Lists start open. Track the ones the user closed, so lists that load late (or are new) still open.
   const [closedLists, setClosedLists] = useState<string[]>([])
   
+  if (listsLoading) {
+    return (
+      <div className="space-y-3" aria-busy="true">
+        <Skeleton className="h-6 w-40" />
+        {[0, 1, 2].map(i => <Skeleton key={i} className="h-14 w-full" />)}
+      </div>
+    )
+  }
+
   if (userLists.length === 0 && activeMyGifts.length === 0 && archivedMyGifts.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">

@@ -1,7 +1,5 @@
 {
   "myGifts": {
-    "title": "My Gift Ideas",
-    "description": "Add items you'd like to receive. Family members can see this list and mark items as purchased.",
     "empty": "No gift ideas yet. Add some items above!",
     "archivedItems": "Archived Items",
     "trackPurchases": "Track Purchases",
@@ -11,8 +9,6 @@
     "archivedList": "{{name}} (archived)"
   },
   "familyGifts": {
-    "title": "Family Gift Lists",
-    "description": "Click on a family member to view and purchase their gift items.",
     "listTitle": "{{name}}'s Gift Lists",
     "empty": "{{name}} hasn't added any gift ideas yet.",
     "summary": "{{itemCount}} item • {{purchasedCount}} purchased",
@@ -178,7 +174,6 @@
     "commentsHiddenFromOwner": "{{name}} can’t read comments until they archive this gift."
   },
   "suggestions": {
-    "title": "Gift Suggestions",
     "suggestGift": "Suggest a Gift",
     "suggestTo": "Suggest a gift idea to {{name}}",
     "selectMember": "Select a family member to suggest a gift to",

@@ -55,5 +55,7 @@
     "error": "Не удалось удалить список",
     "errorWithDetails": "{{error}}",
     "deleted": "Список удалён"
-  }
+  },
+  "defaultName": "Список {{name}}",
+  "defaultNameNoName": "Мой список"
 }
