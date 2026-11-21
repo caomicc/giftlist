@@ -98,4 +98,4 @@ Also: failed saves no longer replace the app with the full-screen "Database Conn
   - Seed the schema from `migrate.js` + `scripts/neon/*.sql`, plus a known test user (password sign-in) for e2e.
   - Then add Playwright tests for the DB-backed workflows that are uncovered today: sign in for real, add / edit / delete a gift, claim a gift, gift-card contributions, suggestions. Today `e2e/` only covers flows that can be stubbed (sign-in UI, locale, profile, themes).
 - [ ] E2E coverage still missing: gift-card contributions and suggestions (the seed already has data for both).
-- [ ] Bug: `family-gift-app.tsx` can create a duplicate "Default wishlist" for users who already have lists when gifts finish loading before lists (`userLists.length === 0 && !loading`).
+- [x] Fixed: `family-gift-app.tsx` could create a duplicate "Default wishlist" for users who already have lists when gifts finish loading before lists (`userLists.length === 0 && !loading`).

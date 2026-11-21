@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -38,6 +38,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const [editingItem, setEditingItem] = useState<any>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [userLists, setUserLists] = useState<any[]>([])
+  // Lists load separately from gifts; only a successful lists fetch can say "this user has none".
+  const [listsLoaded, setListsLoaded] = useState(false)
+  const creatingDefaultList = useRef(false)
   const [activeTab, setActiveTab] = useState("my-list")
   const [suggestDialogOpen, setSuggestDialogOpen] = useState(false)
   const [suggestTargetUserId, setSuggestTargetUserId] = useState<string | null>(null)
@@ -88,6 +91,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       }
       const lists = await response.json()
       setUserLists(lists)
+      setListsLoaded(true)
     } catch (err) {
       console.warn("Failed to fetch lists", err)
     }
@@ -130,12 +134,13 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     fetchUserLists()
   }, [])
 
-  // Create default list if none exists
+  // Create a default list only once the lists have loaded and there really are none
   useEffect(() => {
-    if (userLists.length === 0 && !loading) {
+    if (listsLoaded && userLists.length === 0 && !creatingDefaultList.current) {
+      creatingDefaultList.current = true
       createDefaultList()
     }
-  }, [userLists.length, loading])
+  }, [listsLoaded, userLists.length])
 
   const handleAddGiftItem = async (itemData: any) => {
     setIsSubmitting(true)
