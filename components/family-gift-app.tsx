@@ -338,7 +338,13 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         })
         if (!permissionsResponse.ok) {
           // Without its rules the new list would be visible to everyone: remove it so a retry starts clean
-          await fetch(`/api/lists/${newList.id}`, { method: 'DELETE' }).catch(() => {})
+          const removed = await fetch(`/api/lists/${newList.id}`, { method: 'DELETE' }).then(r => r.ok, () => false)
+          if (!removed) {
+            // It exists and everyone can see it. Say so, and close the dialog: a retry would make a duplicate.
+            reloadLists()
+            toast.error(tLists.toasts?.createdNotPrivate || 'List created, but its privacy didn’t save: everyone can see it. Edit it to try again.')
+            return true
+          }
           toast.error(tLists.toasts?.permissionsFailed || 'Couldn’t save who can see this list. Try again.')
           return false
         }

@@ -63,7 +63,8 @@
   "toasts": {
     "permissionsFailed": "Couldn’t save who can see this list. Try again.",
     "created": "List created",
-    "saved": "List saved"
+    "saved": "List saved",
+    "createdNotPrivate": "List created, but its privacy didn’t save: everyone can see it. Edit it to try again."
   },
   "newList": "New list",
   "deleteList": "Delete list"

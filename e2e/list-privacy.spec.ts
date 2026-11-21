@@ -1,5 +1,8 @@
 import { test, expect, signInAs, SEED } from './fixtures'
 
+// Serial: one test adds (then deletes) a second list for Alex, which changes what the others see
+test.describe.configure({ mode: 'serial' })
+
 const openEditDialog = async (page: import('./fixtures').Page) => {
   await page.getByRole('button', { name: "Edit Alex's wishlist" }).click()
   return page.getByRole('dialog', { name: 'Edit List' })
@@ -14,6 +17,10 @@ test('a failed privacy save says so and keeps the dialog open', async ({ page })
   await dialog.getByLabel(SEED.sam.name).check()
   await dialog.getByRole('button', { name: 'Update List' }).click()
   await expect(page.getByText('Couldn’t save who can see this list. Try again.')).toBeVisible()
+  await expect(dialog).toBeVisible()
+  // Dismissing the toast must not dismiss the dialog (and lose what was typed)
+  await page.getByRole('button', { name: 'Close toast' }).click()
+  await expect(page.getByText('Couldn’t save who can see this list. Try again.')).toBeHidden()
   await expect(dialog).toBeVisible()
 })
 
@@ -49,4 +56,28 @@ test('a list is deleted from its own edit dialog', async ({ page }) => {
   await expect(page.getByText('List deleted')).toBeVisible()
   await expect(page.getByRole('dialog', { name: 'Edit List' })).toBeHidden()
   await expect(page.getByRole('button', { name: `Edit ${name}` })).toHaveCount(0)
+})
+
+test('if a new list’s privacy and its cleanup both fail, the user is told it’s visible', async ({ page }) => {
+  await signInAs(page, SEED.alex.email)
+  const name = `E2E rollback ${Date.now()}`
+  await page.route('**/api/lists/*/permissions', route =>
+    route.request().method() === 'PUT' ? route.fulfill({ status: 500, json: {} }) : route.fallback())
+  await page.route('**/api/lists/*', route =>
+    route.request().method() === 'DELETE' ? route.fulfill({ status: 500, json: {} }) : route.fallback())
+  try {
+    await page.getByRole('button', { name: 'New list' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Create New List' })
+    await dialog.getByLabel('List name').fill(name)
+    await dialog.getByLabel('Hidden from specific members').check()
+    await dialog.getByLabel(SEED.sam.name).check()
+    await dialog.getByRole('button', { name: 'Create List' }).click()
+    await expect(page.getByText('List created, but its privacy didn’t save: everyone can see it. Edit it to try again.')).toBeVisible()
+    await expect(dialog).toBeHidden() // no retry that would make a duplicate
+    await expect(page.getByRole('button', { name: `Edit ${name}` })).toBeVisible()
+  } finally {
+    await page.unrouteAll()
+    const lists: { id: string; name: string }[] = await (await page.request.get('/api/lists')).json()
+    for (const l of lists.filter(l => l.name === name)) await page.request.delete(`/api/lists/${l.id}`)
+  }
 })

@@ -109,7 +109,7 @@ export default function ListManagement({
           {t.newList || 'New list'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t.createDialog?.title}</DialogTitle>
           <DialogDescription>

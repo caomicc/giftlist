@@ -386,7 +386,7 @@ export async function PUT(request: NextRequest) {
           og_description = ${og_description || null},
           og_image = ${og_image || null},
           og_site_name = ${og_site_name || null},
-          archived = ${archived !== undefined ? archived : false},
+          archived = COALESCE(${archived ?? null}, archived), -- editing details never un-archives
           updated_at = NOW()
         WHERE id = ${id}
         RETURNING *

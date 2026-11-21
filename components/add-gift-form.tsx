@@ -338,8 +338,8 @@ export default function AddGiftForm({
             </div>
           )}
 
-          {/* Optional extras stay folded so the quick path is short; open when something's already filled */}
-          <details className="group space-y-4" open={!!item.description || undefined}>
+          {/* Optional extras stay folded so the quick path is short. Uncontrolled: the user opens and closes it */}
+          <details className="group space-y-4">
             <summary className="flex w-fit cursor-pointer list-none items-center gap-1 rounded-sm text-sm text-muted-foreground select-none hover:text-foreground max-md:min-h-11 [&::-webkit-details-marker]:hidden">
               <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden="true" />
               {tQuick.moreDetails || 'More details'}

@@ -75,6 +75,14 @@ test.describe('my list', () => {
     await expect(page.getByLabel(/Description/)).toBeVisible()
   })
 
+  test('clearing the description doesn’t fold the details away', async ({ page }) => {
+    await page.getByPlaceholder('Paste a link or type a gift').fill('Anything')
+    await page.getByText('More details').click()
+    await page.getByLabel(/Description/).fill('x')
+    await page.getByLabel(/Description/).fill('')
+    await expect(page.getByLabel(/Description/)).toBeVisible()
+  })
+
   test('deletes a gift', async ({ page }) => {
     const name = uniqueName()
     await addGift(page, name)
@@ -187,6 +195,25 @@ test('archived gifts are folded away and still editable', async ({ page }) => {
   await expect(page.getByText('Old phone case', { exact: true })).toBeHidden()
   await page.getByText(/Archived items \(1\)/).click()
   await expect(myGiftRow(page, 'Old phone case').getByRole('button', { name: 'Edit' })).toBeEnabled()
+})
+
+test('editing an archived gift keeps it archived', async ({ page }) => {
+  await signInAs(page, SEED.jordan.email) // seed: "Old phone case" is archived
+  await page.getByText(/Archived items \(1\)/).click()
+  await myGiftRow(page, 'Old phone case').getByRole('button', { name: 'Edit' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Edit Gift Item' })
+  await dialog.getByLabel('Description').fill('Still not needed')
+  await dialog.getByRole('button', { name: 'Update Gift Item' }).click()
+  await expect(dialog).toBeHidden()
+  await page.reload()
+  await expect(page.getByText(/Archived items \(1\)/)).toBeVisible()
+  await expect(page.getByText('Old phone case', { exact: true })).toBeHidden() // still folded away with the archive
+  // put the seed description back
+  await page.getByText(/Archived items \(1\)/).click()
+  await myGiftRow(page, 'Old phone case').getByRole('button', { name: 'Edit' }).click()
+  await dialog.getByLabel('Description').fill('No longer needed')
+  await dialog.getByRole('button', { name: 'Update Gift Item' }).click()
+  await expect(dialog).toBeHidden()
 })
 
 test('a group gift offers “I’m in” and “I’ll organize it”', async ({ page }) => {

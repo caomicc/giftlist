@@ -28,7 +28,19 @@ test('parsePrice splits a preview price into amount and currency', () => {
   assert.deepEqual(parsePrice('29.99 GBP'), { amount: '29.99', currency: 'GBP' })
   assert.deepEqual(parsePrice('£1,299.99'), { amount: '1299.99', currency: 'GBP' })
   assert.deepEqual(parsePrice('$65'), { amount: '65', currency: 'USD' })
-  assert.deepEqual(parsePrice('€12,50'), { amount: '12,50', currency: 'EUR' })
+  assert.deepEqual(parsePrice('€12,50'), { amount: '12.50', currency: 'EUR' }) // decimal comma stored as a dot
   assert.deepEqual(parsePrice('80'), { amount: '80', currency: null })
   assert.deepEqual(parsePrice('around 40'), { amount: 'around 40', currency: null })
+})
+
+test('a decimal comma is a decimal, not a thousands separator', () => {
+  assert.equal(formatPrice('12,50', 'EUR', 'en-US'), '€12.50')
+  assert.equal(formatPrice('1,299.99', 'USD', 'en-US'), '$1,299.99')
+})
+
+test('a currency the price text names wins over the stored default', () => {
+  assert.equal(formatPrice('29.99 GBP', 'USD', 'en-US'), '£29.99') // legacy Amazon UK rows defaulted to USD
+  assert.equal(formatPrice('$34.99 CAD', 'USD', 'en-US'), 'CA$34.99')
+  assert.equal(formatPrice('$65', 'EUR', 'en-US'), '€65.00') // a bare $ is ambiguous: keep the item's currency
+  assert.deepEqual(parsePrice('$34.99 CAD'), { amount: '34.99', currency: 'CAD' })
 })
