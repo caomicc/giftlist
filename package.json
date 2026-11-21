@@ -7,8 +7,9 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
-    "test": "node --test lib/*.test.ts",
-    "test:e2e": "playwright test"
+    "test": "node --test lib/*.test.ts scripts/*.test.mjs",
+    "test:e2e": "playwright test",
+    "db:reset": "node scripts/db-reset.mjs"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.2",
