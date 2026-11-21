@@ -286,7 +286,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   }
 
   // List management handlers
-  const handleCreateList = async (listData: NewListData) => {
+  /** Creates a list and its visibility rules. True only when both saved. */
+  const handleCreateList = async (listData: NewListData): Promise<boolean> => {
+    const tLists = translations.lists || {}
     setIsSubmitting(true)
     try {
       // Extract visibility settings
@@ -318,25 +320,36 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
           can_view: visibility_mode === "visible_to" // true for visible_to, false for hidden_from
         }))
 
-        await fetch(`/api/lists/${newList.id}/permissions`, {
+        const permissionsResponse = await fetch(`/api/lists/${newList.id}/permissions`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ permissions }),
         })
+        if (!permissionsResponse.ok) {
+          // Without its rules the new list would be visible to everyone: remove it so a retry starts clean
+          await fetch(`/api/lists/${newList.id}`, { method: 'DELETE' }).catch(() => {})
+          toast.error(tLists.toasts?.permissionsFailed || 'Couldn’t save who can see this list. Try again.')
+          return false
+        }
       }
 
       reloadLists()
+      toast.success(tLists.toasts?.created || 'List created')
+      return true
     } catch (err) {
       console.error("Failed to create list", err)
       toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
+      return false
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleUpdateList = async (listId: string, listData: ListFields, permissions: ListPermissionInput[]) => {
+  /** Saves a list's details and visibility rules. True only when both saved. */
+  const handleUpdateList = async (listId: string, listData: ListFields, permissions: ListPermissionInput[]): Promise<boolean> => {
+    const tLists = translations.lists || {}
     setIsSubmitting(true)
     try {
       const response = await fetch(`/api/lists/${listId}`, {
@@ -361,14 +374,17 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         body: JSON.stringify({ permissions }),
       })
 
-      if (!permissionsResponse.ok) {
-        console.warn('Failed to update list permissions')
-      }
-
       reloadLists()
+      if (!permissionsResponse.ok) {
+        toast.error(tLists.toasts?.permissionsFailed || 'Couldn’t save who can see this list. Try again.')
+        return false
+      }
+      toast.success(tLists.toasts?.saved || 'List saved')
+      return true
     } catch (err) {
       console.error("Failed to update list", err)
       toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
+      return false
     } finally {
       setIsSubmitting(false)
     }

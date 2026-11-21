@@ -57,5 +57,11 @@
     "deleted": "List deleted"
   },
   "defaultName": "{{name}}'s list",
-  "defaultNameNoName": "My list"
+  "defaultNameNoName": "My list",
+  "editList": "Edit {{name}}",
+  "toasts": {
+    "permissionsFailed": "Couldn’t save who can see this list. Try again.",
+    "created": "List created",
+    "saved": "List saved"
+  }
 }

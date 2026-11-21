@@ -42,8 +42,9 @@ export type ListPermissionView = ListPermissionInput & { user_name: string; user
 interface ListManagementProps {
   userLists: UserList[]
   otherMembers: User[]
-  onCreateList: (listData: NewListData) => Promise<void>
-  onUpdateList: (listId: string, listData: ListFields, permissions: ListPermissionInput[]) => Promise<void>
+  /** Resolves true only when the list and its visibility rules saved; the dialog stays open otherwise */
+  onCreateList: (listData: NewListData) => Promise<boolean>
+  onUpdateList: (listId: string, listData: ListFields, permissions: ListPermissionInput[]) => Promise<boolean>
   onDeleteList: (listId: string) => Promise<void>
   fetchListPermissions: (listId: string) => Promise<{ permissions?: ListPermissionView[] }>
   isSubmitting: boolean
@@ -100,7 +101,7 @@ export default function ListManagement({
       selected_users: newListForm.selectedUsers
     }
 
-    await onCreateList(listData)
+    if (!(await onCreateList(listData))) return
     resetNewListForm()
     setIsCreateListDialogOpen(false)
   }
@@ -182,7 +183,7 @@ export default function ListManagement({
       }))
     }
 
-    await onUpdateList(editingList.id, listData, permissions)
+    if (!(await onUpdateList(editingList.id, listData, permissions))) return
     setEditingList(null)
     resetEditListForm()
   }
@@ -253,6 +254,7 @@ export default function ListManagement({
                         size="sm"
                         onClick={() => handleEditList(list)}
                         disabled={isSubmitting}
+                        aria-label={formatMessage(t.editList || 'Edit {{name}}', { name: list.name })}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>

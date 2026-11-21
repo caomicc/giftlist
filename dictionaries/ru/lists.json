@@ -57,5 +57,11 @@
     "deleted": "Список удалён"
   },
   "defaultName": "Список {{name}}",
-  "defaultNameNoName": "Мой список"
+  "defaultNameNoName": "Мой список",
+  "editList": "Изменить «{{name}}»",
+  "toasts": {
+    "permissionsFailed": "Не удалось сохранить, кто видит этот список. Попробуйте ещё раз.",
+    "created": "Список создан",
+    "saved": "Список сохранён"
+  }
 }
