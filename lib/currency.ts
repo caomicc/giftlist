@@ -8,6 +8,24 @@ export function isCurrency(value: unknown): value is Currency {
   return (CURRENCIES as readonly unknown[]).includes(value)
 }
 
+const SYMBOLS: Record<string, Currency> = { $: 'USD', '£': 'GBP', '€': 'EUR', '₽': 'RUB' }
+
+/**
+ * Splits a price as shops and link previews write it ("29.99 GBP", "£1,299.99")
+ * into the amount and, when it names a supported one, the currency.
+ * Text that isn't a price comes back unchanged with no currency.
+ */
+export function parsePrice(text: string): { amount: string; currency: Currency | null } {
+  const raw = text.trim()
+  const symbol = Object.keys(SYMBOLS).find((s) => raw.includes(s))
+  const code = raw.match(/\b[A-Z]{3}\b/)?.[0]
+  const currency = symbol ? SYMBOLS[symbol] : isCurrency(code) ? code : null
+  const rest = raw.replace(/[$£€₽]/g, '').replace(/\b[A-Z]{3}\b/, '').trim()
+  if (!/^\d[\d.,]*$/.test(rest)) return { amount: raw, currency: null }
+  // "1,299.99": the commas are thousands separators. "12,50": the comma is the decimal mark.
+  return { amount: rest.includes('.') ? rest.replace(/,/g, '') : rest, currency }
+}
+
 /**
  * Format a number as currency using international formatting
  * @param amount - The amount to format

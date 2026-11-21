@@ -56,6 +56,7 @@ export function useSuggestionData() {
     name?: string
     description?: string
     price?: string
+    currency?: string
     link?: string
     image_url?: string
     is_anonymous?: boolean

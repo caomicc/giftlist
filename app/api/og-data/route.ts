@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
               type: 'product',
               url: amazonData.url || url,
               price: amazonData.price ? `${amazonData.price} ${amazonData.currency}` : null,
+              currency: amazonData.currency || null,
             }
           })
         }
@@ -176,6 +177,9 @@ export async function POST(request: NextRequest) {
       url: getMetaContent('og:url') || url,
       price: getMetaContent('product:price:amount') ||
         getMetaContent('price') ||
+        null,
+      currency: getMetaContent('product:price:currency') ||
+        getMetaContent('og:price:currency') ||
         null,
     }
 

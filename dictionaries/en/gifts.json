@@ -36,7 +36,8 @@
       "addToList": "Add to List",
       "targetAmount": "Target amount",
       "isGiftCard": "This is a gift card",
-      "isGroupGift": "This is a group gift"
+      "isGroupGift": "This is a group gift",
+      "currency": "Currency"
     },
     "placeholders": {
       "link": "Link (optional)",

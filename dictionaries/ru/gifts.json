@@ -36,7 +36,8 @@
       "addToList": "Добавить в список",
       "targetAmount": "Целевая сумма",
       "isGiftCard": "Это подарочная карта",
-      "isGroupGift": "Это групповой подарок"
+      "isGroupGift": "Это групповой подарок",
+      "currency": "Валюта"
     },
     "placeholders": {
       "link": "Ссылка (необязательно)",

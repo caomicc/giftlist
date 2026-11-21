@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dialog"
 import { Loader2, Gift, UserX } from 'lucide-react'
 import { useTranslation, formatMessage } from "./i18n-provider"
+import CurrencySelect from "./currency-select"
+import { isCurrency, parsePrice } from "@/lib/currency"
 import { toast } from "sonner"
 
 interface User {
@@ -37,6 +39,7 @@ interface SuggestGiftDialogProps {
     name?: string
     description?: string
     price?: string
+    currency?: string
     link?: string
     image_url?: string
     is_anonymous?: boolean
@@ -67,6 +70,7 @@ export default function SuggestGiftDialog({
     name: "",
     description: "",
     price: "",
+    currency: "USD",
     link: "",
     imageUrl: "",
     isAnonymous: false,
@@ -89,10 +93,13 @@ export default function SuggestGiftDialog({
 
       // Auto-fill fields if empty and OG data exists
       if (data) {
+        const preview = data.price ? parsePrice(data.price) : null
+        const previewCurrency = data.currency ?? preview?.currency
         setFormData((prev) => ({
           ...prev,
           name: !prev.name && data.title ? data.title : prev.name,
-          price: !prev.price && data.price ? data.price : prev.price,
+          price: prev.price || preview?.amount || "",
+          currency: !prev.price && isCurrency(previewCurrency) ? previewCurrency : prev.currency,
           imageUrl: !prev.imageUrl && data.image ? data.image : prev.imageUrl,
         }))
       }
@@ -113,6 +120,7 @@ export default function SuggestGiftDialog({
         name: formData.name || ogData?.title || undefined,
         description: formData.description || undefined,
         price: formData.price || undefined,
+        currency: formData.currency,
         link: formData.link || undefined,
         image_url: formData.imageUrl || ogData?.image || undefined,
         is_anonymous: formData.isAnonymous,
@@ -212,14 +220,22 @@ export default function SuggestGiftDialog({
           {/* Price Input */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="suggest-price">{t.addForm?.labels?.price || 'Price'} ({t.suggestions?.optional || 'optional'})</Label>
-            <Input
-              id="suggest-price"
-              inputMode="decimal"
-              placeholder={t.addForm?.placeholders?.price || 'Price'}
-              value={formData.price}
-              onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
-              disabled={isSubmitting}
-            />
+            <div className="flex gap-2">
+              <CurrencySelect
+                id="suggest-currency"
+                value={formData.currency}
+                onChange={(value) => setFormData((prev) => ({ ...prev, currency: value }))}
+                disabled={isSubmitting}
+              />
+              <Input
+                id="suggest-price"
+                inputMode="decimal"
+                placeholder="0.00"
+                value={formData.price}
+                onChange={(e) => setFormData((prev) => ({ ...prev, price: e.target.value }))}
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
 
           {/* Description/Message */}

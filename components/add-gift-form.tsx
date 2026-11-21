@@ -10,6 +10,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Loader2, CreditCard, Users, Gift } from 'lucide-react'
 import { useTranslation, formatMessage } from "./i18n-provider"
+import CurrencySelect from "./currency-select"
+import { isCurrency, parsePrice } from "@/lib/currency"
 
 interface User {
   id: string
@@ -57,10 +59,20 @@ const writeLastList = (id: string) => {
   try { window.localStorage.setItem(LAST_LIST_KEY, id) } catch { /* storage unavailable */ }
 }
 
+// Remember the last currency too, so families outside the US don't re-pick it every time
+const LAST_CURRENCY_KEY = 'meep:lastCurrency'
+const readLastCurrency = () => {
+  try { return window.localStorage.getItem(LAST_CURRENCY_KEY) } catch { return null }
+}
+const writeLastCurrency = (code: string) => {
+  try { window.localStorage.setItem(LAST_CURRENCY_KEY, code) } catch { /* storage unavailable */ }
+}
+
 const emptyItem = (selectedListId: string) => ({
   link: "",
   name: "",
   price: "",
+  currency: "",
   description: "",
   imageUrl: "",
   type: 'item' as GiftType,
@@ -92,6 +104,9 @@ export default function AddGiftForm({
   const storedListId = useSyncExternalStore(noSubscribe, readLastList, () => null)
   const [chosenListId, setChosenListId] = useState<string | null>(null) // picked this session
   const lastListId = chosenListId ?? storedListId
+  const storedCurrency = useSyncExternalStore(noSubscribe, readLastCurrency, () => null)
+  const [chosenCurrency, setChosenCurrency] = useState<string | null>(null) // saved with this session
+  const lastCurrency = chosenCurrency ?? storedCurrency
   const [ogData, setOgData] = useState<OGData | null>(null)
   const [ogLoading, setOgLoading] = useState(false)
   const latestLink = useRef("")
@@ -100,6 +115,7 @@ export default function AddGiftForm({
   const isExpanded = query.trim().length > 0
   const rememberedList = lastListId && userLists.some((l) => l.id === lastListId) ? lastListId : null
   const selectedListId = item.selectedListId || rememberedList || userLists[0]?.id || ""
+  const currency = item.currency || (isCurrency(lastCurrency) ? lastCurrency : 'USD')
   const giftName = isLinkMode ? item.name : query
 
   const handleQueryChange = async (value: string) => {
@@ -123,10 +139,13 @@ export default function AddGiftForm({
     if (latestLink.current !== link) return
     setOgData(data)
     setOgLoading(false)
+    const previewPrice = data?.price ? parsePrice(data.price) : null
+    const previewCurrency = data?.currency ?? previewPrice?.currency
     setItem((prev) => ({
       ...prev,
       name: prev.name || data?.title || fallbackName || "",
-      price: prev.price || data?.price || "",
+      price: prev.price || previewPrice?.amount || "",
+      currency: prev.currency || (isCurrency(previewCurrency) ? previewCurrency : ""),
       imageUrl: prev.imageUrl || data?.image || "",
     }))
   }
@@ -160,6 +179,7 @@ export default function AddGiftForm({
         name: giftName.trim(),
         description: item.description || undefined,
         price: !isGiftCard && item.price ? item.price : undefined,
+        currency,
         link: item.link || undefined,
         image_url: item.imageUrl || undefined,
         owner_id: currentUser.id,
@@ -176,6 +196,8 @@ export default function AddGiftForm({
       })
       writeLastList(selectedListId)
       setChosenListId(selectedListId)
+      writeLastCurrency(currency)
+      setChosenCurrency(currency)
       reset()
       onAdded?.(selectedListId)
     } catch {
@@ -272,30 +294,47 @@ export default function AddGiftForm({
               <Label htmlFor="add-gift-target">
                 {tForm.labels?.targetAmount || 'Target amount'} <span className="font-normal text-muted-foreground">({tQuick.optional || 'optional'})</span>
               </Label>
-              <Input
-                id="add-gift-target"
-                placeholder={tForm.placeholders?.priceExample || 'e.g., 100.00'}
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.01"
-                value={item.giftCardTargetAmount}
-                onChange={(e) => setItem((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
-                disabled={isSubmitting}
-              />
+              <div className="flex gap-2">
+                <CurrencySelect
+                  id="add-gift-currency"
+                  value={currency}
+                  onChange={(value) => setItem((prev) => ({ ...prev, currency: value }))}
+                  disabled={isSubmitting}
+                />
+                <Input
+                  id="add-gift-target"
+                  placeholder={tForm.placeholders?.priceExample || 'e.g., 100.00'}
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  step="0.01"
+                  value={item.giftCardTargetAmount}
+                  onChange={(e) => setItem((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+              </div>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
               <Label htmlFor="add-gift-price">
                 {tForm.labels?.price || 'Price'} <span className="font-normal text-muted-foreground">({tQuick.optional || 'optional'})</span>
               </Label>
-              <Input
-                id="add-gift-price"
-                inputMode="decimal"
-                value={item.price}
-                onChange={(e) => setItem((prev) => ({ ...prev, price: e.target.value }))}
-                disabled={isSubmitting}
-              />
+              <div className="flex gap-2">
+                <CurrencySelect
+                  id="add-gift-currency"
+                  value={currency}
+                  onChange={(value) => setItem((prev) => ({ ...prev, currency: value }))}
+                  disabled={isSubmitting}
+                />
+                <Input
+                  id="add-gift-price"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={item.price}
+                  onChange={(e) => setItem((prev) => ({ ...prev, price: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+              </div>
             </div>
           )}
 

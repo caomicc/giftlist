@@ -26,3 +26,25 @@ test('a euro item shows in euros', async ({ page }) => {
     await page.request.delete(`/api/gift-items?id=${item.id}`)
   }
 })
+
+test('adding a gift in pounds shows pounds, and the next gift defaults to pounds', async ({ page }) => {
+  await signInAs(page, SEED.alex.email)
+  const name = `E2E pounds ${Date.now()}`
+  await page.getByPlaceholder('Paste a link or type a gift').fill(name)
+  await page.getByLabel('Price').fill('25')
+  await page.getByRole('combobox', { name: 'Currency' }).click()
+  await page.getByRole('option', { name: 'GBP' }).click()
+  await page.getByRole('button', { name: 'Add Gift Idea' }).click()
+  await expand(page, "Alex's wishlist")
+  try {
+    await expect(myGiftRow(page, name).getByText('£25.00')).toBeVisible()
+    await page.reload()
+    await page.getByPlaceholder('Paste a link or type a gift').fill('x')
+    await expect(page.getByRole('combobox', { name: 'Currency' })).toHaveText('GBP')
+  } finally {
+    await page.getByPlaceholder('Paste a link or type a gift').fill('')
+    await expand(page, "Alex's wishlist")
+    await myGiftRow(page, name).getByRole('button', { name: 'Delete' }).click()
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()
+  }
+})

@@ -3,6 +3,7 @@
 import type { GiftItem } from "@/lib/neon"
 import type { GiftItemUpdate, OGData } from "@/hooks/useGiftData"
 import { useState } from "react"
+import CurrencySelect from "./currency-select"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -49,6 +50,7 @@ export default function EditGiftDialog({
     name: editingItem?.name || "",
     description: editingItem?.description || "",
     price: editingItem?.price || "",
+    currency: editingItem?.currency || "USD",
     link: editingItem?.link || "",
     imageUrl: editingItem?.image_url || "",
     isGiftCard: editingItem?.is_gift_card || false,
@@ -90,6 +92,7 @@ export default function EditGiftDialog({
       name: editForm.name,
       description: editForm.description || undefined,
       price: editForm.price || undefined,
+      currency: editForm.currency,
       link: editForm.link || undefined,
       image_url: editForm.imageUrl || undefined,
       list_id: editForm.selectedListId,
@@ -131,13 +134,22 @@ export default function EditGiftDialog({
           </div>
           <div className="grid gap-2">
             <Label htmlFor="edit-price">{t.addForm?.labels?.price || "Price"}</Label>
-            <Input
-              id="edit-price"
-              value={editForm.price}
-              onChange={(e) => setEditForm((prev) => ({ ...prev, price: e.target.value }))}
-              placeholder={t.addForm?.placeholders?.price || "Price (optional)"}
-              disabled={isSubmitting || editForm.isGiftCard}
-            />
+            <div className="flex gap-2">
+              <CurrencySelect
+                id="edit-currency"
+                value={editForm.currency}
+                onChange={(value) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                disabled={isSubmitting || editForm.isGiftCard}
+              />
+              <Input
+                id="edit-price"
+                inputMode="decimal"
+                value={editForm.price}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, price: e.target.value }))}
+                placeholder="0.00"
+                disabled={isSubmitting || editForm.isGiftCard}
+              />
+            </div>
           </div>
 </div>
           <div className="grid grid-cols-1 gap-4">
@@ -258,17 +270,25 @@ export default function EditGiftDialog({
           {editForm.isGiftCard && (
             <div className="flex flex-col gap-2">
               <Label htmlFor="edit-giftCardTargetAmount">{t.addForm?.labels?.targetAmount || "Target amount"}</Label>
-              <Input
-                id="edit-giftCardTargetAmount"
-                placeholder={t.addForm?.placeholders?.priceExample || "e.g., 100.00"}
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.01"
-                value={editForm.giftCardTargetAmount}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
-                disabled={isSubmitting}
-              />
+              <div className="flex gap-2">
+                <CurrencySelect
+                  id="edit-target-currency"
+                  value={editForm.currency}
+                  onChange={(value) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                  disabled={isSubmitting}
+                />
+                <Input
+                  id="edit-giftCardTargetAmount"
+                  placeholder={t.addForm?.placeholders?.priceExample || "e.g., 100.00"}
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  step="0.01"
+                  value={editForm.giftCardTargetAmount}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, giftCardTargetAmount: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+              </div>
               <p className="text-xs text-muted-foreground">
                 {t.addForm?.messages?.giftCardHelp || "Family members record what they put toward it. Leave the target blank for no limit."}
               </p>

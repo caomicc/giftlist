@@ -10,6 +10,7 @@ export type OGData = {
   image?: string
   siteName?: string
   price?: string | null
+  currency?: string | null
   type?: string
   url?: string
 }
