@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -24,6 +25,8 @@ import FamilyGiftsList from "./family-gifts-list"
 import SuggestGiftDialog from "./suggest-gift-dialog"
 import SuggestionsView from "./suggestions-view"
 
+const TABS = ['my-list', 'family-lists', 'suggestions']
+
 interface User {
   id: string
   name: string
@@ -44,7 +47,17 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const creatingDefaultList = useRef(false)
   const [listsReload, setListsReload] = useState(0) // bump to refetch lists after a change
   const reloadLists = () => setListsReload(n => n + 1)
-  const [activeTab, setActiveTab] = useState("my-list")
+  // The open tab lives in the URL (?tab=…), so reloads, Back and shared links keep it
+  const tabParam = useSearchParams().get('tab')
+  const activeTab = tabParam && TABS.includes(tabParam) ? tabParam : 'my-list'
+  const setActiveTab = (tab: string) => {
+    const params = new URLSearchParams(window.location.search)
+    if (tab === 'my-list') params.delete('tab')
+    else params.set('tab', tab)
+    const query = params.toString()
+    // Next folds replaceState into its router: useSearchParams updates without a server round trip
+    window.history.replaceState(null, '', query ? `?${query}` : window.location.pathname)
+  }
   const [suggestDialogOpen, setSuggestDialogOpen] = useState(false)
   const [suggestTargetUserId, setSuggestTargetUserId] = useState<string | null>(null)
   const [suggestDialogKey, setSuggestDialogKey] = useState(0) // new key per open = fresh form
