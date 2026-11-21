@@ -196,7 +196,8 @@ CREATE TABLE public.gift_items (
     image_url text,
     is_group_gift boolean DEFAULT false,
     suggested_by_id text,
-    is_anonymous_suggestion boolean DEFAULT false
+    is_anonymous_suggestion boolean DEFAULT false,
+    currency text DEFAULT 'USD'::text NOT NULL
 );
 
 
@@ -229,6 +230,7 @@ CREATE TABLE public.gift_suggestions (
     og_site_name text,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
+    currency text DEFAULT 'USD'::text NOT NULL,
     CONSTRAINT gift_suggestions_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'approved'::text, 'denied'::text])))
 );
 

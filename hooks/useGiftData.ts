@@ -19,6 +19,7 @@ export type NewGiftItem = {
   name: string
   description?: string
   price?: string
+  currency?: string
   link?: string
   image_url?: string
   owner_id: string

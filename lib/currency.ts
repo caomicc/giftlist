@@ -1,5 +1,13 @@
 // Utility functions for currency and number formatting
 
+/** Currencies a gift's price can be entered in. Every stored price has one (default USD). */
+export const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'RUB'] as const
+export type Currency = (typeof CURRENCIES)[number]
+
+export function isCurrency(value: unknown): value is Currency {
+  return (CURRENCIES as readonly unknown[]).includes(value)
+}
+
 /**
  * Format a number as currency using international formatting
  * @param amount - The amount to format
@@ -13,12 +21,17 @@ export function formatCurrency(amount: number | string, currency: string = 'USD'
     return '—';
   }
 
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(numericAmount);
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numericAmount);
+  } catch {
+    // Malformed currency code: show the bare number rather than crash the row
+    return numericAmount.toFixed(2);
+  }
 }
 
 /**
@@ -52,31 +65,4 @@ export function getUserLocale(): string {
     return navigator.language || 'en-US';
   }
   return 'en-US';
-}
-
-/**
- * Get the user's preferred currency based on locale
- */
-export function getUserCurrency(locale?: string): string {
-  const userLocale = locale || getUserLocale();
-
-  // Map common locales to currencies
-  const currencyMap: Record<string, string> = {
-    'en-US': 'USD',
-    'en-GB': 'GBP',
-    'en-CA': 'CAD',
-    'en-AU': 'AUD',
-    'de-DE': 'EUR',
-    'fr-FR': 'EUR',
-    'es-ES': 'EUR',
-    'it-IT': 'EUR',
-    'ja-JP': 'JPY',
-    'ko-KR': 'KRW',
-    'zh-CN': 'CNY',
-    'ru-RU': 'RUB',
-    'pt-BR': 'BRL',
-    'in-IN': 'INR',
-  };
-
-  return currencyMap[userLocale] || 'USD';
 }

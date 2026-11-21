@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Eye, EyeOff, Gift, Users } from 'lucide-react';
-import { formatCurrency, getUserLocale, getUserCurrency } from '@/lib/currency';
+import { formatCurrency, getUserLocale } from '@/lib/currency';
 import { useTranslation } from './i18n-provider';
 
 interface GiftCardPurchase {
@@ -21,6 +21,8 @@ interface GiftCardDetailsProps {
   isPublic?: boolean;
   totalPurchased: number;
   targetAmount?: number | null;
+  /** The gift item's currency */
+  currency?: string;
 }
 
 const GiftCardDetails: React.FC<GiftCardDetailsProps> = ({
@@ -29,7 +31,8 @@ const GiftCardDetails: React.FC<GiftCardDetailsProps> = ({
   isOwner,
   isPublic = false,
   totalPurchased,
-  targetAmount
+  targetAmount,
+  currency = 'USD'
 }) => {
   const { t } = useTranslation('gifts');
   const tCard = t.giftCard || {};
@@ -37,7 +40,6 @@ const GiftCardDetails: React.FC<GiftCardDetailsProps> = ({
   const [showDetails, setShowDetails] = useState(false);
 
   const locale = getUserLocale();
-  const currency = getUserCurrency(locale);
 
   // Default to surprise when visibility is unknown: hiding too much is recoverable, leaking is not
   const isSurpriseOwner = isOwner && !isPublic;

@@ -3,7 +3,7 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Edit, Trash2, Check, X } from 'lucide-react';
-import { formatCurrency, getUserLocale, getUserCurrency } from '@/lib/currency';
+import { formatCurrency, getUserLocale } from '@/lib/currency';
 import { useTranslation, formatMessage } from './i18n-provider';
 import { useConfirm } from './confirm-dialog';
 
@@ -20,13 +20,16 @@ interface GiftCardContributionsProps {
   currentUserId: string;
   isOwner: boolean;
   onPurchaseUpdate?: () => void;
+  /** The gift item's currency */
+  currency?: string;
 }
 
 const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
   giftItemId,
   currentUserId,
   isOwner,
-  onPurchaseUpdate
+  onPurchaseUpdate,
+  currency = 'USD'
 }) => {
   const { t } = useTranslation('gifts');
   const confirm = useConfirm();
@@ -36,7 +39,6 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
   const [editAmount, setEditAmount] = useState('');
 
   const locale = getUserLocale();
-  const currency = getUserCurrency(locale);
 
   useEffect(() => {
     let ignore = false;

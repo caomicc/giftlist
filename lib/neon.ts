@@ -46,6 +46,7 @@ export type GiftItem = {
   name: string
   description: string | null
   price: string | null
+  currency: string
   link: string | null
   image_url: string | null
   owner_id: string
@@ -114,6 +115,7 @@ export type GiftSuggestion = {
   name: string
   description: string | null
   price: string | null
+  currency: string
   link: string | null
   image_url: string | null
   is_anonymous: boolean

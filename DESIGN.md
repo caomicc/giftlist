@@ -187,7 +187,7 @@ A restrained neutral zinc base carrying one violet brand voice, with three small
 - **Body** (400, 0.875rem): descriptions, form text, dialog copy. Inputs use 1rem on phones (prevents iOS zoom) and 0.875rem at md+.
 - **Label** (500, 0.75rem): badges, the "Claimed by" chip, counts, and inline privacy lines.
 
-Money uses `tabular-nums` in Geist Sans (gift-card purchase dialog). Geist Mono is loaded in the layout but not used by any surface.
+Money uses `tabular-nums` in Geist Sans. Every price and gift-card amount is shown in the item's own currency (stored per item, default USD) and formatted with the viewer's number conventions; it is never converted to the viewer's currency. Geist Mono is loaded in the layout but not used by any surface.
 
 ### Named Rules
 **The Medium Weight Rule.** App headings are medium (500), not bold. The greeting, list titles and section headers all use 500.
@@ -237,6 +237,7 @@ The buyer's main action on someone else's gift, in three states:
 Gift cards replace the claim with an "Add amount" secondary button that turns success-green and disabled when the target is reached.
 
 ### Chips / Badges
+- **Price:** not a badge. Prices are quiet 12px Slate Grey text with `tabular-nums` (`PriceTag`); green stays reserved for claimed/purchased.
 - **Style:** 12px label type, md radius. State badges are outlined in the state hue at 40% with state-coloured text and icon (group gift, suggested by); "Purchased / Complete" is a solid mint wash; gift card uses the secondary fill; archived and comment counts are outlined grey.
 - **Privacy:** a purchase badge is never shown to the owner of a surprise list.
 

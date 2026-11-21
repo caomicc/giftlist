@@ -169,7 +169,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                       {t.giftItem?.badges?.giftCard || 'Gift Card'}
                     </Badge>
                   )}
-                  {item.price && !isGiftCard && <PriceTag price={item.price} />}
+                  {item.price && !isGiftCard && <PriceTag price={item.price} currency={item.currency} />}
                 </div>
               </div>
               <DrawerClose asChild>
@@ -230,6 +230,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                     isPublic={item.is_public === true}
                     totalPurchased={giftCardTotal}
                     targetAmount={giftCardTarget}
+                    currency={item.currency}
                   />
                   {!isMyGift && (
                     <GiftCardContributions
@@ -238,6 +239,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                       currentUserId={currentUserId}
                       isOwner={isMyGift}
                       onPurchaseUpdate={handlePurchaseUpdate}
+                      currency={item.currency}
                     />
                   )}
                 </div>

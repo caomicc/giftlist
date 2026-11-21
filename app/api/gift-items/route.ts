@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
 import { getApiUser } from '@/lib/auth'
 import { scrubForViewer, unauthorized, forbidden } from '@/lib/gift-privacy'
+import { isCurrency } from '@/lib/currency'
 
 export async function GET(request: NextRequest) {
   try {
@@ -156,6 +157,7 @@ export async function POST(request: NextRequest) {
       name,
       description,
       price,
+      currency,
       link,
       image_url,
       owner_id,
@@ -174,6 +176,10 @@ export async function POST(request: NextRequest) {
 
     // You can only add items to your own lists
     if (owner_id !== currentUser.id) return forbidden()
+
+    if (currency != null && !isCurrency(currency)) {
+      return NextResponse.json({ error: 'Unsupported currency' }, { status: 400 })
+    }
 
     if (!list_id) {
       return NextResponse.json(
@@ -197,13 +203,14 @@ export async function POST(request: NextRequest) {
 
     const data = await sql`
       INSERT INTO gift_items (
-        name, description, price, link, image_url, owner_id, list_id, is_gift_card, is_group_gift, gift_card_target_amount,
+        name, description, price, currency, link, image_url, owner_id, list_id, is_gift_card, is_group_gift, gift_card_target_amount,
         og_title, og_description, og_image, og_site_name
       )
       VALUES (
         ${name},
         ${description || null},
         ${price || null},
+        ${currency || 'USD'},
         ${link || null},
         ${image_url || null},
         ${owner_id},
@@ -273,6 +280,7 @@ export async function PUT(request: NextRequest) {
       name,
       description,
       price,
+      currency,
       link,
       image_url,
       list_id,
@@ -288,6 +296,10 @@ export async function PUT(request: NextRequest) {
 
     const currentUser = await getApiUser()
     if (!currentUser) return unauthorized()
+
+    if (currency != null && !isCurrency(currency)) {
+      return NextResponse.json({ error: 'Unsupported currency' }, { status: 400 })
+    }
 
     const [existing] = await sql`
       SELECT gi.owner_id, gi.purchased_by, l.is_public
@@ -362,6 +374,7 @@ export async function PUT(request: NextRequest) {
           name = ${name || null},
           description = ${description || null},
           price = ${price || null},
+          currency = COALESCE(${currency || null}, currency),
           link = ${link || null},
           image_url = ${image_url || null},
           list_id = ${list_id || null},

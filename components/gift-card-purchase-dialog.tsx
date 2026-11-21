@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Loader2 } from 'lucide-react';
-import { formatCurrency, getUserLocale, getUserCurrency } from '@/lib/currency';
+import { formatCurrency, getUserLocale } from '@/lib/currency';
 import { useTranslation, formatMessage } from './i18n-provider';
 
 interface GiftCardPurchaseDialogProps {
@@ -22,6 +22,7 @@ interface GiftCardPurchaseDialogProps {
     name: string;
     gift_card_target_amount?: number | string | null;
     gift_card_total_purchased?: number | string;
+    currency?: string;
   };
   currentUserId: string;
   /** Records the contribution. Should throw on failure so the dialog stays open. */
@@ -40,7 +41,7 @@ const GiftCardPurchaseDialog: React.FC<GiftCardPurchaseDialogProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const locale = getUserLocale();
-  const currency = getUserCurrency(locale);
+  const currency = giftItem.currency || 'USD';
   const money = (value: number) => formatCurrency(value, currency, locale);
 
   const totalPurchased = parseFloat(giftItem.gift_card_total_purchased?.toString() || '0') || 0;

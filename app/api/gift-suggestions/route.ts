@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
 import { getSession } from '@/lib/auth'
+import { isCurrency } from '@/lib/currency'
 import { sendSuggestionNotification, sendSuggestionDeclinedNotification } from '@/lib/email'
 
 export async function GET(request: NextRequest) {
@@ -81,6 +82,7 @@ export async function POST(request: NextRequest) {
       name,
       description,
       price,
+      currency,
       link,
       image_url,
       is_anonymous,
@@ -95,6 +97,10 @@ export async function POST(request: NextRequest) {
         { error: 'Target user is required' },
         { status: 400 }
       )
+    }
+
+    if (currency != null && !isCurrency(currency)) {
+      return NextResponse.json({ error: 'Unsupported currency' }, { status: 400 })
     }
 
     if (!name && !link) {
@@ -131,6 +137,7 @@ export async function POST(request: NextRequest) {
         name,
         description,
         price,
+        currency,
         link,
         image_url,
         is_anonymous,
@@ -145,6 +152,7 @@ export async function POST(request: NextRequest) {
         ${name || og_title || 'Suggested Gift'},
         ${description || null},
         ${price || null},
+        ${currency || 'USD'},
         ${link || null},
         ${image_url || null},
         ${is_anonymous || false},
@@ -256,6 +264,7 @@ export async function PUT(request: NextRequest) {
           name,
           description,
           price,
+          currency,
           link,
           image_url,
           owner_id,
@@ -271,6 +280,7 @@ export async function PUT(request: NextRequest) {
           ${suggestion.name},
           ${suggestion.description},
           ${suggestion.price},
+          ${suggestion.currency},
           ${suggestion.link},
           ${suggestion.image_url},
           ${currentUser.id},

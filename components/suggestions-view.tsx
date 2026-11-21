@@ -33,6 +33,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useTranslation, formatMessage } from "./i18n-provider"
 import { useConfirm } from "./confirm-dialog"
+import PriceTag from "./price-tag"
 import { toast } from "sonner"
 import type { GiftSuggestion, List } from "@/lib/neon"
 
@@ -213,7 +214,7 @@ export default function SuggestionsView({
               )}
 
               {suggestion.price && (
-                <p className="text-sm font-medium mt-1">{suggestion.price}</p>
+                <p className="mt-1"><PriceTag price={suggestion.price} currency={suggestion.currency} /></p>
               )}
 
               {/* Denial reason for outgoing denied suggestions */}

@@ -131,7 +131,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                 {t.giftItem?.badges?.giftCard || 'Gift Card'}
               </Badge>
             )}
-            {item.price && !isGiftCard && <PriceTag price={item.price} />}
+            {item.price && !isGiftCard && <PriceTag price={item.price} currency={item.currency} />}
             {/* Comment indicator */}
             {item.comment_count && item.comment_count > 0 && (
               <Badge variant="outline" className="text-xs text-muted-foreground">
