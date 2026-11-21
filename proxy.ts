@@ -33,7 +33,8 @@ export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip for favicon and common static files
-  if (pathname === '/favicon.ico' || pathname === '/robots.txt' || pathname === '/sitemap.xml') {
+  // Metadata routes have no locale (apple-icon has no extension, so the matcher doesn't skip it)
+  if (pathname === '/favicon.ico' || pathname === '/robots.txt' || pathname === '/sitemap.xml' || pathname === '/apple-icon') {
     return NextResponse.next()
   }
 

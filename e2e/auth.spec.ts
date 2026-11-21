@@ -80,3 +80,14 @@ test('the sign-in button says “Sign in”', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Sign in to Meep' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
 })
+
+test('the app can be added to a home screen', async ({ page }) => {
+  const manifest = await (await page.request.get('/manifest.webmanifest')).json()
+  expect(manifest).toMatchObject({ short_name: 'Meep', display: 'standalone' })
+  await page.goto('/en/auth/signin')
+  await expect(page.locator('link[rel="manifest"]')).toHaveCount(1)
+  const href = await page.locator('link[rel="apple-touch-icon"]').getAttribute('href')
+  const icon = await page.request.get(href!)
+  expect(icon.status()).toBe(200)
+  expect(icon.headers()['content-type']).toContain('image/png')
+})

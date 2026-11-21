@@ -54,7 +54,7 @@ Each line maps to the task that closes it.
 
   **Task 18**
 - [x] The bookmarklet card shows on phones. **Task 19**
-- [ ] There's no web app manifest or home-screen icon. **Task 20**
+- [x] There's no web app manifest or home-screen icon. **Task 20**
 - [x] Rows and pages:
   - Drop the "Created …" line on lists.
   - Make the comment delete icon grey until hovered (it's red at rest).
