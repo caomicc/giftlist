@@ -26,3 +26,14 @@ test('theme labels are translated', async ({ page }) => {
     await expect(page.getByRole('menuitemradio', { name: label, exact: true })).toBeVisible()
   }
 })
+
+test('menu labels line up, including the Theme submenu', async ({ page }) => {
+  await page.goto('/en/profile')
+  await page.getByRole('button', { name: 'My Profile' }).click()
+  // The menu zooms in as it opens; measure once it has settled
+  await page.getByRole('menu').evaluate(el => Promise.all(el.getAnimations({ subtree: true }).map(a => a.finished)))
+  const left = async (item: string) =>
+    (await page.getByRole('menuitem', { name: item }).getByText(item, { exact: true }).boundingBox())!.x
+  expect(Math.abs((await left('Theme')) - (await left('Profile Settings')))).toBeLessThan(1)
+  expect(Math.abs((await left('Sign out')) - (await left('Profile Settings')))).toBeLessThan(1)
+})

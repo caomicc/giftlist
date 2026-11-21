@@ -92,12 +92,12 @@ export function UserMenu({ user }: UserMenuProps) {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleProfile}>
-          <Settings className="mr-2 h-4 w-4" />
+          <Settings className="size-4" />
           <span>{t.userMenu?.profileSettings || 'Profile Settings'}</span>
         </DropdownMenuItem>
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <Palette className="mr-2 h-4 w-4" />
+            <Palette className="size-4" />
             <span>{t.theme?.label || 'Theme'}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent>
@@ -110,13 +110,13 @@ export function UserMenu({ user }: UserMenuProps) {
         </DropdownMenuSub>
         {hasPassword === false && (
           <DropdownMenuItem onClick={handleSetPassword}>
-            <Lock className="mr-2 h-4 w-4" />
+            <Lock className="size-4" />
             <span>{t.userMenu?.setPassword || 'Set Password'}</span>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="size-4" />
           <span>{t.userMenu?.signOut || 'Sign out'}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
