@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { match as matchLocale } from '@formatjs/intl-localematcher'
 import Negotiator from 'negotiator'
-import { locales, defaultLocale } from '@/lib/i18n-config'
+import { locales, defaultLocale, type Locale } from '@/lib/i18n-config'
 
 const RETURN_TO_COOKIE = 'meep_return_to'
 
 function getLocale(request: NextRequest): string {
   // Check if locale is stored in cookie
   const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value
-  if (cookieLocale && locales.includes(cookieLocale as any)) {
+  if (cookieLocale && locales.includes(cookieLocale as Locale)) {
     return cookieLocale
   }
 

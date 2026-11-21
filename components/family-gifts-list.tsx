@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback } from "./ui/avatar"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Gift, Lightbulb, Eye, EyeOff } from 'lucide-react'
 import GiftItem from "./gift-item"
+import type { GiftItem as GiftItemData } from "@/lib/neon"
 import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
@@ -14,10 +15,13 @@ interface User {
   email: string
 }
 
+/** One member's gifts on one of their lists. */
+type ListGroup = { name: string; isPublic?: boolean; items: GiftItemData[] }
+
 interface FamilyGiftsListProps {
   currentUser: User
   users: User[]
-  giftItems: any[]
+  giftItems: GiftItemData[]
   onTogglePurchase: (itemId: string, currentPurchasedBy: string | null) => Promise<void>
   onGiftCardPurchase: (itemId: string, amount: number) => Promise<void>
   onSuggestGift?: (targetUserId: string) => void
@@ -34,17 +38,17 @@ export default function FamilyGiftsList({
   const { t } = useTranslation('gifts')
   const { t: tCommon } = useTranslation('common')
 
-  const getOtherMembers = () => users.filter((u: any) => u.id !== currentUser.id)
-  const getMemberGifts = (memberId: string) => giftItems.filter((item: any) => item.owner_id === memberId && !item.archived)
+  const getOtherMembers = () => users.filter(u => u.id !== currentUser.id)
+  const getMemberGifts = (memberId: string) => giftItems.filter(item => item.owner_id === memberId && !item.archived)
 
   return (
     <Accordion type="single" collapsible className="w-full flex flex-col group">
-      {getOtherMembers().map((member: any) => {
+      {getOtherMembers().map(member => {
         const memberGifts = getMemberGifts(member.id)
-        const purchasedCount = memberGifts.filter((item: any) => item.purchased_by).length
+        const purchasedCount = memberGifts.filter(item => item.purchased_by).length
 
         // Group gifts by list to show privacy indicators
-        const giftsByList = memberGifts.reduce((acc: any, item: any) => {
+        const giftsByList = memberGifts.reduce<Record<string, ListGroup>>((acc, item) => {
           const listId = item.list_id
           const listName = item.list_name || 'Unnamed List'
           const isPublic = item.is_public
@@ -123,7 +127,7 @@ export default function FamilyGiftsList({
                   </div>
                 ) : (
                   <Accordion type="single" collapsible className="w-full md:px-3">
-                    {Object.entries(giftsByList).map(([listId, listData]: [string, any]) => (
+                    {Object.entries(giftsByList).map(([listId, listData]) => (
                       <AccordionItem key={listId} value={listId} className="w-full">
                         <AccordionTrigger className="hover:no-underline items-center py-2">
                           <div className="flex items-start gap-1 flex-col">
@@ -149,9 +153,9 @@ export default function FamilyGiftsList({
                         </AccordionTrigger>
                         <AccordionContent className="pb-0">
                           <div className="px-1 md:px-2 divide-y divide-border">
-                            {listData.items.map((item: any) => {
+                            {listData.items.map(item => {
                               const purchaserName = item.purchased_by
-                                ? users.find((u: any) => u.id === item.purchased_by)?.name
+                                ? users.find(u => u.id === item.purchased_by)?.name
                                 : null
 
                               return (

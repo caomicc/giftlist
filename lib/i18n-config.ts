@@ -15,5 +15,7 @@ export type Namespace =
   | "emails"
   | "errors";
 
-// Dictionary type
+// Translation JSON, read at arbitrary depth as t.a?.b || 'fallback'. A precise type would make every
+// lookup a string-or-object union that JSX can't render, so this stays loose on purpose.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Dictionary = Record<string, any>;

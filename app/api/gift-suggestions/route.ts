@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     `
 
     // Hide suggester name for anonymous pending suggestions
-    const processedSuggestions = suggestions.map((s: any) => ({
+    const processedSuggestions = suggestions.map(s => ({
       ...s,
       suggested_by_name: s.is_anonymous && s.status === 'pending' ? null : s.suggested_by_name,
       // Also hide suggested_by_id for anonymous pending

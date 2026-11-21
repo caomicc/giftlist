@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
     await setPassword(session.user.email, password)
     
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Set password error:', error)
     
-    if (error.message === 'User not found') {
+    if (error instanceof Error && error.message === 'User not found') {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }

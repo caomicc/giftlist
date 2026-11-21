@@ -1,5 +1,7 @@
 "use client"
 
+import type { GiftItem } from "@/lib/neon"
+import type { GiftItemUpdate, OGData } from "@/hooks/useGiftData"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,19 +16,19 @@ import { useTranslation, formatMessage } from "./i18n-provider"
 interface UserList {
   id: string
   name: string
-  description?: string
+  description?: string | null
   is_public: boolean
   created_at: string
   item_count?: number
 }
 
 interface EditGiftDialogProps {
-  editingItem: any
+  editingItem: GiftItem | null
   userLists: UserList[]
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onUpdateGiftItem: (itemData: any) => Promise<void>
-  fetchOGData: (url: string) => Promise<any>
+  onUpdateGiftItem: (itemData: GiftItemUpdate) => Promise<void>
+  fetchOGData: (url: string) => Promise<OGData | null>
   isSubmitting: boolean
 }
 
@@ -54,13 +56,13 @@ export default function EditGiftDialog({
     giftCardTargetAmount: editingItem?.gift_card_target_amount ? editingItem.gift_card_target_amount.toString() : "",
     selectedListId: editingItem?.list_id || ""
   }))
-  const [editFormOGData, setEditFormOGData] = useState<any>(() =>
+  const [editFormOGData, setEditFormOGData] = useState<OGData | null>(() =>
     editingItem && (editingItem.og_title || editingItem.og_description || editingItem.og_image)
       ? {
-          title: editingItem.og_title,
-          description: editingItem.og_description,
-          image: editingItem.og_image,
-          siteName: editingItem.og_site_name
+          title: editingItem.og_title ?? undefined,
+          description: editingItem.og_description ?? undefined,
+          image: editingItem.og_image ?? undefined,
+          siteName: editingItem.og_site_name ?? undefined
         }
       : null
   )

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Gift, Archive, Eye, EyeOff } from 'lucide-react'
 import GiftItem from "./gift-item"
+import type { GiftItem as GiftItemData } from "@/lib/neon"
 import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
@@ -15,7 +16,7 @@ interface User {
 interface UserList {
   id: string
   name: string
-  description?: string
+  description?: string | null
   is_public: boolean
   created_at: string
   item_count?: number
@@ -24,9 +25,9 @@ interface UserList {
 interface MyGiftsListProps {
   currentUser: User
   userLists: UserList[]
-  activeMyGifts: any[]
-  archivedMyGifts: any[]
-  onEdit: (item: any) => void
+  activeMyGifts: GiftItemData[]
+  archivedMyGifts: GiftItemData[]
+  onEdit: (item: GiftItemData) => void
   onDelete: (itemId: string) => void
   onArchive: (itemId: string) => void
 }
@@ -59,7 +60,7 @@ export default function MyGiftsList({
       description: listInfo?.description || '',
       isPublic: listInfo?.is_public || false,
       createdAt: listInfo?.created_at || null,
-      items: [] as any[]
+      items: [] as GiftItemData[]
     }
   }
 
@@ -82,7 +83,7 @@ export default function MyGiftsList({
     <div className="space-y-6">
       {/* Active Lists and Items */}
       <Accordion type="single" collapsible className="w-full">
-        {Object.entries(itemsByList).map(([listId, listData]: [string, any]) => (
+        {Object.entries(itemsByList).map(([listId, listData]) => (
           <AccordionItem key={listId} value={listId}>
             <AccordionTrigger className="hover:no-underline items-center">
               <div className="flex items-center gap-3 w-full">
@@ -119,7 +120,7 @@ export default function MyGiftsList({
                 </p>
               )}
               <div className="divide-y divide-border">
-                {listData.items.map((item: any) => (
+                {listData.items.map(item => (
                   <div key={item.id}>
                     <GiftItem
                       item={item}
@@ -145,7 +146,7 @@ export default function MyGiftsList({
             {t.myGifts?.archivedItems || 'Archived Items'}
           </h4>
           <div className="space-y-6">
-            {Object.entries(archivedByList).map(([listId, listData]: [string, any]) => (
+            {Object.entries(archivedByList).map(([listId, listData]) => (
               <div key={`archived-${listId}`} className="space-y-3">
                 <div className="flex items-center gap-3 pb-2 border-b border-dashed">
                   <div className="flex-1">
@@ -158,7 +159,7 @@ export default function MyGiftsList({
                   </div>
                 </div>
                 <div className="divide-y divide-border">
-                  {listData.items.map((item: any) => (
+                  {listData.items.map(item => (
                     <GiftItem
                       key={item.id}
                       item={item}

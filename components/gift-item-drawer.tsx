@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
+import type { GiftItem as GiftItemData } from '@/lib/neon'
 import {
   Drawer,
   DrawerClose,
@@ -38,33 +39,13 @@ import { useTranslation, formatMessage } from './i18n-provider'
 import { cn, formatRelativeTime } from '@/lib/utils'
 
 export type GiftItemDrawerProps = {
-  item: {
-    id: string
-    name: string
-    description?: string
-    price?: string
-    link?: string
-    purchased_by?: string | null
-    owner_id: string
-    list_id?: string
-    is_public?: boolean
-    is_gift_card?: boolean
-    is_group_gift?: boolean
-    gift_card_target_amount?: number | string | null
-    gift_card_total_purchased?: number | string
-    og_title?: string | null
-    og_description?: string | null
-    og_image?: string | null
-    og_site_name?: string | null
-    archived?: boolean
-    image_url?: string | null
-  } | null
+  item: GiftItemData & { comment_count?: number; suggested_by_name?: string | null } | null
   open: boolean
   onOpenChange: (open: boolean) => void
   currentUserId: string
   purchaserName?: string
   variant?: 'my-gifts' | 'family-gifts'
-  onEdit?: (item: any) => void
+  onEdit?: (item: GiftItemData) => void
   onDelete?: (itemId: string) => void
   onArchive?: (itemId: string) => void
   onTogglePurchase?: (itemId: string, currentPurchasedBy: string | null) => void

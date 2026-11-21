@@ -20,22 +20,32 @@ interface User {
   email: string
 }
 
-interface UserList {
+export interface UserList {
   id: string
   name: string
-  description?: string
+  description?: string | null
   is_public: boolean
   created_at: string
   item_count?: number
 }
 
+export type VisibilityMode = "all" | "hidden_from" | "visible_to"
+/** Editable list fields (PUT /api/lists/[id]). */
+export type ListFields = { name: string; description: string | null; is_public: boolean }
+/** A new list plus who may see it (POST /api/lists, then permissions). */
+export type NewListData = ListFields & { visibility_mode: VisibilityMode; selected_users: string[] }
+/** Stored exception to a list's default visibility. */
+export type ListPermissionInput = { user_id: string; can_view: boolean }
+/** One member's effective visibility, from GET /api/lists/[id]/permissions. */
+export type ListPermissionView = ListPermissionInput & { user_name: string; user_email: string; is_explicit: boolean }
+
 interface ListManagementProps {
   userLists: UserList[]
   otherMembers: User[]
-  onCreateList: (listData: any) => Promise<void>
-  onUpdateList: (listId: string, listData: any, permissions: any[]) => Promise<void>
+  onCreateList: (listData: NewListData) => Promise<void>
+  onUpdateList: (listId: string, listData: ListFields, permissions: ListPermissionInput[]) => Promise<void>
   onDeleteList: (listId: string) => Promise<void>
-  fetchListPermissions: (listId: string) => Promise<any>
+  fetchListPermissions: (listId: string) => Promise<{ permissions?: ListPermissionView[] }>
   isSubmitting: boolean
 }
 
@@ -53,7 +63,7 @@ export default function ListManagement({
 
   const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false)
   const [isManageListsDialogOpen, setIsManageListsDialogOpen] = useState(false)
-  const [editingList, setEditingList] = useState<any>(null)
+  const [editingList, setEditingList] = useState<UserList | null>(null)
 
   const [newListForm, setNewListForm] = useState({
     name: "",
@@ -95,19 +105,19 @@ export default function ListManagement({
     setIsCreateListDialogOpen(false)
   }
 
-  const handleEditList = async (list: any) => {
+  const handleEditList = async (list: UserList) => {
     setEditingList(list)
 
     try {
       const response = await fetchListPermissions(list.id)
-      const permissions = response?.permissions || []
+      const permissions: ListPermissionView[] = response?.permissions || []
 
       // Only consider explicit permissions (not defaults applied to new users)
-      const explicitPermissions = permissions.filter((p: any) => p.is_explicit)
+      const explicitPermissions = permissions.filter(p => p.is_explicit)
 
       // Determine visibility mode based on explicit permissions only
-      const explicitHiddenUsers = explicitPermissions.filter((p: any) => !p.can_view).map((p: any) => p.user_id)
-      const explicitVisibleUsers = explicitPermissions.filter((p: any) => p.can_view).map((p: any) => p.user_id)
+      const explicitHiddenUsers = explicitPermissions.filter(p => !p.can_view).map(p => p.user_id)
+      const explicitVisibleUsers = explicitPermissions.filter(p => p.can_view).map(p => p.user_id)
 
       let visibilityMode: "all" | "hidden_from" | "visible_to" = "all"
       let selectedUsers: string[] = []
@@ -159,7 +169,7 @@ export default function ListManagement({
     }
 
     // Calculate permissions based on visibility mode
-    let permissions: any[] = []
+    let permissions: ListPermissionInput[] = []
 
     // Only create explicit permissions if not in "visible to all" mode
     if (editListForm.visibilityMode !== "all") {

@@ -6,7 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Gift, AlertCircle } from 'lucide-react'
-import { useGiftData } from "@/hooks/useGiftData"
+import { useGiftData, type NewGiftItem, type GiftItemUpdate } from "@/hooks/useGiftData"
+import type { GiftItem, List } from "@/lib/neon"
 import { useSuggestionData } from "@/hooks/useSuggestionData"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Button } from "@/components/ui/button"
@@ -17,7 +18,7 @@ import { useI18n, formatMessage } from "./i18n-provider"
 // Import our new components
 import AddGiftForm from "./add-gift-form"
 import EditGiftDialog from "./edit-gift-dialog"
-import ListManagement from "./list-management"
+import ListManagement, { type NewListData, type ListFields, type ListPermissionInput } from "./list-management"
 import MyGiftsList from "./my-gifts-list"
 import FamilyGiftsList from "./family-gifts-list"
 import SuggestGiftDialog from "./suggest-gift-dialog"
@@ -35,9 +36,9 @@ interface FamilyGiftAppProps {
 
 export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [editingItem, setEditingItem] = useState<any>(null)
+  const [editingItem, setEditingItem] = useState<GiftItem | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [userLists, setUserLists] = useState<any[]>([])
+  const [userLists, setUserLists] = useState<(List & { item_count?: number })[]>([]) // GET /api/lists rows
   // Lists load separately from gifts; only a successful lists fetch can say "this user has none".
   const [listsLoaded, setListsLoaded] = useState(false)
   const creatingDefaultList = useRef(false)
@@ -119,7 +120,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
       .catch(err => console.warn("Failed to create default list", err))
   }, [listsLoaded, userLists.length, currentUser.name])
 
-  const handleAddGiftItem = async (itemData: any) => {
+  const handleAddGiftItem = async (itemData: NewGiftItem) => {
     setIsSubmitting(true)
     try {
       await addGiftItem(itemData)
@@ -132,12 +133,12 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     }
   }
 
-  const handleEditGiftItem = (item: any) => {
+  const handleEditGiftItem = (item: GiftItem) => {
     setEditingItem(item)
     setIsEditDialogOpen(true)
   }
 
-  const handleUpdateGiftItem = async (itemData: any) => {
+  const handleUpdateGiftItem = async (itemData: GiftItemUpdate) => {
     if (!editingItem) return
 
     setIsSubmitting(true)
@@ -153,7 +154,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   }
 
   const handleRemoveGiftItem = async (itemId: string) => {
-    const name = giftItems.find((g: any) => g.id === itemId)?.name || ''
+    const name = giftItems.find(g => g.id === itemId)?.name || ''
     const ok = await confirm({
       title: formatMessage(tGifts.deleteGift?.title || 'Delete "{{name}}"?', { name }),
       description: tGifts.deleteGift?.description || 'This removes it from your list for good. To hide it without losing it, archive it instead.',
@@ -182,16 +183,16 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         toast(tToasts.released || "Unmarked. It's open again.")
         return
       }
-      const item = giftItems.find((g: any) => g.id === itemId)
-      const ownerName = users.find((u: any) => u.id === item?.owner_id)?.name
+      const item = giftItems.find(g => g.id === itemId)
+      const ownerName = users.find(u => u.id === item?.owner_id)?.name
       if (item && item.is_public === false && ownerName) {
         toast.success(formatMessage(tToasts.claimedSurprise || "Marked as yours. {{name}} won't see this.", { name: ownerName }))
       } else {
         toast.success(tToasts.claimed || 'Marked as yours')
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to toggle purchase status", err)
-      if (err?.status === 403) {
+      if ((err as { status?: number })?.status === 403) {
         toast.error(tToasts.alreadyClaimed || 'Someone else already claimed this')
         refetchGifts()
       } else {
@@ -233,7 +234,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     setSuggestTargetUserId(null)
   }
 
-  const handleCreateSuggestion = async (suggestionData: any) => {
+  const handleCreateSuggestion = async (suggestionData: Parameters<typeof createSuggestion>[0]) => {
     await createSuggestion(suggestionData)
   }
 
@@ -252,7 +253,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   }
 
   // List management handlers
-  const handleCreateList = async (listData: any) => {
+  const handleCreateList = async (listData: NewListData) => {
     setIsSubmitting(true)
     try {
       // Extract visibility settings
@@ -302,7 +303,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     }
   }
 
-  const handleUpdateList = async (listId: string, listData: any, permissions: any[]) => {
+  const handleUpdateList = async (listId: string, listData: ListFields, permissions: ListPermissionInput[]) => {
     setIsSubmitting(true)
     try {
       const response = await fetch(`/api/lists/${listId}`, {
@@ -377,9 +378,9 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
   // Helper functions
   const getCurrentMember = () => currentUser
-  const getOtherMembers = () => users.filter((u: any) => u.id !== currentUser.id)
-  const getActiveMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id && !item.archived)
-  const getArchivedMyGifts = () => giftItems.filter((item: any) => item.owner_id === currentUser.id && item.archived)
+  const getOtherMembers = () => users.filter(u => u.id !== currentUser.id)
+  const getActiveMyGifts = () => giftItems.filter(item => item.owner_id === currentUser.id && !item.archived)
+  const getArchivedMyGifts = () => giftItems.filter(item => item.owner_id === currentUser.id && item.archived)
 
   // Loading state: the skeleton mirrors the real layout (greeting, then the list card)
   if (loading) {

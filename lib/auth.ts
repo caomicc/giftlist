@@ -184,12 +184,13 @@ export async function verifyMagicLink(token: string, email: string) {
     }
 
     // Get or create user FIRST (before deleting token)
-    let user: Record<string, any> | undefined;
+    type UserRow = User & { email_verified?: Date | null }
+    let user: UserRow | undefined;
     {
       const [foundUser] = await sql`
         SELECT * FROM users WHERE email = ${email}
       `;
-      user = foundUser;
+      user = foundUser as UserRow | undefined;
     }
 
     if (!user) {
@@ -208,7 +209,7 @@ export async function verifyMagicLink(token: string, email: string) {
           throw new Error('User creation returned no results');
         }
 
-        user = result[0];
+        user = result[0] as UserRow | undefined;
         if (!user) {
           console.error('❌ User creation returned null/undefined user');
           throw new Error('User creation returned null user');

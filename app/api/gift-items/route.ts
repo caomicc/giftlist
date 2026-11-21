@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Never tell the owner of a surprise list what has been bought
-    giftItems = giftItems.map((row: any) => scrubForViewer(row, currentUser.id))
+    giftItems = giftItems.map(row => scrubForViewer(row, currentUser.id))
 
     return NextResponse.json({ giftItems })
   } catch (error) {
@@ -300,7 +300,7 @@ export async function PUT(request: NextRequest) {
     }
     const isOwner = existing.owner_id === currentUser.id
     // Responses to the owner go through the surprise-list scrub
-    const respond = (row: any) =>
+    const respond = (row: Record<string, unknown>) =>
       NextResponse.json({ giftItem: scrubForViewer(row, currentUser.id, existing.is_public) })
 
     // If updating archive status only

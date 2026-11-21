@@ -3,6 +3,38 @@
 import { useState, useEffect } from "react"
 import type { User, GiftItem } from "@/lib/neon"
 
+/** Link preview returned by /api/og-data. */
+export type OGData = {
+  title?: string
+  description?: string
+  image?: string
+  siteName?: string
+  price?: string | null
+  type?: string
+  url?: string
+}
+
+/** Body for POST /api/gift-items. */
+export type NewGiftItem = {
+  name: string
+  description?: string
+  price?: string
+  link?: string
+  image_url?: string
+  owner_id: string
+  list_id: string
+  is_gift_card?: boolean
+  is_group_gift?: boolean
+  gift_card_target_amount?: number
+  og_title?: string
+  og_description?: string
+  og_image?: string
+  og_site_name?: string
+}
+
+/** Body for PUT /api/gift-items (besides the id). */
+export type GiftItemUpdate = Partial<Omit<NewGiftItem, 'owner_id'>>
+
 export function useGiftData() {
   const [users, setUsers] = useState<User[]>([])
   const [giftItems, setGiftItems] = useState<GiftItem[]>([])
@@ -34,21 +66,7 @@ export function useGiftData() {
   }
 
   // Add gift item
-  const addGiftItem = async (item: {
-    name: string
-    description?: string
-    price?: string
-    link?: string
-    image_url?: string
-    owner_id: string
-    list_id: string
-    is_gift_card?: boolean
-    gift_card_target_amount?: number
-    og_title?: string
-    og_description?: string
-    og_image?: string
-    og_site_name?: string
-  }) => {
+  const addGiftItem = async (item: NewGiftItem) => {
     try {
       const response = await fetch('/api/gift-items', {
         method: 'POST',
@@ -69,21 +87,7 @@ export function useGiftData() {
   }
 
   // Update gift item
-  const updateGiftItem = async (itemId: string, updates: {
-    name?: string
-    description?: string
-    price?: string
-    link?: string
-    image_url?: string
-    list_id?: string
-    is_gift_card?: boolean
-    is_group_gift?: boolean
-    gift_card_target_amount?: number
-    og_title?: string
-    og_description?: string
-    og_image?: string
-    og_site_name?: string
-  }) => {
+  const updateGiftItem = async (itemId: string, updates: GiftItemUpdate) => {
     try {
       const response = await fetch('/api/gift-items', {
         method: 'PUT',
@@ -243,7 +247,7 @@ export function useGiftData() {
   }
 
   // Fetch OpenGraph data
-  const fetchOGData = async (url: string) => {
+  const fetchOGData = async (url: string): Promise<OGData | null> => {
     try {
       const response = await fetch('/api/og-data', {
         method: 'POST',

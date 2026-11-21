@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
       success: true, 
       user: { email: user.email, name: user.name } 
     })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Registration error:', error)
     
-    if (error.message === 'User already exists') {
+    if (error instanceof Error && error.message === 'User already exists') {
       return NextResponse.json(
         { error: 'An account with this email already exists' },
         { status: 400 }

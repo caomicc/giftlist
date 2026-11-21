@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
  * owner what has been bought or contributed. Hiding it in the UI is not enough:
  * the API response itself has to be scrubbed.
  */
-type GiftRow = Record<string, any> & {
+type GiftRow = Record<string, unknown> & {
   owner_id?: string
   list_owner_id?: string
   is_public?: boolean

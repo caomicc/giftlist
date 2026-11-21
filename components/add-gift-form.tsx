@@ -1,5 +1,6 @@
 "use client"
 
+import type { NewGiftItem, OGData } from "@/hooks/useGiftData"
 import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,7 +20,7 @@ interface User {
 interface UserList {
   id: string
   name: string
-  description?: string
+  description?: string | null
   is_public: boolean
   created_at: string
   item_count?: number
@@ -28,8 +29,8 @@ interface UserList {
 interface AddGiftFormProps {
   currentUser: User
   userLists: UserList[]
-  onAddGiftItem: (itemData: any) => Promise<void>
-  fetchOGData: (url: string) => Promise<any>
+  onAddGiftItem: (itemData: NewGiftItem) => Promise<void>
+  fetchOGData: (url: string) => Promise<OGData | null>
   isSubmitting: boolean
   /** Pre-fills the quick-add field (e.g. a link shared from the bookmarklet) */
   initialQuery?: string
@@ -91,7 +92,7 @@ export default function AddGiftForm({
   const storedListId = useSyncExternalStore(noSubscribe, readLastList, () => null)
   const [chosenListId, setChosenListId] = useState<string | null>(null) // picked this session
   const lastListId = chosenListId ?? storedListId
-  const [ogData, setOgData] = useState<any>(null)
+  const [ogData, setOgData] = useState<OGData | null>(null)
   const [ogLoading, setOgLoading] = useState(false)
   const latestLink = useRef("")
 

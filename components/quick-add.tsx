@@ -1,5 +1,6 @@
 'use client'
 
+import type { NewGiftItem } from '@/hooks/useGiftData'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { Check } from 'lucide-react'
@@ -64,7 +65,7 @@ export default function QuickAdd({ lang, currentUser, initialUrl, pageTitle }: Q
     return () => window.clearTimeout(timer)
   }, [savedTo, isPopup])
 
-  const addGiftItem = async (itemData: any) => {
+  const addGiftItem = async (itemData: NewGiftItem) => {
     setIsSubmitting(true)
     try {
       const response = await fetch('/api/gift-items', {

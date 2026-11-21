@@ -1,5 +1,6 @@
 "use client"
 
+import type { OGData } from "@/hooks/useGiftData"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,7 +45,7 @@ interface SuggestGiftDialogProps {
     og_image?: string
     og_site_name?: string
   }) => Promise<void>
-  fetchOGData: (url: string) => Promise<any>
+  fetchOGData: (url: string) => Promise<OGData | null>
 }
 
 export default function SuggestGiftDialog({
@@ -58,7 +59,7 @@ export default function SuggestGiftDialog({
 }: SuggestGiftDialogProps) {
   const { t } = useTranslation('gifts')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [ogData, setOgData] = useState<any>(null)
+  const [ogData, setOgData] = useState<OGData | null>(null)
   const [ogLoading, setOgLoading] = useState(false)
   
   const [formData, setFormData] = useState({
