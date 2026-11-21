@@ -36,7 +36,7 @@ export async function signInAs(page: Page, email: string) {
   await page.goto('/en/auth/signin')
   await page.getByLabel('Email').fill(email)
   await page.getByPlaceholder('Enter your password').fill(SEED_PASSWORD)
-  await page.getByRole('button', { name: 'Login' }).click()
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await page.waitForURL(/\/en$/)
 }
 

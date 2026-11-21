@@ -17,6 +17,7 @@ function LoginFormContent({
   ...props
 }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState('')
+  const [tab, setTab] = useState('password') // controlled so "Forgot your password?" can switch to the magic link
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -93,10 +94,7 @@ function LoginFormContent({
           <div className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">{(signin?.title as string) ?? 'Hi 😊'}</h1>
-                <p className="text-muted-foreground text-balance dark:text-muted-foreground">
-                  {(signin?.subtitle as string) ?? 'Login to your Meep Giftlist account'}
-                </p>
+                <h1 className="text-2xl font-medium tracking-tight">{(signin?.title as string) ?? 'Sign in to Meep'}</h1>
               </div>
 
               {errorMessage && (
@@ -105,7 +103,7 @@ function LoginFormContent({
                 </Alert>
               )}
 
-              <Tabs defaultValue="password" className="w-full">
+              <Tabs value={tab} onValueChange={setTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="password">{(signin?.tabs as Record<string, string>)?.password ?? 'Password'}</TabsTrigger>
                   <TabsTrigger value="magic-link">{(signin?.tabs as Record<string, string>)?.magicLink ?? 'Magic Link'}</TabsTrigger>
@@ -134,6 +132,15 @@ function LoginFormContent({
                         required
                         placeholder={(signin?.form as Record<string, string>)?.passwordPlaceholder ?? 'Enter your password'}
                       />
+                      {/* The magic link is the way back in without a password; keep the typed email */}
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="h-auto justify-start p-0 text-sm font-normal text-muted-foreground max-md:min-h-11"
+                        onClick={() => setTab('magic-link')}
+                      >
+                        {(signin?.form as Record<string, string>)?.forgotPassword ?? 'Forgot your password? Email me a sign-in link'}
+                      </Button>
                     </div>
 
                     {message && (
@@ -147,7 +154,7 @@ function LoginFormContent({
                       className="w-full"
                       disabled={isLoading || !email || !password}
                     >
-                      {isLoading ? ((signin?.form as Record<string, string>)?.submittingButton ?? 'Signing in...') : ((signin?.form as Record<string, string>)?.submitButton ?? 'Login')}
+                      {isLoading ? ((signin?.form as Record<string, string>)?.submittingButton ?? 'Signing in...') : ((signin?.form as Record<string, string>)?.submitButton ?? 'Sign in')}
                     </Button>
 
                     <div className="text-center text-sm">
@@ -203,7 +210,8 @@ function LoginFormContent({
               </Tabs>
             </div>
           </div>
-          <div className="bg-muted aspect-4/3 md:aspect-[unset] relative block">
+          {/* Decorative: on phones it would push nothing useful below the form, so desktop only */}
+          <div className="bg-muted relative hidden md:block">
             <Image
               src="/baby.webp"
               alt=""

@@ -3,7 +3,7 @@ import { test, expect, signInAs, SEED } from './fixtures'
 test('signed-out visitors are sent to sign in', async ({ page }) => {
   await page.goto('/en/profile')
   await expect(page).toHaveURL(/\/en\/auth\/signin$/)
-  await expect(page.getByRole('heading', { name: 'Hi 😊' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Sign in to Meep' })).toBeVisible()
 })
 
 test('the browser language picks the locale', async ({ browser }) => {
@@ -28,7 +28,7 @@ test('wrong password shows the server error', async ({ page }) => {
   await page.goto('/en/auth/signin')
   await page.getByLabel('Email').fill('someone@example.com')
   await page.getByPlaceholder('Enter your password').fill('wrong-password')
-  await page.getByRole('button', { name: 'Login' }).click()
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page.getByText('Invalid email or password')).toBeVisible()
   expect(body).toEqual({ email: 'someone@example.com', password: 'wrong-password' })
 })
@@ -65,4 +65,18 @@ test('a signed-in user who opens sign-in goes to their lists', async ({ page }) 
   await signInAs(page, SEED.alex.email)
   await page.goto('/en/auth/signin')
   await expect(page).toHaveURL(/\/en$/)
+})
+
+test('forgot password switches to the sign-in link, keeping the email', async ({ page }) => {
+  await page.goto('/en/auth/signin')
+  await page.getByLabel('Email').fill('alex@example.com')
+  await page.getByRole('button', { name: 'Forgot your password? Email me a sign-in link' }).click()
+  await expect(page.getByRole('tab', { name: 'Magic Link' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByLabel('Email')).toHaveValue('alex@example.com')
+})
+
+test('the sign-in button says “Sign in”', async ({ page }) => {
+  await page.goto('/en/auth/signin')
+  await expect(page.getByRole('heading', { name: 'Sign in to Meep' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
 })
