@@ -1,6 +1,8 @@
 // Refuses anything that could point local-only tooling (db:reset, e2e) at a real database,
 // a remote Docker daemon, or a real mail account. Only the fields passed are checked.
-export const LOCAL_DB_HOSTS = ['db.localtest.me', 'localhost']
+import { LOCAL_DB_HOSTS } from '../lib/local-db.ts'
+
+export { LOCAL_DB_HOSTS }
 
 const isLocalDocker = target => !target || target.startsWith('unix://') || target.startsWith('npipe://')
 
