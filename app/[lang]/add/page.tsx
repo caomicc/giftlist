@@ -22,7 +22,7 @@ export default async function AddPage({
   const safeUrl = /^https?:\/\//i.test(candidate) ? candidate : ''
 
   return (
-    <main className="mx-auto w-full max-w-md px-4 pt-20 pb-8">
+    <main className="mx-auto w-full max-w-md px-4 pt-2 pb-8">
       <QuickAdd
         lang={lang}
         currentUser={{ id: user.id, name: user.name ?? '', email: user.email }}

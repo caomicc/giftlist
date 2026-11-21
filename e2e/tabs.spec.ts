@@ -23,3 +23,14 @@ test('the greeting and tabs don’t repeat themselves', async ({ page }) => {
   await page.getByRole('tab', { name: /Suggestions/ }).click()
   await expect(page.getByText('1', { exact: true })).toHaveCount(2) // tab badge + Incoming badge only
 })
+
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  test('header controls sit above the greeting', async ({ page }) => {
+    await signInAs(page, SEED.alex.email)
+    const header = await page.getByRole('banner').boundingBox()
+    const greeting = await page.getByRole('heading', { level: 1 }).boundingBox()
+    expect(header!.y + header!.height).toBeLessThanOrEqual(greeting!.y)
+  })
+})

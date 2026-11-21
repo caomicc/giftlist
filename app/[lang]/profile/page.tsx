@@ -136,7 +136,7 @@ export default function ProfilePage() {
 
   if (isLoadingProfile) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-[calc(100svh-4rem)] items-center justify-center">
         <p className="text-lg">Loading profile...</p>
       </div>
     )
@@ -144,7 +144,7 @@ export default function ProfilePage() {
 
   if (!profile) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-[calc(100svh-4rem)] items-center justify-center">
         <Card className="container w-full max-w-xl">
           <CardContent className="pt-6">
             <Alert variant="destructive">
@@ -157,7 +157,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center gap-6 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Profile Settings</CardTitle>

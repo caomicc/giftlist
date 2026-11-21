@@ -419,7 +419,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     return (
       <div className="container mx-auto max-w-xl w-full" aria-busy="true">
         <span className="sr-only">{t.loading || 'Loading...'}</span>
-        <div className="flex items-end mb-4 md:mb-6 px-4 md:px-0 min-h-[100px] md:min-h-auto">
+        <div className="flex items-end mb-4 md:mb-6 px-4 md:px-0">
           <div className="space-y-2">
             <Skeleton className="h-7 w-48" />
             <Skeleton className="h-4 w-32" />
@@ -465,7 +465,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     <TooltipProvider>
       <div className="container mx-auto max-w-xl w-full">
         {/* Header */}
-        <div className="flex items-end justify-between mb-4 md:mb-6 px-4 md:px-0 min-h-[100px] md:min-h-auto">
+        <div className="flex items-end justify-between mb-4 md:mb-6 px-4 md:px-0">
           <div className="flex items-center gap-3">
             <div>
               <h1 className="text-2xl font-medium tracking-tight text-balance">

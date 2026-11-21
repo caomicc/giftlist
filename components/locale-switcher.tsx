@@ -16,11 +16,6 @@ const localeNames: Record<string, string> = {
   ru: "Русский",
 };
 
-const localeFlags: Record<string, string> = {
-  en: "🇺🇸",
-  ru: "🇷🇺",
-};
-
 export function LocaleSwitcher() {
   const pathname = usePathname();
   const { locale, translations } = useI18n();
@@ -43,18 +38,13 @@ export function LocaleSwitcher() {
 
   return (
     <Select value={locale} onValueChange={handleLocaleChange}>
-      <SelectTrigger className="w-[140px] shadow-none border-0" aria-label={translations?.common?.language || "Language"}>
+      <SelectTrigger className="w-auto -ml-3 shadow-none border-0" aria-label={translations?.common?.language || "Language"}>
         <SelectValue placeholder="Language" />
       </SelectTrigger>
       <SelectContent>
         {locales.map((loc) => (
           <SelectItem key={loc} value={loc}>
-            <div className="flex row items-center gap-2 [&>span]:inline-block">
-              <span>
-                {localeNames[loc]}
-              </span>
-              <span>{localeFlags[loc]}</span>
-            </div>
+            {localeNames[loc]}
           </SelectItem>
         ))}
       </SelectContent>

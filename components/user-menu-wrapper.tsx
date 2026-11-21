@@ -38,9 +38,5 @@ export function UserMenuWrapper() {
     return null
   }
 
-  return (
-    <div className="absolute md:fixed top-0 right-0 p-4 z-50">
-      <UserMenu user={user} />
-    </div>
-  )
+  return <UserMenu user={user} />
 }

@@ -55,11 +55,12 @@ export default async function LangLayout({
           disableTransitionOnChange
         >
         <I18nProvider locale={lang} translations={translations}>
-          <div className="absolute top-4 left-4 z-50">
-            <LocaleSwitcher />
-          </div>
           <ConfirmProvider>
-            <UserMenuWrapper />
+            {/* One row, aligned with the content column, in normal flow (nothing overlaps the page below) */}
+            <header className="relative z-50 mx-auto flex h-16 max-w-xl items-center justify-between px-4 md:px-0">
+              <LocaleSwitcher />
+              <UserMenuWrapper />
+            </header>
             <div className="relative z-10">{children}</div>
           </ConfirmProvider>
           <Toaster position="bottom-center" richColors closeButton />

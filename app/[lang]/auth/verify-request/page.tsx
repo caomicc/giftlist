@@ -9,7 +9,7 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
   const isDevelopment = process.env.NODE_ENV === 'development'
 
   return (
-    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-[calc(100svh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Check your email</CardTitle>

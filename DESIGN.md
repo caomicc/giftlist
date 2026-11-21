@@ -262,7 +262,7 @@ Rows inside lists: optional 48px thumbnail, item title as a button (opens the gi
 One field, "Paste a link or type a gift". Details (name, price, type, list) reveal as soon as the field has text; a pasted link fetches a preview and pre-fills the name. Type is a three-way segmented toggle group (Item / Gift card / Group gift) whose items are 44px on phones.
 
 ### Navigation
-Three full-width tabs on a Mist track (My Gift List, Family Lists, Suggestions); the active tab turns white with a small shadow. A red count badge on Suggestions shows pending items. The locale switcher sits top-left and the user menu top-right, outside the card.
+Three full-width tabs on a Mist track (My Gift List, Family Lists, Suggestions); the active tab turns white with a small shadow. A red count badge on Suggestions shows pending items. A header row (64px, in normal flow, the content column's width) holds the locale switcher on the left and the user menu on the right, above the greeting. Languages are named, not flagged. Centred pages subtract the header from their min-height.
 
 ### Feedback
 - **Toasts:** sonner at the bottom centre with rich colours and a close button, for save successes and failures ("Couldn't save that. Try again.", "Someone else already claimed this").
