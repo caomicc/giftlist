@@ -22,7 +22,7 @@ test('theme labels are translated', async ({ page }) => {
   await page.goto('/ru/profile')
   await page.getByRole('button', { name: 'Мой профиль' }).click()
   await page.getByRole('menuitem', { name: 'Тема' }).click()
-  for (const label of ['Светлая', 'Тёмная', 'Сезонная светлая', 'Сезонная тёмная']) {
+  for (const label of ['Как на устройстве', 'Светлая', 'Тёмная', 'Сезонная светлая', 'Сезонная тёмная']) {
     await expect(page.getByRole('menuitemradio', { name: label, exact: true })).toBeVisible()
   }
 })

@@ -33,6 +33,7 @@ export function UserMenu({ user }: UserMenuProps) {
   const [hasPassword, setHasPassword] = useState<boolean | null>(null)
   const { theme, setTheme } = useTheme()
   const themes = [
+    ['system', t.theme?.system || 'Match my device'],
     ['light', t.theme?.light || 'Light'],
     ['dark', t.theme?.dark || 'Dark'],
     ['seasonal-light', t.theme?.seasonalLight || 'Seasonal light'],

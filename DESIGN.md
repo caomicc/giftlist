@@ -141,7 +141,7 @@ Feedback is non-modal by default. Successes and failures arrive as toasts at the
 - White card on a diagonal red-100 to violet-300 page gradient.
 - Geist Sans at medium weight for every heading; small (14px) body and 12px labels.
 - Phone-first ergonomics: 44px controls below 768px, bottom-sheet card, owner actions moved into a drawer.
-- Four themes via `data-theme` on `<html>`: light, dark, seasonal-light, seasonal-dark (accents follow the calendar season, `data-season`).
+- Four themes via `data-theme` on `<html>`: light, dark, seasonal-light, seasonal-dark (accents follow the calendar season, `data-season`). The default, "Match my device", resolves to light or dark from the OS setting.
 
 ## Colors
 

@@ -49,8 +49,8 @@ export default async function LangLayout({
         <ThemeProvider
           attribute="data-theme"
           themes={['light', 'dark', 'seasonal-light', 'seasonal-dark']}
-          defaultTheme="light"
-          enableSystem={false}
+          defaultTheme="system"
+          enableSystem
           enableColorScheme={false}
           disableTransitionOnChange
         >

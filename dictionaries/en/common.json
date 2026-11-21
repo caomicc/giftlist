@@ -24,7 +24,8 @@
     "light": "Light",
     "dark": "Dark",
     "seasonalLight": "Seasonal light",
-    "seasonalDark": "Seasonal dark"
+    "seasonalDark": "Seasonal dark",
+    "system": "Match my device"
   },
   "userMenu": {
     "profileSettings": "Profile Settings",

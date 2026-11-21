@@ -16,11 +16,13 @@ async function openWithTheme(page: Page, theme: string | null) {
 const token = (page: Page, name: string) =>
   page.evaluate(n => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), name)
 
-test('defaults to light', async ({ page }) => {
-  await openWithTheme(page, null)
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
-  expect(await token(page, '--background')).toMatch(LIGHT_BACKGROUND)
-})
+for (const scheme of ['light', 'dark'] as const) {
+  test(`with no choice saved, follows a ${scheme} device`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme })
+    await openWithTheme(page, null)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', scheme)
+  })
+}
 
 for (const theme of ['dark', 'seasonal-dark']) {
   test(`${theme} applies the dark tokens and dark: utilities`, async ({ page }) => {
@@ -33,7 +35,7 @@ for (const theme of ['dark', 'seasonal-dark']) {
 }
 
 test('an unknown stored theme renders as light', async ({ page }) => {
-  await openWithTheme(page, 'system')
+  await openWithTheme(page, 'neon')
   expect(await token(page, '--background')).toMatch(LIGHT_BACKGROUND)
 })
 
