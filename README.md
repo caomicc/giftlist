@@ -52,3 +52,8 @@ npm run dev:prod     # app against whatever .env says (production)
   docker run --rm -e URL="$URL" postgres:17-alpine sh -c 'pg_dump "$URL" --schema-only --no-owner --no-privileges' > db/schema.sql
   npm run db:reset
   ```
+
+## Git hooks
+
+`npm install` points git at `.githooks/`: commits need a clean `npm run lint` and passing `npm test`;
+pushes need a passing `npm run test:e2e` (run `npm run db:up` first). Skip once with `--no-verify`.

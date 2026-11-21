@@ -19,6 +19,11 @@ npm test             # Unit tests (node --test lib/*.test.ts scripts/*.test.mjs)
 npm run test:e2e     # Playwright e2e against the local DB (needs npm run db:up; own next dev on :3100, distDir .next-e2e)
 ```
 
+Git hooks live in `.githooks/` (enabled by `npm install` via the `prepare` script):
+- **pre-commit:** `npm run lint` + `npm test` must pass.
+- **pre-push:** `npm run test:e2e` must pass (start the local DB first: `npm run db:up`).
+- Skip once with `--no-verify`.
+
 ## Local database
 
 A throwaway Postgres with a fake family, so development and tests never touch production. Needs Docker.

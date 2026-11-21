@@ -12,7 +12,8 @@
     "db:reset": "node scripts/db-reset.mjs",
     "dev:prod": "next dev",
     "db:up": "docker compose up -d --wait",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.2",

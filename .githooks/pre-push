@@ -1,0 +1,6 @@
+#!/bin/sh
+# Blocks the push if the Playwright suite fails (needs the local database: npm run db:up).
+# Skip once with: git push --no-verify
+set -e
+echo "pre-push: npm run test:e2e"
+npm run test:e2e --silent -- --reporter=line
