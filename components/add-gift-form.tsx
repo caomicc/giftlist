@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Loader2, CreditCard, Users, Gift } from 'lucide-react'
+import { Plus, Loader2, CreditCard, Users, Gift, ChevronDown } from 'lucide-react'
 import { useTranslation, formatMessage } from "./i18n-provider"
 import CurrencySelect from "./currency-select"
 import { isCurrency, parsePrice } from "@/lib/currency"
@@ -338,6 +338,12 @@ export default function AddGiftForm({
             </div>
           )}
 
+          {/* Optional extras stay folded so the quick path is short; open when something's already filled */}
+          <details className="group space-y-4" open={!!item.description || undefined}>
+            <summary className="flex w-fit cursor-pointer list-none items-center gap-1 rounded-sm text-sm text-muted-foreground select-none hover:text-foreground max-md:min-h-11 [&::-webkit-details-marker]:hidden">
+              <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+              {tQuick.moreDetails || 'More details'}
+            </summary>
           <div className="flex flex-col gap-2">
             <Label htmlFor="add-gift-description">
               {tForm.labels?.description || 'Description'} <span className="font-normal text-muted-foreground">({tQuick.optional || 'optional'})</span>
@@ -370,6 +376,7 @@ export default function AddGiftForm({
               </p>
             </div>
           )}
+          </details>
 
           {userLists.length > 1 && (
             <div className="flex flex-col gap-2">

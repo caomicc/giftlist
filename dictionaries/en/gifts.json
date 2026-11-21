@@ -67,7 +67,8 @@
       },
       "cancel": "Cancel",
       "nameLabel": "Gift name",
-      "optional": "optional"
+      "optional": "optional",
+      "moreDetails": "More details"
     }
   },
   "editDialog": {

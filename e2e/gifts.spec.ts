@@ -67,6 +67,14 @@ test.describe('my list', () => {
     await expect(myGiftRow(page, knife).getByRole('button', { name: 'Unarchive item' })).toHaveCount(0)
   })
 
+  test('description and image wait behind “More details”', async ({ page }) => {
+    await page.getByPlaceholder('Paste a link or type a gift').fill('Anything')
+    await expect(page.getByLabel(/Image URL/)).toBeHidden()
+    await page.getByText('More details').click()
+    await expect(page.getByLabel(/Image URL/)).toBeVisible()
+    await expect(page.getByLabel(/Description/)).toBeVisible()
+  })
+
   test('deletes a gift', async ({ page }) => {
     const name = uniqueName()
     await addGift(page, name)

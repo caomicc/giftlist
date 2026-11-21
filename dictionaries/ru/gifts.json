@@ -67,7 +67,8 @@
       },
       "cancel": "Отмена",
       "nameLabel": "Название",
-      "optional": "необязательно"
+      "optional": "необязательно",
+      "moreDetails": "Подробнее"
     }
   },
   "editDialog": {
