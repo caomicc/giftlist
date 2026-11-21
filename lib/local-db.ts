@@ -1,5 +1,4 @@
-// Hosts that mean "the local docker compose database" (db/local.env). Shared with scripts/db-guard.mjs.
-export const LOCAL_DB_HOSTS = ['db.localtest.me', 'localhost']
+import { LOCAL_DB_HOSTS } from '../scripts/db-guard.mjs'
 
 /**
  * The Neon HTTP endpoint for a local database URL, or undefined to keep the driver default.
