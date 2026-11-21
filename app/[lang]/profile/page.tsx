@@ -160,7 +160,7 @@ export default function ProfilePage() {
     <div className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center gap-6 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Profile Settings</CardTitle>
+          <CardTitle className="text-2xl font-medium">Profile Settings</CardTitle>
           <CardDescription>
             Manage your account information and security settings.
           </CardDescription>
@@ -304,7 +304,10 @@ export default function ProfilePage() {
           </div>
         </CardContent>
       </Card>
-      <SaveBookmarklet />
+      {/* Phones have no bookmarks bar to drag it to */}
+      <div className="hidden w-full justify-center md:flex">
+        <SaveBookmarklet />
+      </div>
     </div>
   )
 }

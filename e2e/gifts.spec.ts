@@ -182,6 +182,13 @@ test.describe('claiming', () => {
   })
 })
 
+test('archived gifts are folded away and still editable', async ({ page }) => {
+  await signInAs(page, SEED.jordan.email) // seed: "Old phone case" is archived
+  await expect(page.getByText('Old phone case', { exact: true })).toBeHidden()
+  await page.getByText(/Archived items \(1\)/).click()
+  await expect(myGiftRow(page, 'Old phone case').getByRole('button', { name: 'Edit' })).toBeEnabled()
+})
+
 test('a group gift offers “I’m in” and “I’ll organize it”', async ({ page }) => {
   await signInAs(page, SEED.riley.email)
   await page.getByRole('tab', { name: 'Family Lists' }).click()

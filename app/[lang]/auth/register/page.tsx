@@ -63,7 +63,7 @@ export default function RegisterPage() {
     <div className="flex min-h-[calc(100svh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <Card className="container w-full max-w-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">{(register?.title as string) ?? 'Create Account'}</CardTitle>
+          <CardTitle className="text-2xl font-medium">{(register?.title as string) ?? 'Create Account'}</CardTitle>
           <CardDescription>
             {(register?.subtitle as string) ?? 'Sign up for Gift List'}
           </CardDescription>

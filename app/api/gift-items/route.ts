@@ -120,7 +120,8 @@ export async function GET(request: NextRequest) {
         LEFT JOIN users u_purchaser ON gi.purchased_by = u_purchaser.id
         LEFT JOIN users u_suggester ON gi.suggested_by_id::uuid = u_suggester.id
         LEFT JOIN list_permissions lp ON l.id = lp.list_id AND lp.user_id = ${currentUser.id}
-        WHERE gi.archived = FALSE
+        -- Your own archived gifts come back too (to unarchive them, or read their comments); others' never do
+        WHERE (gi.archived = FALSE OR gi.owner_id = ${currentUser.id})
         AND (
           l.owner_id = ${currentUser.id}  -- User owns the list
           OR (lp.can_view = TRUE)  -- User has explicit permission to view

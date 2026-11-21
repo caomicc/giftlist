@@ -1,12 +1,12 @@
 {
   "myGifts": {
     "empty": "Пока нет идей для подарков. Добавьте что-нибудь выше!",
-    "archivedItems": "Архивные подарки",
     "trackPurchases": "Отслеживать покупки",
     "keepSurprise": "Сохранить сюрприз",
     "surpriseLine": "Сюрприз: вы не увидите, что уже купили",
     "trackedLine": "Вы видите, что уже купили",
-    "archivedList": "{{name}} (в архиве)"
+    "archivedList": "{{name}} (в архиве)",
+    "archivedSummary": "Архив ({{count}})"
   },
   "familyGifts": {
     "listTitle": "Списки подарков для {{name}}",

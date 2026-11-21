@@ -45,7 +45,6 @@
     "tryAgain": "Try Again"
   },
   "dates": {
-    "created": "Created {{date}}",
     "joined": "Joined",
     "updated": "Updated {{date}}"
   },

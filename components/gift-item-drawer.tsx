@@ -144,7 +144,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
             isDesktop ? 'sm:max-w-lg h-full' : 'max-h-[85vh] rounded-t-3xl'
           )}
         >
-          <DrawerHeader className="border-b">
+          <DrawerHeader className="border-b group-data-[vaul-drawer-direction=bottom]/drawer-content:text-left">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <DrawerTitle className="text-lg">
@@ -316,12 +316,12 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-8 ml-auto md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                                className="size-8 ml-auto text-muted-foreground hover:text-destructive md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                                 onClick={() => handleDeleteComment(comment.id)}
                                 title={t.drawer?.deleteComment || 'Delete comment'}
                                 aria-label={t.drawer?.deleteComment || 'Delete comment'}
                               >
-                                <Trash2 className="size-3.5 text-destructive" />
+                                <Trash2 className="size-3.5" />
                               </Button>
                             )}
                           </div>
@@ -400,7 +400,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                       purchaserName={purchaserName}
                       onToggle={onTogglePurchase}
                       isGroupGift={isGroupGift}
-                      className="flex-1 justify-center"
+                      className="flex-1 justify-center max-md:max-w-none"
                     />
                   )}
                 </>
@@ -415,7 +415,6 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                       onEdit?.(item)
                       onOpenChange(false)
                     }}
-                    disabled={isArchived}
                   >
                     <Edit className="w-4 h-4 mr-1" />
                     {t.giftItem?.buttons?.edit || 'Edit'}

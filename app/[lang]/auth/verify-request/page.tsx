@@ -12,7 +12,7 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
     <div className="flex min-h-[calc(100svh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Check your email</CardTitle>
+          <CardTitle className="text-2xl font-medium">Check your email</CardTitle>
           <CardDescription>
             We’ve sent a magic link to{' '}
             {email && <span className="font-medium">{email}</span>}

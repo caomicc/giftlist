@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Gift, Archive, Eye, EyeOff, Pencil } from 'lucide-react'
+import { Gift, Archive, Eye, EyeOff, Pencil, ChevronDown } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import GiftItem from "./gift-item"
 import type { GiftItem as GiftItemData } from "@/lib/neon"
@@ -134,11 +134,6 @@ export default function MyGiftsList({
                     <span className="text-xs text-muted-foreground">
                       {formatMessage((listData.items.length === 1 ? tCommon.counts?.items : tCommon.counts?.itemsPlural) || '{{count}} items', { count: listData.items.length })}
                     </span>
-                    {listData.createdAt && (
-                      <span className="text-xs text-muted-foreground">
-                        • {formatMessage(tCommon.dates?.created || 'Created {{date}}', { date: new Date(listData.createdAt).toLocaleDateString() })}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -183,12 +178,14 @@ export default function MyGiftsList({
 
       {/* Archived Items by List */}
       {Object.keys(archivedByList).length > 0 && (
-        <div className="pt-4 border-t">
-          <h4 className="text-lg font-medium text-muted-foreground mb-4 flex items-center gap-2">
-            <Archive className="w-5 h-5" />
-            {t.myGifts?.archivedItems || 'Archived Items'}
-          </h4>
-          <div className="space-y-6">
+        // Folded by default so it doesn't grow forever under the active lists
+        <details className="group pt-4 border-t">
+          <summary className="flex w-fit cursor-pointer list-none items-center gap-2 rounded-sm text-sm font-medium text-muted-foreground select-none hover:text-foreground max-md:min-h-11 [&::-webkit-details-marker]:hidden">
+            <Archive className="size-4" aria-hidden="true" />
+            {formatMessage(t.myGifts?.archivedSummary || 'Archived items ({{count}})', { count: archivedMyGifts.length })}
+            <ChevronDown className="size-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div className="mt-4 space-y-6">
             {Object.entries(archivedByList).map(([listId, listData]) => (
               <div key={`archived-${listId}`} className="space-y-3">
                 <div className="flex items-center gap-3 pb-2 border-b border-dashed">
@@ -217,7 +214,7 @@ export default function MyGiftsList({
               </div>
             ))}
           </div>
-        </div>
+        </details>
       )}
     </div>
   )

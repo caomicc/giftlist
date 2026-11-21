@@ -22,6 +22,7 @@ test('the owner reads family comments only once the gift is archived', async ({ 
   await myGiftRow(page, TENT.name).getByRole('button', { name: 'Archive item' }).click()
   try {
     await expect.poll(async () => Number(await tentCount(page))).toBe(1)
+    await page.getByText(/Archived items/).click() // the archived section starts folded
     await page.getByRole('button', { name: TENT.name }).click()
     await expect(page.getByRole('dialog', { name: TENT.name }).getByText(SAMS_COMMENT)).toBeVisible()
     await page.keyboard.press('Escape')

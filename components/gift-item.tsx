@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import type { GiftItem as GiftItemData } from '@/lib/neon';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, CreditCard, Archive, Users, ChevronRight, MessageCircle, Lightbulb } from 'lucide-react';
+import { Edit, Trash2, CreditCard, Archive, Users, ChevronRight, MessageCircle, Lightbulb, Gift } from 'lucide-react';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
 import GiftItemDrawer from './gift-item-drawer';
@@ -38,6 +38,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
   const { t } = useTranslation('gifts')
   const [isGiftCardDialogOpen, setIsGiftCardDialogOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   const isMyGift = variant === 'my-gifts';
   const isPurchased = !!item.purchased_by;
@@ -75,19 +76,22 @@ const GiftItem: React.FC<GiftItemProps> = ({
           isArchived && 'bg-muted opacity-75',
         )}
       >
-        {/* Thumbnail */}
-        {previewImage && (
-          <div className="shrink-0">
+        {/* Thumbnail, or a quiet tile so every row's text starts at the same place.
+            Phones skip the tile: the width goes to the title instead. */}
+        <div className={cn('shrink-0', !(previewImage && !imageFailed) && 'max-md:hidden')}>
+          {previewImage && !imageFailed ? (
             <img
               src={previewImage}
               alt=""
               className="size-12 object-cover rounded"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none'
-              }}
+              onError={() => setImageFailed(true)}
             />
-          </div>
-        )}
+          ) : (
+            <div className="flex size-12 items-center justify-center rounded bg-muted">
+              <Gift className="size-5 text-muted-foreground" aria-hidden="true" />
+            </div>
+          )}
+        </div>
 
         {/* Main Content */}
         <div className="flex-1 min-w-0">
@@ -200,7 +204,6 @@ const GiftItem: React.FC<GiftItemProps> = ({
                   onEdit?.(item);
                 }}
                 className="size-8 text-muted-foreground hover:text-foreground"
-                disabled={isArchived}
                 aria-label={t.giftItem?.buttons?.edit || 'Edit'}
                 title={t.giftItem?.buttons?.edit || 'Edit'}
               >

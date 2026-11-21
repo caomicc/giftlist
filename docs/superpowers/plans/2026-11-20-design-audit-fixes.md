@@ -19,43 +19,43 @@
 Each line maps to the task that closes it.
 
 ### Highest impact
-- [ ] Lists start collapsed. Your own gifts are hidden on load, family gifts need two clicks, and a new gift lands in a closed list with no toast. **Tasks 4, 9**
-- [ ] Comments don't say who can read them. Decision: the owner reads others' comments only after archiving. **Task 1**
-- [ ] Prices show in the viewer's browser currency, not the item's. Decision: per-item currency, default USD. **Tasks 2, 3, 15**
-- [ ] The price badge is the same raw green as "Purchased" (breaks the Semantic-Only and State Owns The Hue rules). **Task 2**
-- [ ] Phone family rows cut titles to about 12 characters, and the "Purchased" badge repeats the "Claimed by" chip. **Task 5**
-- [ ] The gift drawer slides in from the right on phones. It shows "Purchased by" and "Claimed by" together and strikes through the title. **Task 6**
+- [x] Lists start collapsed. Your own gifts are hidden on load, family gifts need two clicks, and a new gift lands in a closed list with no toast. **Tasks 4, 9**
+- [x] Comments don't say who can read them. Decision: the owner reads others' comments only after archiving. **Task 1**
+- [x] Prices show in the viewer's browser currency, not the item's. Decision: per-item currency, default USD. **Tasks 2, 3, 15**
+- [x] The price badge is the same raw green as "Purchased" (breaks the Semantic-Only and State Owns The Hue rules). **Task 2**
+- [x] Phone family rows cut titles to about 12 characters, and the "Purchased" badge repeats the "Claimed by" chip. **Task 5**
+- [x] The gift drawer slides in from the right on phones. It shows "Purchased by" and "Claimed by" together and strikes through the title. **Task 6**
 
 ### Medium
-- [ ] Group gifts have two competing calls to action ("Interested" and "I'll get this"), and pledges end up in comments. **Task 13**
-- [ ] No undo for releasing a claim or archiving. "Tap to unmark" is a tooltip, which touch screens never show. **Task 7**
-- [ ] The open tab isn't in the URL, so refresh and Back lose it. **Task 8**
-- [ ] First run: the default list is "{Full Name}'s List" with a hardcoded English "Default wishlist" description, and its empty state is hidden in a closed list. **Tasks 4, 9**
-- [ ] Repeated chrome: "Welcome back 😊", headings that repeat the tab names, "Click on…" on phones, the suggestion count shown three times, and "Suggesti…" truncated. **Task 9**
-- [ ] The top bar isn't a real row. The locale switcher nearly touches the greeting, the avatar overlaps the profile card, English shows a 🇺🇸 flag, and on desktop both controls sit at the window edges. **Task 10**
-- [ ] List management is separate from the lists (gear, then a modal, then a dialog) and uses its own "Tracked/Surprise" words. **Task 12**
-- [ ] Saving who can see a list fails silently, and creating or updating a list gives no success toast. **Task 11**
-- [ ] The add form always shows "Image URL" and the price field gives no hint of currency. **Tasks 3, 14**
-- [ ] Suggestions:
+- [x] Group gifts have two competing calls to action ("Interested" and "I'll get this"), and pledges end up in comments. **Task 13**
+- [x] No undo for releasing a claim or archiving. "Tap to unmark" is a tooltip, which touch screens never show. **Task 7**
+- [x] The open tab isn't in the URL, so refresh and Back lose it. **Task 8**
+- [x] First run: the default list is "{Full Name}'s List" with a hardcoded English "Default wishlist" description, and its empty state is hidden in a closed list. **Tasks 4, 9**
+- [x] Repeated chrome: "Welcome back 😊", headings that repeat the tab names, "Click on…" on phones, the suggestion count shown three times, and "Suggesti…" truncated. **Task 9**
+- [x] The top bar isn't a real row. The locale switcher nearly touches the greeting, the avatar overlaps the profile card, English shows a 🇺🇸 flag, and on desktop both controls sit at the window edges. **Task 10**
+- [x] List management is separate from the lists (gear, then a modal, then a dialog) and uses its own "Tracked/Surprise" words. **Task 12**
+- [x] Saving who can see a list fails silently, and creating or updating a list gives no success toast. **Task 11**
+- [x] The add form always shows "Image URL" and the price field gives no hint of currency. **Tasks 3, 14**
+- [x] Suggestions:
   - The suggest dialog repeats each label as its placeholder.
   - The card shows a raw "199.00".
   - A "Pending" badge sits under "Pending Review".
   - "Add to List" is green.
 
   **Tasks 2, 15**
-- [ ] The theme ignores the device's dark mode. **Task 16**
-- [ ] Claimed and available gifts are mixed together. **Task 17**
+- [x] The theme ignores the device's dark mode. **Task 16**
+- [x] Claimed and available gifts are mixed together. **Task 17**
 
 ### Polish
-- [ ] Sign-in:
+- [x] Sign-in:
   - The button says "Login" and the headline is just "Hi 😊".
   - There's no "Forgot password?" link.
   - The photo takes half the phone screen.
 
   **Task 18**
-- [ ] The bookmarklet card shows on phones. **Task 19**
+- [x] The bookmarklet card shows on phones. **Task 19**
 - [ ] There's no web app manifest or home-screen icon. **Task 20**
-- [ ] Rows and pages:
+- [x] Rows and pages:
   - Drop the "Created …" line on lists.
   - Make the comment delete icon grey until hovered (it's red at rest).
   - Collapse the Archived section by default.

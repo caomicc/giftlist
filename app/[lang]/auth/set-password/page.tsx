@@ -58,7 +58,7 @@ export default function SetPasswordPage() {
     <div className="flex min-h-[calc(100svh-4rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <Card className="container w-full max-w-xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Set Password</CardTitle>
+          <CardTitle className="text-2xl font-medium">Set Password</CardTitle>
           <CardDescription>
             Add a password to your account so you can sign in with either method
           </CardDescription>

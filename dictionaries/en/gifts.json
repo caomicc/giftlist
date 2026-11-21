@@ -1,12 +1,12 @@
 {
   "myGifts": {
     "empty": "No gift ideas yet. Add some items above!",
-    "archivedItems": "Archived Items",
     "trackPurchases": "Track Purchases",
     "keepSurprise": "Keep Surprise",
     "surpriseLine": "Surprise: you won’t see what’s been bought",
     "trackedLine": "You can see what’s been bought",
-    "archivedList": "{{name}} (archived)"
+    "archivedList": "{{name}} (archived)",
+    "archivedSummary": "Archived items ({{count}})"
   },
   "familyGifts": {
     "listTitle": "{{name}}'s Gift Lists",
