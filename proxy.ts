@@ -101,10 +101,9 @@ export default function proxy(request: NextRequest) {
     return response
   }
 
-  // If user is authenticated and trying to access auth pages
-  if (sessionToken && pathWithoutLocale.startsWith('/auth/')) {
-    return NextResponse.redirect(new URL(`/${locale}`, request.url))
-  }
+  // Don't bounce a cookie-holder away from the auth pages here: the proxy can't tell a live
+  // session from a stale one (expired, signed out elsewhere, database reset), and the pages
+  // would send a stale one straight back, looping. The sign-in page checks the session itself.
 
   return NextResponse.next()
 }
