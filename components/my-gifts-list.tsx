@@ -5,6 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Gift, Archive, Eye, EyeOff } from 'lucide-react'
 import GiftItem from "./gift-item"
 import type { GiftItem as GiftItemData } from "@/lib/neon"
+import { useState } from "react"
 import { useTranslation, formatMessage } from "./i18n-provider"
 
 interface User {
@@ -43,6 +44,8 @@ export default function MyGiftsList({
 }: MyGiftsListProps) {
   const { t } = useTranslation('gifts')
   const { t: tCommon } = useTranslation('common')
+  // Lists start open. Track the ones the user closed, so lists that load late (or are new) still open.
+  const [closedLists, setClosedLists] = useState<string[]>([])
   
   if (userLists.length === 0 && activeMyGifts.length === 0 && archivedMyGifts.length === 0) {
     return (
@@ -79,10 +82,17 @@ export default function MyGiftsList({
     ;(archivedByList[listId] ??= listGroup(listId)).items.push(item)
   }
 
+  const listIds = Object.keys(itemsByList)
+
   return (
     <div className="space-y-6">
       {/* Active Lists and Items */}
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion
+        type="multiple"
+        value={listIds.filter(id => !closedLists.includes(id))}
+        onValueChange={open => setClosedLists(listIds.filter(id => !open.includes(id)))}
+        className="w-full"
+      >
         {Object.entries(itemsByList).map(([listId, listData]) => (
           <AccordionItem key={listId} value={listId}>
             <AccordionTrigger className="hover:no-underline items-center">

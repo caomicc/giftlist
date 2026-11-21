@@ -124,6 +124,8 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     setIsSubmitting(true)
     try {
       await addGiftItem(itemData)
+      const list = userLists.find(l => l.id === itemData.list_id)?.name || ''
+      toast.success(formatMessage(tGifts.toasts?.added || 'Added to {{list}}', { list }))
     } catch (err) {
       console.error("Failed to add gift item", err)
       toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")

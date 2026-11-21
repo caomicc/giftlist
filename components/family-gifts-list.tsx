@@ -126,55 +126,51 @@ export default function FamilyGiftsList({
                     <p>{formatMessage(t.familyGifts?.empty || "{{name}} hasn't added any gift ideas yet.", { name: member.name })}</p>
                   </div>
                 ) : (
-                  <Accordion type="single" collapsible className="w-full md:px-3">
+                  <div className="w-full space-y-4 md:px-3">
                     {Object.entries(giftsByList).map(([listId, listData]) => (
-                      <AccordionItem key={listId} value={listId} className="w-full">
-                        <AccordionTrigger className="hover:no-underline items-center py-2">
-                          <div className="flex items-start gap-1 flex-col">
-                            <h4 className="font-medium text-sm">{listData.name}</h4>
-                            <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-0.5">
-                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                {listData.isPublic
-                                  ? <Eye className="size-3.5" aria-hidden="true" />
-                                  : <EyeOff className="size-3.5" aria-hidden="true" />}
-                                {formatMessage(
-                                  listData.isPublic
-                                    ? (t.familyGifts?.purchaseTracking?.trackedLine || "{{name}} can see what you buy")
-                                    : (t.familyGifts?.purchaseTracking?.surpriseLine || "{{name}} won't see what you buy"),
-                                  { name: member.name }
-                                )}
-                              </span>
-                              <span aria-hidden="true" className="text-xs text-muted-foreground">·</span>
-                              <span className="text-xs text-muted-foreground">
-                                {itemsTranslation(listData.items.length)}
-                              </span>
-                            </div>
+                      <section key={listId} aria-label={listData.name}>
+                        <div className="flex items-start gap-1 flex-col py-2">
+                          <h4 className="font-medium text-sm">{listData.name}</h4>
+                          <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-0.5">
+                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                              {listData.isPublic
+                                ? <Eye className="size-3.5" aria-hidden="true" />
+                                : <EyeOff className="size-3.5" aria-hidden="true" />}
+                              {formatMessage(
+                                listData.isPublic
+                                  ? (t.familyGifts?.purchaseTracking?.trackedLine || "{{name}} can see what you buy")
+                                  : (t.familyGifts?.purchaseTracking?.surpriseLine || "{{name}} won't see what you buy"),
+                                { name: member.name }
+                              )}
+                            </span>
+                            <span aria-hidden="true" className="text-xs text-muted-foreground">·</span>
+                            <span className="text-xs text-muted-foreground">
+                              {itemsTranslation(listData.items.length)}
+                            </span>
                           </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="pb-0">
-                          <div className="px-1 md:px-2 divide-y divide-border">
-                            {listData.items.map(item => {
-                              const purchaserName = item.purchased_by
-                                ? users.find(u => u.id === item.purchased_by)?.name
-                                : null
+                        </div>
+                        <div className="px-1 md:px-2 divide-y divide-border">
+                          {listData.items.map(item => {
+                            const purchaserName = item.purchased_by
+                              ? users.find(u => u.id === item.purchased_by)?.name
+                              : null
 
-                              return (
-                                <GiftItem
-                                  key={item.id}
-                                  item={item}
-                                  currentUserId={currentUser.id}
-                                  purchaserName={purchaserName || undefined}
-                                  variant="family-gifts"
-                                  onTogglePurchase={onTogglePurchase}
-                                  onGiftCardPurchase={onGiftCardPurchase}
-                                />
-                              )
-                            })}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
+                            return (
+                              <GiftItem
+                                key={item.id}
+                                item={item}
+                                currentUserId={currentUser.id}
+                                purchaserName={purchaserName || undefined}
+                                variant="family-gifts"
+                                onTogglePurchase={onTogglePurchase}
+                                onGiftCardPurchase={onGiftCardPurchase}
+                              />
+                            )
+                          })}
+                        </div>
+                      </section>
                     ))}
-                  </Accordion>
+                  </div>
                 )}
               </div>
             </AccordionContent>

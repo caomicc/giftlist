@@ -44,6 +44,18 @@ test.describe('my list', () => {
     await deleteGift(page, renamed)
   })
 
+  test('my lists are open when the page loads', async ({ page }) => {
+    await expect(page.getByText(SEED_GIFTS.chefsKnife.name, { exact: true })).toBeVisible()
+  })
+
+  test('adding a gift says which list it went to', async ({ page }) => {
+    const name = uniqueName()
+    await page.getByPlaceholder('Paste a link or type a gift').fill(name)
+    await page.getByRole('button', { name: 'Add Gift Idea' }).click()
+    await expect(page.getByText(`Added to ${ALEX_LIST}`)).toBeVisible()
+    await deleteGift(page, name)
+  })
+
   test('deletes a gift', async ({ page }) => {
     const name = uniqueName()
     await addGift(page, name)
@@ -61,9 +73,15 @@ test.describe('claiming', () => {
   async function openSkillet(page: Page) {
     await page.getByRole('tab', { name: 'Family Lists' }).click()
     await expand(page, `${SEED.sam.name}'s Gift Lists`)
-    await expand(page, "Sam's wishlist")
     await page.getByText(skillet, { exact: true }).click()
   }
+
+  test('one click on a family member shows their gifts', async ({ page }) => {
+    await signInAs(page, SEED.riley.email)
+    await page.getByRole('tab', { name: 'Family Lists' }).click()
+    await page.getByRole('button', { name: `${SEED.sam.name}'s Gift Lists` }).click()
+    await expect(page.getByText(skillet, { exact: true })).toBeVisible()
+  })
 
   test('claims and unclaims another member’s gift', async ({ page }) => {
     await signInAs(page, SEED.riley.email)
@@ -95,7 +113,6 @@ test.describe('claiming', () => {
 
       const sam = await others[1].newPage() // Sam's list keeps purchases hidden from Sam (is_public = false)
       await signInAs(sam, SEED.sam.email)
-      await expand(sam, "Sam's wishlist")
       await expect(sam.getByText(skillet, { exact: true })).toBeVisible()
       await expect(sam.getByText('Purchased', { exact: true })).toHaveCount(0)
       await expect(sam.getByText(SEED.riley.name)).toHaveCount(0)

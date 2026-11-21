@@ -35,7 +35,6 @@ test('family members are told the owner can’t read comments yet', async ({ pag
   await signInAs(page, SEED.sam.email)
   await page.getByRole('tab', { name: 'Family Lists' }).click()
   await expand(page, `${SEED.alex.name}'s Gift Lists`)
-  await expand(page, "Alex's wishlist")
   await page.getByRole('button', { name: TENT.name }).click()
   const drawer = page.getByRole('dialog', { name: TENT.name })
   await expect(drawer.getByText(SAMS_COMMENT)).toBeVisible()

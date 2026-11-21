@@ -249,7 +249,9 @@ Gift cards replace the claim with an "Add amount" secondary button that turns su
 - **Internal Padding:** 24px vertical; 24px horizontal on phones, 12px at md+.
 
 ### Gift Rows
-Rows inside accordion lists: optional 48px thumbnail, item title as a button (opens the gift drawer), a wrap of badges, and the quick action on the right. Hover tints the row Mist at 50%. Purchased items (when the viewer may know) and archived items get a struck-through, muted title; archived rows also sit on Mist at 75% opacity. Owner actions are inline icon buttons at md+; on phones the row opens the drawer, where the same actions carry text labels.
+Your own lists are accordions that start open (the ones you close stay closed for the visit; lists that load late or are new open). On Family Lists, a member is one accordion; their lists inside are plain sections, so one tap shows every gift. Adding a gift confirms with a toast naming the list.
+
+Rows inside lists: optional 48px thumbnail, item title as a button (opens the gift drawer), a wrap of badges, and the quick action on the right. Hover tints the row Mist at 50%. Purchased items (when the viewer may know) and archived items get a struck-through, muted title; archived rows also sit on Mist at 75% opacity. Owner actions are inline icon buttons at md+; on phones the row opens the drawer, where the same actions carry text labels.
 
 ### Inputs / Fields
 - **Style:** transparent fill, hairline stroke, md radius, 36px tall (44px on phones), Slate Grey placeholder.

@@ -234,7 +234,8 @@
     "released": "Unmarked. It’s open again.",
     "alreadyClaimed": "Someone else already claimed this",
     "saveFailed": "Couldn’t save that. Try again.",
-    "deleted": "Deleted “{{name}}”"
+    "deleted": "Deleted “{{name}}”",
+    "added": "Added to {{list}}"
   },
   "deleteGift": {
     "title": "Delete “{{name}}”?",
