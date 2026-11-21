@@ -3,7 +3,8 @@
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Gift, Archive, Eye, EyeOff } from 'lucide-react'
+import { Gift, Archive, Eye, EyeOff, Pencil } from 'lucide-react'
+import { Button } from "@/components/ui/button"
 import GiftItem from "./gift-item"
 import type { GiftItem as GiftItemData } from "@/lib/neon"
 import { useState } from "react"
@@ -34,6 +35,8 @@ interface MyGiftsListProps {
   onEdit: (item: GiftItemData) => void
   onDelete: (itemId: string) => void
   onArchive: (itemId: string) => void
+  /** Opens the edit dialog for one of my lists */
+  onEditList?: (listId: string) => void
 }
 
 export default function MyGiftsList({
@@ -44,10 +47,12 @@ export default function MyGiftsList({
   archivedMyGifts,
   onEdit,
   onDelete,
-  onArchive
+  onArchive,
+  onEditList
 }: MyGiftsListProps) {
   const { t } = useTranslation('gifts')
   const { t: tCommon } = useTranslation('common')
+  const { t: tLists } = useTranslation('lists')
   // Lists start open. Track the ones the user closed, so lists that load late (or are new) still open.
   const [closedLists, setClosedLists] = useState<string[]>([])
   
@@ -108,7 +113,9 @@ export default function MyGiftsList({
       >
         {Object.entries(itemsByList).map(([listId, listData]) => (
           <AccordionItem key={listId} value={listId}>
-            <AccordionTrigger className="hover:no-underline items-center">
+            {/* The edit button sits beside the trigger, never inside it (no button in a button) */}
+            <div className="flex items-start gap-1 [&>h3]:flex-1 [&>h3]:min-w-0">
+            <AccordionTrigger className="hover:no-underline items-center flex-1">
               <div className="flex items-center gap-3 w-full">
                 <div className="flex-1">
                   <h3 className="font-medium text-lg">{listData.name}</h3>
@@ -136,6 +143,19 @@ export default function MyGiftsList({
                 </div>
               </div>
             </AccordionTrigger>
+            {onEditList && userLists.some(l => l.id === listId) && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="mt-3 size-8 text-muted-foreground hover:text-foreground"
+                onClick={() => onEditList(listId)}
+                aria-label={formatMessage(tLists.editList || 'Edit {{name}}', { name: listData.name })}
+                title={formatMessage(tLists.editList || 'Edit {{name}}', { name: listData.name })}
+              >
+                <Pencil className="size-4" aria-hidden="true" />
+              </Button>
+            )}
+            </div>
             <AccordionContent>
               {listData.items.length === 0 && (
                 <p className="py-4 text-center text-sm text-muted-foreground">

@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,9 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { Plus, Settings, Edit, Trash2, Gift, Loader2 } from 'lucide-react'
-import { useTranslation, formatMessage } from "./i18n-provider"
+import { Plus, Edit, Trash2, Loader2 } from 'lucide-react'
+import { useTranslation } from "./i18n-provider"
 
 interface User {
   id: string
@@ -47,6 +45,9 @@ interface ListManagementProps {
   onUpdateList: (listId: string, listData: ListFields, permissions: ListPermissionInput[]) => Promise<boolean>
   onDeleteList: (listId: string) => Promise<void>
   fetchListPermissions: (listId: string) => Promise<{ permissions?: ListPermissionView[] }>
+  /** The list whose edit dialog is open (opened from the list's own edit button) */
+  editingListId: string | null
+  onEditingListIdChange: (listId: string | null) => void
   isSubmitting: boolean
 }
 
@@ -57,14 +58,14 @@ export default function ListManagement({
   onUpdateList,
   onDeleteList,
   fetchListPermissions,
-  isSubmitting
+  isSubmitting,
+  editingListId,
+  onEditingListIdChange,
 }: ListManagementProps) {
   const { t } = useTranslation('lists')
   const { t: tCommon } = useTranslation('common')
 
   const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false)
-  const [isManageListsDialogOpen, setIsManageListsDialogOpen] = useState(false)
-  const [editingList, setEditingList] = useState<UserList | null>(null)
 
   const [newListForm, setNewListForm] = useState({
     name: "",
@@ -74,21 +75,11 @@ export default function ListManagement({
     selectedUsers: [] as string[]
   })
 
-  const [editListForm, setEditListForm] = useState({
-    name: "",
-    description: "",
-    isPublic: false,
-    visibilityMode: "all" as "all" | "hidden_from" | "visible_to",
-    selectedUsers: [] as string[]
-  })
 
   const resetNewListForm = () => {
     setNewListForm({ name: "", description: "", isPublic: false, visibilityMode: "all", selectedUsers: [] })
   }
 
-  const resetEditListForm = () => {
-    setEditListForm({ name: "", description: "", isPublic: false, visibilityMode: "all", selectedUsers: [] })
-  }
 
   const handleCreateList = async () => {
     if (!newListForm.name.trim() || isSubmitting) return
@@ -106,10 +97,208 @@ export default function ListManagement({
     setIsCreateListDialogOpen(false)
   }
 
-  const handleEditList = async (list: UserList) => {
-    setEditingList(list)
+  const editingList = userLists.find(l => l.id === editingListId)
 
-    try {
+  return (
+    <>
+    {/* Create New List Dialog */}
+    <Dialog open={isCreateListDialogOpen} onOpenChange={setIsCreateListDialogOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <Plus className="size-4" aria-hidden="true" />
+          {t.newList || 'New list'}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{t.createDialog?.title}</DialogTitle>
+          <DialogDescription>
+            {t.createDialog?.description}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="list-name">{t.form?.listName}</Label>
+            <Input
+              id="list-name"
+              value={newListForm.name}
+              onChange={(e) => setNewListForm(prev => ({ ...prev, name: e.target.value }))}
+              placeholder={t.form?.listNamePlaceholder || ""}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="list-description">{t.form?.description}</Label>
+            <Textarea
+              id="list-description"
+              value={newListForm.description}
+              onChange={(e) => setNewListForm(prev => ({ ...prev, description: e.target.value }))}
+              placeholder={t.form?.descriptionPlaceholder || ""}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="space-y-0.5">
+              <Label htmlFor="list-privacy">{t.form?.purchaseVisibility}</Label>
+              <p className="text-sm text-muted-foreground">
+                {newListForm.isPublic
+                  ? (t.form?.trackPurchasesHelp || "You'll see which gifts have been bought.")
+                  : (t.form?.keepSurpriseHelp || "Kept a surprise: you won't see what's been bought.")}
+              </p>
+            </div>
+            <Switch
+              id="list-privacy"
+              checked={newListForm.isPublic}
+              onCheckedChange={(checked) => setNewListForm(prev => ({ ...prev, isPublic: checked }))}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="p-4 border rounded-lg space-y-4">
+            <div>
+              <Label>{t.form?.listVisibility}</Label>
+              <p className="text-sm text-muted-foreground mb-3">
+                {t.form?.listVisibilityDescription}
+              </p>
+            </div>
+
+            <RadioGroup
+              value={newListForm.visibilityMode}
+              onValueChange={(value: "all" | "hidden_from" | "visible_to") =>
+                setNewListForm(prev => ({ ...prev, visibilityMode: value, selectedUsers: [] }))
+              }
+              disabled={isSubmitting}
+              className="space-y-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="all" id="visibility-all" />
+                <Label htmlFor="visibility-all" className="text-sm font-normal cursor-pointer">
+                  {t.visibility?.visibleToAll}
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="hidden_from" id="visibility-hidden" />
+                <Label htmlFor="visibility-hidden" className="text-sm font-normal cursor-pointer">
+                  {t.visibility?.hiddenFromSpecific}
+                </Label>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="visible_to" id="visibility-visible" />
+                <Label htmlFor="visibility-visible" className="text-sm font-normal cursor-pointer">
+                  {t.visibility?.visibleOnlyToSpecific}
+                </Label>
+              </div>
+            </RadioGroup>
+
+            {newListForm.visibilityMode !== "all" && (
+              <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
+                <Label className="text-sm font-medium">
+                  {newListForm.visibilityMode === "hidden_from"
+                    ? (t.visibility?.selectToHide || "Select members to hide from")
+                    : (t.visibility?.selectToShow || "Select members who can view")}
+                </Label>
+                <div className="space-y-2 mt-2">
+                  {otherMembers.map((member) => (
+                    <div key={member.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`member-${member.id}`}
+                        checked={newListForm.selectedUsers.includes(member.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setNewListForm(prev => ({
+                              ...prev,
+                              selectedUsers: [...prev.selectedUsers, member.id]
+                            }))
+                          } else {
+                            setNewListForm(prev => ({
+                              ...prev,
+                              selectedUsers: prev.selectedUsers.filter((id: string) => id !== member.id)
+                            }))
+                          }
+                        }}
+                        disabled={isSubmitting}
+                      />
+                      <Label htmlFor={`member-${member.id}`} className="text-sm font-normal cursor-pointer">
+                        {member.name}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="flex justify-end gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setIsCreateListDialogOpen(false)}
+            disabled={isSubmitting}
+          >
+            {t.createDialog?.cancelButton || tCommon.cancel}
+          </Button>
+          <Button
+            onClick={handleCreateList}
+            disabled={!newListForm.name.trim() || isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {t.createDialog?.submittingButton || "Creating..."}
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 mr-2" />
+                {t.createDialog?.submitButton || "Create List"}
+              </>
+            )}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+      {/* Keyed by list: the form starts from the list being edited */}
+      {editingList && (
+        <EditListDialog
+          key={editingList.id}
+          list={editingList}
+          canDelete={userLists.length > 1}
+          otherMembers={otherMembers}
+          onUpdateList={onUpdateList}
+          onDeleteList={onDeleteList}
+          fetchListPermissions={fetchListPermissions}
+          isSubmitting={isSubmitting}
+          onClose={() => onEditingListIdChange(null)}
+        />
+      )}
+    </>
+  )
+}
+
+type EditListDialogProps = Pick<ListManagementProps, 'otherMembers' | 'onUpdateList' | 'onDeleteList' | 'fetchListPermissions' | 'isSubmitting'> & {
+  list: UserList
+  /** The last list can't be deleted */
+  canDelete: boolean
+  onClose: () => void
+}
+
+function EditListDialog({ list, canDelete, otherMembers, onUpdateList, onDeleteList, fetchListPermissions, isSubmitting, onClose }: EditListDialogProps) {
+  const { t } = useTranslation('lists')
+  const { t: tCommon } = useTranslation('common')
+  const [editListForm, setEditListForm] = useState({
+    name: list.name,
+    description: list.description || "",
+    isPublic: list.is_public,
+    visibilityMode: "all" as "all" | "hidden_from" | "visible_to",
+    selectedUsers: [] as string[]
+  })
+  // Saving before the rules load would overwrite them with "visible to all", so wait for them
+  const [permissionsLoaded, setPermissionsLoaded] = useState(false)
+  const [permissionsFailed, setPermissionsFailed] = useState(false)
+
+  useEffect(() => {
+    let ignore = false
+    const load = async () => {
       const response = await fetchListPermissions(list.id)
       const permissions: ListPermissionView[] = response?.permissions || []
 
@@ -141,27 +330,19 @@ export default function ListManagement({
         selectedUsers = []
       }
 
-      setEditListForm({
-        name: list.name,
-        description: list.description || "",
-        isPublic: list.is_public,
-        visibilityMode: visibilityMode,
-        selectedUsers: selectedUsers
-      })
-    } catch (err) {
-      console.error("Failed to fetch list permissions", err)
-      setEditListForm({
-        name: list.name,
-        description: list.description || "",
-        isPublic: list.is_public,
-        visibilityMode: "all",
-        selectedUsers: []
-      })
+      if (ignore) return
+      setEditListForm(prev => ({ ...prev, visibilityMode, selectedUsers }))
+      setPermissionsLoaded(true)
     }
-  }
+    load().catch(err => {
+      console.error("Failed to fetch list permissions", err)
+      if (!ignore) setPermissionsFailed(true)
+    })
+    return () => { ignore = true }
+  }, [list.id, fetchListPermissions])
 
   const handleUpdateList = async () => {
-    if (!editingList || !editListForm.name.trim() || isSubmitting) return
+    if (!editListForm.name.trim() || isSubmitting || !permissionsLoaded) return
 
     const listData = {
       name: editListForm.name.trim(),
@@ -183,148 +364,52 @@ export default function ListManagement({
       }))
     }
 
-    if (!(await onUpdateList(editingList.id, listData, permissions))) return
-    setEditingList(null)
-    resetEditListForm()
-  }
-
-  const itemCount = (count: number) => {
-    return count === 1
-      ? formatMessage(t.listItem?.itemCount || '{{count}} item', { count })
-      : formatMessage(t.listItem?.itemCountPlural || '{{count}} items', { count })
+    if (await onUpdateList(list.id, listData, permissions)) onClose()
   }
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Manage Lists Dialog */}
-      <Dialog open={isManageListsDialogOpen} onOpenChange={setIsManageListsDialogOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" size="icon" className="size-10 md:size-8" aria-label={t.management?.title || 'Manage Lists'} title={t.management?.title || 'Manage Lists'}>
-            <Settings className="size-4" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[600px]">
+      <Dialog open onOpenChange={(open) => { if (!open) onClose() }}>
+        <DialogContent className="sm:max-w-[425px] overflow-y-scroll max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle>{t.management?.title}</DialogTitle>
+            <DialogTitle>{t.editDialog?.title}</DialogTitle>
             <DialogDescription>
-              {t.management?.description}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-[400px] overflow-y-auto">
-            {userLists.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>{t.management?.empty || 'No lists created yet.'}</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {userLists.map((list) => (
-                  <div key={list.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <h3 className="font-medium">{list.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {list.description || (t.form?.descriptionPlaceholder || "No description")}
-                      </p>
-                      <div className="flex flex-col items-start gap-2 mt-1">
-
-                        <span className="text-xs text-muted-foreground">
-                          {itemCount(list.item_count || 0)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {formatMessage(t.listItem?.created || 'Created {{date}}', { date: new Date(list.created_at).toLocaleDateString() })}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-col">
-                                              <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Badge variant={list.is_public ? "default" : "secondary"} className="text-xs cursor-help">
-                              {list.is_public ? (t.listItem?.badges?.tracked || "Tracked") : (t.listItem?.badges?.surprise || "Surprise")}
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{list.is_public
-                              ? (t.form?.trackPurchasesHelp || "Track Purchases: You can see which items family members have purchased from this list")
-                              : (t.form?.keepSurpriseHelp || "Keep Surprise: You cannot see which items family members have purchased from this list")}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      <div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditList(list)}
-                        disabled={isSubmitting}
-                        aria-label={formatMessage(t.editList || 'Edit {{name}}', { name: list.name })}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      {userLists.length > 1 && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onDeleteList(list.id)}
-                          disabled={isSubmitting}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                </div>    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Create New List Dialog */}
-      <Dialog open={isCreateListDialogOpen} onOpenChange={setIsCreateListDialogOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" size="icon" className="size-10 md:size-8" aria-label={t.createDialog?.title || 'Create New List'} title={t.createDialog?.title || 'Create New List'}>
-            <Plus className="size-4" />
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{t.createDialog?.title}</DialogTitle>
-            <DialogDescription>
-              {t.createDialog?.description}
+              {t.editDialog?.description}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="list-name">{t.form?.listName}</Label>
+              <Label htmlFor="edit-list-name">{t.form?.listName}</Label>
               <Input
-                id="list-name"
-                value={newListForm.name}
-                onChange={(e) => setNewListForm(prev => ({ ...prev, name: e.target.value }))}
-                placeholder={t.form?.listNamePlaceholder || ""}
+                id="edit-list-name"
+                value={editListForm.name}
+                onChange={(e) => setEditListForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder={t.form?.listName || "List name"}
                 disabled={isSubmitting}
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="list-description">{t.form?.description}</Label>
+              <Label htmlFor="edit-list-description">{t.form?.description}</Label>
               <Textarea
-                id="list-description"
-                value={newListForm.description}
-                onChange={(e) => setNewListForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder={t.form?.descriptionPlaceholder || ""}
+                id="edit-list-description"
+                value={editListForm.description}
+                onChange={(e) => setEditListForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder={t.form?.descriptionPlaceholder || "Optional description"}
                 disabled={isSubmitting}
               />
             </div>
             <div className="flex items-center justify-between p-4 border rounded-lg">
               <div className="space-y-0.5">
-                <Label htmlFor="list-privacy">{t.form?.purchaseVisibility}</Label>
+                <Label htmlFor="edit-list-privacy">{t.form?.purchaseVisibility}</Label>
                 <p className="text-sm text-muted-foreground">
-                  {newListForm.isPublic
+                  {editListForm.isPublic
                     ? (t.form?.trackPurchasesHelp || "You'll see which gifts have been bought.")
                     : (t.form?.keepSurpriseHelp || "Kept a surprise: you won't see what's been bought.")}
                 </p>
               </div>
               <Switch
-                id="list-privacy"
-                checked={newListForm.isPublic}
-                onCheckedChange={(checked) => setNewListForm(prev => ({ ...prev, isPublic: checked }))}
+                id="edit-list-privacy"
+                checked={editListForm.isPublic}
+                onCheckedChange={(checked) => setEditListForm(prev => ({ ...prev, isPublic: checked }))}
                 disabled={isSubmitting}
               />
             </div>
@@ -337,39 +422,39 @@ export default function ListManagement({
               </div>
 
               <RadioGroup
-                value={newListForm.visibilityMode}
+                value={editListForm.visibilityMode}
                 onValueChange={(value: "all" | "hidden_from" | "visible_to") =>
-                  setNewListForm(prev => ({ ...prev, visibilityMode: value, selectedUsers: [] }))
+                  setEditListForm(prev => ({ ...prev, visibilityMode: value, selectedUsers: [] }))
                 }
                 disabled={isSubmitting}
                 className="space-y-2"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="all" id="visibility-all" />
-                  <Label htmlFor="visibility-all" className="text-sm font-normal cursor-pointer">
+                  <RadioGroupItem value="all" id="edit-visibility-all" />
+                  <Label htmlFor="edit-visibility-all" className="text-sm font-normal cursor-pointer">
                     {t.visibility?.visibleToAll}
                   </Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="hidden_from" id="visibility-hidden" />
-                  <Label htmlFor="visibility-hidden" className="text-sm font-normal cursor-pointer">
+                  <RadioGroupItem value="hidden_from" id="edit-visibility-hidden" />
+                  <Label htmlFor="edit-visibility-hidden" className="text-sm font-normal cursor-pointer">
                     {t.visibility?.hiddenFromSpecific}
                   </Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="visible_to" id="visibility-visible" />
-                  <Label htmlFor="visibility-visible" className="text-sm font-normal cursor-pointer">
+                  <RadioGroupItem value="visible_to" id="edit-visibility-visible" />
+                  <Label htmlFor="edit-visibility-visible" className="text-sm font-normal cursor-pointer">
                     {t.visibility?.visibleOnlyToSpecific}
                   </Label>
                 </div>
               </RadioGroup>
 
-              {newListForm.visibilityMode !== "all" && (
+              {editListForm.visibilityMode !== "all" && (
                 <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
                   <Label className="text-sm font-medium">
-                    {newListForm.visibilityMode === "hidden_from"
+                    {editListForm.visibilityMode === "hidden_from"
                       ? (t.visibility?.selectToHide || "Select members to hide from")
                       : (t.visibility?.selectToShow || "Select members who can view")}
                   </Label>
@@ -377,16 +462,16 @@ export default function ListManagement({
                     {otherMembers.map((member) => (
                       <div key={member.id} className="flex items-center space-x-2">
                         <Checkbox
-                          id={`member-${member.id}`}
-                          checked={newListForm.selectedUsers.includes(member.id)}
+                          id={`edit-member-${member.id}`}
+                          checked={editListForm.selectedUsers.includes(member.id)}
                           onCheckedChange={(checked) => {
                             if (checked) {
-                              setNewListForm(prev => ({
+                              setEditListForm(prev => ({
                                 ...prev,
                                 selectedUsers: [...prev.selectedUsers, member.id]
                               }))
                             } else {
-                              setNewListForm(prev => ({
+                              setEditListForm(prev => ({
                                 ...prev,
                                 selectedUsers: prev.selectedUsers.filter((id: string) => id !== member.id)
                               }))
@@ -394,7 +479,7 @@ export default function ListManagement({
                           }}
                           disabled={isSubmitting}
                         />
-                        <Label htmlFor={`member-${member.id}`} className="text-sm font-normal cursor-pointer">
+                        <Label htmlFor={`edit-member-${member.id}`} className="text-sm font-normal cursor-pointer">
                           {member.name}
                         </Label>
                       </div>
@@ -404,185 +489,48 @@ export default function ListManagement({
               )}
             </div>
           </div>
-          <div className="flex justify-end gap-3">
+          {permissionsFailed && (
+            <p className="text-sm text-destructive">
+              {t.editDialog?.loadFailed || "Couldn’t load who can see this list. Close this and try again."}
+            </p>
+          )}
+          <div className="flex flex-wrap justify-end gap-3">
+            {canDelete && (
+              <Button
+                variant="outline"
+                onClick={() => onDeleteList(list.id)}
+                disabled={isSubmitting}
+                className="mr-auto text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="size-4" aria-hidden="true" />
+                {t.deleteList || 'Delete list'}
+              </Button>
+            )}
             <Button
               variant="outline"
-              onClick={() => setIsCreateListDialogOpen(false)}
+              onClick={onClose}
               disabled={isSubmitting}
             >
-              {t.createDialog?.cancelButton || tCommon.cancel}
+              {t.editDialog?.cancelButton || tCommon.cancel}
             </Button>
             <Button
-              onClick={handleCreateList}
-              disabled={!newListForm.name.trim() || isSubmitting}
+              onClick={handleUpdateList}
+              disabled={!editListForm.name.trim() || isSubmitting || !permissionsLoaded}
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t.createDialog?.submittingButton || "Creating..."}
+                  {t.editDialog?.submittingButton || "Updating..."}
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4 mr-2" />
-                  {t.createDialog?.submitButton || "Create List"}
+                  <Edit className="w-4 h-4 mr-2" />
+                  {t.editDialog?.submitButton || "Update List"}
                 </>
               )}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Edit List Dialog */}
-      {editingList && (
-        <Dialog open={!!editingList} onOpenChange={() => setEditingList(null)}>
-          <DialogContent className="sm:max-w-[425px] overflow-y-scroll max-h-[90vh]">
-            <DialogHeader>
-              <DialogTitle>{t.editDialog?.title}</DialogTitle>
-              <DialogDescription>
-                {t.editDialog?.description}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="edit-list-name">{t.form?.listName}</Label>
-                <Input
-                  id="edit-list-name"
-                  value={editListForm.name}
-                  onChange={(e) => setEditListForm(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder={t.form?.listName || "List name"}
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="edit-list-description">{t.form?.description}</Label>
-                <Textarea
-                  id="edit-list-description"
-                  value={editListForm.description}
-                  onChange={(e) => setEditListForm(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder={t.form?.descriptionPlaceholder || "Optional description"}
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="space-y-0.5">
-                  <Label htmlFor="edit-list-privacy">{t.form?.purchaseVisibility}</Label>
-                  <p className="text-sm text-muted-foreground">
-                    {editListForm.isPublic
-                      ? (t.form?.trackPurchasesHelp || "You'll see which gifts have been bought.")
-                      : (t.form?.keepSurpriseHelp || "Kept a surprise: you won't see what's been bought.")}
-                  </p>
-                </div>
-                <Switch
-                  id="edit-list-privacy"
-                  checked={editListForm.isPublic}
-                  onCheckedChange={(checked) => setEditListForm(prev => ({ ...prev, isPublic: checked }))}
-                  disabled={isSubmitting}
-                />
-              </div>
-              <div className="p-4 border rounded-lg space-y-4">
-                <div>
-                  <Label>{t.form?.listVisibility}</Label>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {t.form?.listVisibilityDescription}
-                  </p>
-                </div>
-
-                <RadioGroup
-                  value={editListForm.visibilityMode}
-                  onValueChange={(value: "all" | "hidden_from" | "visible_to") =>
-                    setEditListForm(prev => ({ ...prev, visibilityMode: value, selectedUsers: [] }))
-                  }
-                  disabled={isSubmitting}
-                  className="space-y-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="all" id="edit-visibility-all" />
-                    <Label htmlFor="edit-visibility-all" className="text-sm font-normal cursor-pointer">
-                      {t.visibility?.visibleToAll}
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="hidden_from" id="edit-visibility-hidden" />
-                    <Label htmlFor="edit-visibility-hidden" className="text-sm font-normal cursor-pointer">
-                      {t.visibility?.hiddenFromSpecific}
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="visible_to" id="edit-visibility-visible" />
-                    <Label htmlFor="edit-visibility-visible" className="text-sm font-normal cursor-pointer">
-                      {t.visibility?.visibleOnlyToSpecific}
-                    </Label>
-                  </div>
-                </RadioGroup>
-
-                {editListForm.visibilityMode !== "all" && (
-                  <div className="mt-4 p-3 bg-muted rounded-lg space-y-2">
-                    <Label className="text-sm font-medium">
-                      {editListForm.visibilityMode === "hidden_from"
-                        ? (t.visibility?.selectToHide || "Select members to hide from")
-                        : (t.visibility?.selectToShow || "Select members who can view")}
-                    </Label>
-                    <div className="space-y-2 mt-2">
-                      {otherMembers.map((member) => (
-                        <div key={member.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`edit-member-${member.id}`}
-                            checked={editListForm.selectedUsers.includes(member.id)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setEditListForm(prev => ({
-                                  ...prev,
-                                  selectedUsers: [...prev.selectedUsers, member.id]
-                                }))
-                              } else {
-                                setEditListForm(prev => ({
-                                  ...prev,
-                                  selectedUsers: prev.selectedUsers.filter((id: string) => id !== member.id)
-                                }))
-                              }
-                            }}
-                            disabled={isSubmitting}
-                          />
-                          <Label htmlFor={`edit-member-${member.id}`} className="text-sm font-normal cursor-pointer">
-                            {member.name}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setEditingList(null)}
-                disabled={isSubmitting}
-              >
-                {t.editDialog?.cancelButton || tCommon.cancel}
-              </Button>
-              <Button
-                onClick={handleUpdateList}
-                disabled={!editListForm.name.trim() || isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t.editDialog?.submittingButton || "Updating..."}
-                  </>
-                ) : (
-                  <>
-                    <Edit className="w-4 h-4 mr-2" />
-                    {t.editDialog?.submitButton || "Update List"}
-                  </>
-                )}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-    </div>
   )
 }

@@ -27,6 +27,14 @@ import SuggestionsView from "./suggestions-view"
 
 const TABS = ['my-list', 'family-lists', 'suggestions']
 
+// Module-level so it's stable: the edit-list dialog loads with it in an effect.
+// Throws on failure: treating an error as "no rules" would let a save wipe them.
+async function fetchListPermissions(listId: string) {
+  const response = await fetch(`/api/lists/${listId}/permissions`)
+  if (!response.ok) throw new Error(`Failed to load list permissions (${response.status})`)
+  return response.json()
+}
+
 interface User {
   id: string
   name: string
@@ -60,6 +68,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     // Next folds replaceState into its router: useSearchParams updates without a server round trip
     window.history.replaceState(null, '', query ? `?${query}` : window.location.pathname)
   }
+  const [editingListId, setEditingListId] = useState<string | null>(null)
   const [suggestDialogOpen, setSuggestDialogOpen] = useState(false)
   const [suggestTargetUserId, setSuggestTargetUserId] = useState<string | null>(null)
   const [suggestDialogKey, setSuggestDialogKey] = useState(0) // new key per open = fresh form
@@ -409,6 +418,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         return
       }
 
+      setEditingListId(null)
       reloadLists()
       toast(tLists.deleteConfirm?.deleted || 'List deleted')
     } catch (err) {
@@ -419,10 +429,6 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     }
   }
 
-  const fetchListPermissions = async (listId: string) => {
-    const response = await fetch(`/api/lists/${listId}/permissions`)
-    return response.json()
-  }
 
   // Helper functions
   const getCurrentMember = () => currentUser
@@ -510,18 +516,6 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
               {/* My Gift List Tab */}
               <TabsContent value="my-list" className="space-y-6 mb-0 md:mb-6">
-                {/* The tab names this panel; no heading that repeats it */}
-                <div className="flex justify-end">
-                  <ListManagement
-                    userLists={userLists}
-                    otherMembers={getOtherMembers()}
-                    onCreateList={handleCreateList}
-                    onUpdateList={handleUpdateList}
-                    onDeleteList={handleDeleteList}
-                    fetchListPermissions={fetchListPermissions}
-                    isSubmitting={isSubmitting}
-                  />
-                </div>
 
                 <AddGiftForm
                   currentUser={currentUser}
@@ -540,6 +534,19 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
                   onEdit={handleEditGiftItem}
                   onDelete={handleRemoveGiftItem}
                   onArchive={handleArchiveItem}
+                  onEditList={setEditingListId}
+                />
+
+                <ListManagement
+                  userLists={userLists}
+                  otherMembers={getOtherMembers()}
+                  onCreateList={handleCreateList}
+                  onUpdateList={handleUpdateList}
+                  onDeleteList={handleDeleteList}
+                  fetchListPermissions={fetchListPermissions}
+                  isSubmitting={isSubmitting}
+                  editingListId={editingListId}
+                  onEditingListIdChange={setEditingListId}
                 />
               </TabsContent>
 

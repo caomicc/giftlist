@@ -17,7 +17,8 @@
     "description": "Update your list details and privacy settings.",
     "submitButton": "Update List",
     "submittingButton": "Updating...",
-    "cancelButton": "Cancel"
+    "cancelButton": "Cancel",
+    "loadFailed": "Couldn’t load who can see this list. Close this and try again."
   },
   "form": {
     "listName": "List name *",
@@ -63,5 +64,7 @@
     "permissionsFailed": "Couldn’t save who can see this list. Try again.",
     "created": "List created",
     "saved": "List saved"
-  }
+  },
+  "newList": "New list",
+  "deleteList": "Delete list"
 }

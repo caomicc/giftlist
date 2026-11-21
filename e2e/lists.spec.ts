@@ -17,7 +17,7 @@ test('a user who already has a list never gets a default list, even when lists l
   await expect(page.getByPlaceholder('Paste a link or type a gift')).toBeVisible()
   await expect(page.getByText('Unknown List')).toHaveCount(0)
   releaseLists()
-  await expect(page.getByRole('button', { name: "Jordan's wishlist" })).toBeVisible()
+  await expect(page.getByRole('button', { name: /^Jordan's wishlist/ })).toBeVisible()
   await expect(page.getByText('Board game: Wingspan', { exact: true })).toBeVisible() // a list that loads late still opens
   await page.waitForTimeout(500) // give any late effect a chance to fire
   expect(created).toEqual([])
