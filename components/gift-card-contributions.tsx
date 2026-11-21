@@ -31,33 +31,21 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
   const { t } = useTranslation('gifts');
   const confirm = useConfirm();
   const [purchases, setPurchases] = useState<GiftCardPurchase[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [reload, setReload] = useState(0); // bumped after an edit/delete to refetch
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState('');
 
   const locale = getUserLocale();
   const currency = getUserCurrency(locale);
 
-  const fetchPurchases = async () => {
-    if (loading) return;
-
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/gift-card-purchases?gift_item_id=${giftItemId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setPurchases(data.purchases || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch gift card purchases:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchPurchases();
-  }, [giftItemId]);
+    let ignore = false;
+    fetch(`/api/gift-card-purchases?gift_item_id=${giftItemId}`)
+      .then(response => (response.ok ? response.json() : null))
+      .then(data => { if (!ignore && data) setPurchases(data.purchases || []); })
+      .catch(error => console.error('Failed to fetch gift card purchases:', error));
+    return () => { ignore = true; };
+  }, [giftItemId, reload]);
 
   const handleEditStart = (purchase: GiftCardPurchase) => {
     setEditingId(purchase.id);
@@ -84,7 +72,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
       });
 
       if (response.ok) {
-        await fetchPurchases();
+        setReload(n => n + 1);
         onPurchaseUpdate?.();
         setEditingId(null);
         setEditAmount('');
@@ -109,7 +97,7 @@ const GiftCardContributions: React.FC<GiftCardContributionsProps> = ({
       });
 
       if (response.ok) {
-        await fetchPurchases();
+        setReload(n => n + 1);
         onPurchaseUpdate?.();
       } else {
         console.error('Failed to delete purchase');

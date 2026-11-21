@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -35,6 +35,9 @@ async function fetchOGData(url: string) {
 }
 
 /** The /add page: one form, then a "saved" state that closes itself when opened as a popup. */
+// window.opener never changes for a page, so there's nothing to subscribe to.
+const noSubscribe = () => () => {}
+
 export default function QuickAdd({ lang, currentUser, initialUrl, pageTitle }: QuickAddProps) {
   const { t } = useTranslation('gifts')
   const tQuick = t.quickAdd || {}
@@ -42,14 +45,16 @@ export default function QuickAdd({ lang, currentUser, initialUrl, pageTitle }: Q
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [savedTo, setSavedTo] = useState<string | null>(null)
   const [formKey, setFormKey] = useState(0)
-  const [isPopup, setIsPopup] = useState(false)
+  // Opened by the bookmarklet as a popup? window.opener only exists in the browser (false while server-rendering).
+  const isPopup = useSyncExternalStore(noSubscribe, () => !!window.opener, () => false)
 
   useEffect(() => {
-    setIsPopup(!!window.opener)
+    let ignore = false
     fetch('/api/lists', { credentials: 'include' })
       .then((res) => (res.ok ? res.json() : []))
-      .then((data) => setLists(Array.isArray(data) ? data : []))
-      .catch(() => setLists([]))
+      .then((data) => { if (!ignore) setLists(Array.isArray(data) ? data : []) })
+      .catch(() => { if (!ignore) setLists([]) })
+    return () => { ignore = true }
   }, [])
 
   // Opened from the bookmarklet: close shortly after saving

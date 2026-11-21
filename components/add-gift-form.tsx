@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -50,6 +50,8 @@ const LAST_LIST_KEY = 'meep:lastListId'
 const readLastList = () => {
   try { return window.localStorage.getItem(LAST_LIST_KEY) } catch { return null }
 }
+// Only this tab writes it, and it also keeps the in-memory choice, so there's nothing to subscribe to.
+const noSubscribe = () => () => {}
 const writeLastList = (id: string) => {
   try { window.localStorage.setItem(LAST_LIST_KEY, id) } catch { /* storage unavailable */ }
 }
@@ -86,7 +88,9 @@ export default function AddGiftForm({
 
   const [query, setQuery] = useState("")
   const [item, setItem] = useState(() => emptyItem(""))
-  const [lastListId, setLastListId] = useState<string | null>(null)
+  const storedListId = useSyncExternalStore(noSubscribe, readLastList, () => null)
+  const [chosenListId, setChosenListId] = useState<string | null>(null) // picked this session
+  const lastListId = chosenListId ?? storedListId
   const [ogData, setOgData] = useState<any>(null)
   const [ogLoading, setOgLoading] = useState(false)
   const latestLink = useRef("")
@@ -125,10 +129,6 @@ export default function AddGiftForm({
       imageUrl: prev.imageUrl || data?.image || "",
     }))
   }
-
-  useEffect(() => {
-    setLastListId(readLastList())
-  }, [])
 
   // Pre-fill once (e.g. /add?url=…); runs the same link preview as typing would
   const prefilled = useRef(false)
@@ -174,7 +174,7 @@ export default function AddGiftForm({
         og_site_name: ogData?.siteName,
       })
       writeLastList(selectedListId)
-      setLastListId(selectedListId)
+      setChosenListId(selectedListId)
       reset()
       onAdded?.(selectedListId)
     } catch {

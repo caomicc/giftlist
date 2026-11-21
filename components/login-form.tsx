@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -20,22 +20,18 @@ function LoginFormContent({
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
   const { t, locale } = useTranslation('auth')
   const signin = (t as Record<string, Record<string, string | Record<string, string>>>)?.signin as Record<string, string | Record<string, string>> | undefined
 
-  useEffect(() => {
-    const error = searchParams.get('error')
-    if (error === 'invalid-link') {
-      setErrorMessage((signin?.errors as Record<string, string>)?.invalidLink ?? 'This magic link is invalid or malformed.')
-    } else if (error === 'expired-link') {
-      setErrorMessage((signin?.errors as Record<string, string>)?.expiredLink ?? 'This magic link has expired or has already been used.')
-    } else if (error === 'server-error') {
-      setErrorMessage((signin?.errors as Record<string, string>)?.signInFailed ?? 'Something went wrong during sign in.')
-    }
-  }, [searchParams, signin])
+  // ?error= set by /api/auth/verify when a magic link fails
+  const linkErrors = signin?.errors as Record<string, string> | undefined
+  const errorMessage = {
+    'invalid-link': linkErrors?.invalidLink ?? 'This magic link is invalid or malformed.',
+    'expired-link': linkErrors?.expiredLink ?? 'This magic link has expired or has already been used.',
+    'server-error': linkErrors?.signInFailed ?? 'Something went wrong during sign in.',
+  }[searchParams.get('error') ?? ''] ?? ''
 
   const handleMagicLinkSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,7 +52,7 @@ function LoginFormContent({
       } else {
         setMessage(data.error || 'Something went wrong')
       }
-    } catch (error) {
+    } catch {
       setMessage((signin?.errors as Record<string, string>)?.sendMagicLinkFailed ?? 'Failed to send magic link')
     } finally {
       setIsLoading(false)
@@ -83,7 +79,7 @@ function LoginFormContent({
       } else {
         setMessage(data.error || ((signin?.errors as Record<string, string>)?.invalidCredentials ?? 'Invalid email or password'))
       }
-    } catch (error) {
+    } catch {
       setMessage((signin?.errors as Record<string, string>)?.failed ?? 'Failed to sign in')
     } finally {
       setIsLoading(false)

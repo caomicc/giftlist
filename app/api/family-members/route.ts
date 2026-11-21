@@ -1,6 +1,6 @@
 import { getApiUser } from '@/lib/auth'
 import { unauthorized } from '@/lib/gift-privacy'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
 
 export async function GET() {

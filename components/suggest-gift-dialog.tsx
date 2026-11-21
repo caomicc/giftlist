@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -71,21 +71,7 @@ export default function SuggestGiftDialog({
     isAnonymous: false,
   })
 
-  // Reset form when dialog opens/closes or target changes
-  useEffect(() => {
-    if (isOpen) {
-      setFormData({
-        targetUserId: targetUserId || "",
-        name: "",
-        description: "",
-        price: "",
-        link: "",
-        imageUrl: "",
-        isAnonymous: false,
-      })
-      setOgData(null)
-    }
-  }, [isOpen, targetUserId])
+  // The parent gives this dialog a new key each time it opens, so the form above always starts fresh.
 
   // Filter out current user from family members
   const availableMembers = familyMembers.filter(m => m.id !== currentUser.id)

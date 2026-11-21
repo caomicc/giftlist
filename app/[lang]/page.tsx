@@ -1,14 +1,8 @@
 import { requireAuth } from '@/lib/auth'
 import FamilyGiftApp from '@/components/family-gift-app'
-import { type Locale } from '@/lib/i18n'
 
-export default async function HomePage({
-  params,
-}: {
-  params: Promise<{ lang: Locale }>
-}) {
+export default async function HomePage() {
   const user = await requireAuth()
-  const { lang } = await params
 
   return (
     <>

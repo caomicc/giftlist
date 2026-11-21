@@ -29,26 +29,17 @@ const GroupGiftInterest: React.FC<GroupGiftInterestProps> = ({
 }) => {
   const { t } = useTranslation('gifts');
   const [interests, setInterests] = useState<GiftInterest[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
 
-  const fetchInterests = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/gift-interest?gift_item_id=${giftItemId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setInterests(data.interests || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch gift interest:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchInterests();
+    let ignore = false; // a newer item (or unmount) makes this response stale
+    fetch(`/api/gift-interest?gift_item_id=${giftItemId}`)
+      .then(response => (response.ok ? response.json() : null))
+      .then(data => { if (!ignore && data) setInterests(data.interests || []); })
+      .catch(error => console.error('Failed to fetch gift interest:', error))
+      .finally(() => { if (!ignore) setLoading(false); });
+    return () => { ignore = true; };
   }, [giftItemId]);
 
   const isUserInterested = interests.some(interest => interest.user_id === currentUserId);

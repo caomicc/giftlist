@@ -52,7 +52,7 @@ export default function RegisterPage() {
       } else {
         setMessage(data.error || ((register?.errors as Record<string, string>)?.failed ?? 'Failed to create account'))
       }
-    } catch (error) {
+    } catch {
       setMessage((register?.errors as Record<string, string>)?.failed ?? 'Failed to create account')
     } finally {
       setIsLoading(false)

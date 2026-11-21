@@ -13,8 +13,6 @@ interface User {
 
 export function UserMenuWrapper() {
   const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  // const router = useRouter()
   const pathname = usePathname()
 
   // Check if we're on an auth page where we shouldn't show the user menu.
@@ -23,35 +21,20 @@ export function UserMenuWrapper() {
   const isAuthPage = pathWithoutLocale.startsWith('/auth') || pathWithoutLocale.startsWith('/login')
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const response = await fetch('/api/user/profile')
-
-        if (response.ok) {
-          const userData = await response.json()
-          setUser(userData)
-        } else if (response.status === 401) {
-          // User not authenticated - don't show menu
-          setUser(null)
-        }
-      } catch (error) {
+    if (isAuthPage) return
+    let ignore = false
+    fetch('/api/user/profile')
+      .then(response => (response.ok ? response.json() : null)) // 401: signed out, no menu
+      .then(userData => { if (!ignore) setUser(userData) })
+      .catch(error => {
         console.error('Failed to fetch user:', error)
-        setUser(null)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    // Only check for user if not on auth pages
-    if (!isAuthPage) {
-      checkUser()
-    } else {
-      setIsLoading(false)
-    }
+        if (!ignore) setUser(null)
+      })
+    return () => { ignore = true }
   }, [pathname, isAuthPage])
 
-  // Don't render anything while loading or on auth pages
-  if (isLoading || isAuthPage || !user) {
+  // Nothing until the user has loaded, and never on auth pages
+  if (isAuthPage || !user) {
     return null
   }
 

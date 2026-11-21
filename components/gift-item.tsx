@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, ExternalLink, CreditCard, Archive, Users, ChevronRight, MessageCircle, Lightbulb } from 'lucide-react';
-import Link from 'next/link';
+import { Edit, Trash2, CreditCard, Archive, Users, ChevronRight, MessageCircle, Lightbulb } from 'lucide-react';
 import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
 import GiftItemDrawer from './gift-item-drawer';
@@ -60,7 +59,6 @@ const GiftItem: React.FC<GiftItemProps> = ({
   const { t } = useTranslation('gifts')
   const [isGiftCardDialogOpen, setIsGiftCardDialogOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const isMyGift = variant === 'my-gifts';
   const isPurchased = !!item.purchased_by;
@@ -75,10 +73,6 @@ const GiftItem: React.FC<GiftItemProps> = ({
     if (onGiftCardPurchase) {
       await onGiftCardPurchase(item.id, amount);
     }
-  };
-
-  const handlePurchaseUpdate = () => {
-    setRefreshKey(prev => prev + 1);
   };
 
   const handleRowClick = (e: React.MouseEvent) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Eye, EyeOff, Gift, Users } from 'lucide-react';
@@ -42,21 +42,15 @@ const GiftCardDetails: React.FC<GiftCardDetailsProps> = ({
   // Default to surprise when visibility is unknown: hiding too much is recoverable, leaking is not
   const isSurpriseOwner = isOwner && !isPublic;
 
-  const fetchPurchases = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/gift-card-purchases?gift_item_id=${giftItemId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setPurchases(data.purchases || []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch gift card purchases:', error);
-    }
-  }, [giftItemId]);
-
   useEffect(() => {
-    if (isOwner && !isSurpriseOwner) fetchPurchases();
-  }, [isOwner, isSurpriseOwner, fetchPurchases]);
+    if (!isOwner || isSurpriseOwner) return;
+    let ignore = false;
+    fetch(`/api/gift-card-purchases?gift_item_id=${giftItemId}`)
+      .then(response => (response.ok ? response.json() : null))
+      .then(data => { if (!ignore && data) setPurchases(data.purchases || []); })
+      .catch(error => console.error('Failed to fetch gift card purchases:', error));
+    return () => { ignore = true; };
+  }, [giftItemId, isOwner, isSurpriseOwner]);
 
   if (isSurpriseOwner) {
     return (

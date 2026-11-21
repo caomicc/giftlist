@@ -41,9 +41,12 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   // Lists load separately from gifts; only a successful lists fetch can say "this user has none".
   const [listsLoaded, setListsLoaded] = useState(false)
   const creatingDefaultList = useRef(false)
+  const [listsReload, setListsReload] = useState(0) // bump to refetch lists after a change
+  const reloadLists = () => setListsReload(n => n + 1)
   const [activeTab, setActiveTab] = useState("my-list")
   const [suggestDialogOpen, setSuggestDialogOpen] = useState(false)
   const [suggestTargetUserId, setSuggestTargetUserId] = useState<string | null>(null)
+  const [suggestDialogKey, setSuggestDialogKey] = useState(0) // new key per open = fresh form
   const { translations } = useI18n()
   const t = translations.common || {}
   const tGifts = translations.gifts || {}
@@ -72,75 +75,49 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
     approveSuggestion,
     denySuggestion,
     deleteSuggestion,
-    refetch: refetchSuggestions
   } = useSuggestionData()
 
-  // Fetch user's lists
-  const fetchUserLists = async () => {
-    try {
-      const response = await fetch('/api/lists', {
-        credentials: 'include'
-      })
-      if (response.status === 401) {
-        // User not authenticated
-        return
-      }
-      if (!response.ok) {
-        console.warn('Failed to fetch lists with status:', response.status)
-        return
-      }
-      const lists = await response.json()
-      setUserLists(lists)
-      setListsLoaded(true)
-    } catch (err) {
-      console.warn("Failed to fetch lists", err)
-    }
-  }
-
-  // Create a default list for new users
-  const createDefaultList = async () => {
-    try {
-      const response = await fetch('/api/lists', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: `${currentUser.name || 'My'}'s List`,
-          description: 'Default wishlist',
-          is_public: false,
-          is_visible: true
-        }),
-      })
-
-      if (response.status === 401) {
-        // User not authenticated
-        return
-      }
-      if (!response.ok) {
-        console.warn('Failed to create default list with status:', response.status)
-        return
-      }
-      const newList = await response.json()
-      setUserLists([newList])
-    } catch (err) {
-      console.warn("Failed to create default list", err)
-    }
-  }
-
-  // Initialize lists on component mount
+  // Fetch the user's lists (again whenever listsReload changes)
   useEffect(() => {
-    fetchUserLists()
-  }, [])
+    let ignore = false
+    fetch('/api/lists', { credentials: 'include' })
+      .then(response => {
+        if (response.ok) return response.json()
+        if (response.status !== 401) console.warn('Failed to fetch lists with status:', response.status)
+        return null
+      })
+      .then(lists => {
+        if (ignore || !lists) return
+        setUserLists(lists)
+        setListsLoaded(true)
+      })
+      .catch(err => console.warn("Failed to fetch lists", err))
+    return () => { ignore = true }
+  }, [listsReload])
 
   // Create a default list only once the lists have loaded and there really are none
   useEffect(() => {
-    if (listsLoaded && userLists.length === 0 && !creatingDefaultList.current) {
-      creatingDefaultList.current = true
-      createDefaultList()
-    }
-  }, [listsLoaded, userLists.length])
+    if (!listsLoaded || userLists.length > 0 || creatingDefaultList.current) return
+    creatingDefaultList.current = true
+    fetch('/api/lists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        name: `${currentUser.name || 'My'}'s List`,
+        description: 'Default wishlist',
+        is_public: false,
+        is_visible: true
+      }),
+    })
+      .then(response => {
+        if (response.ok) return response.json()
+        if (response.status !== 401) console.warn('Failed to create default list with status:', response.status)
+        return null
+      })
+      .then(newList => { if (newList) setUserLists([newList]) })
+      .catch(err => console.warn("Failed to create default list", err))
+  }, [listsLoaded, userLists.length, currentUser.name])
 
   const handleAddGiftItem = async (itemData: any) => {
     setIsSubmitting(true)
@@ -247,6 +224,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
   // Suggestion handlers
   const handleOpenSuggestDialog = (targetUserId: string) => {
     setSuggestTargetUserId(targetUserId)
+    setSuggestDialogKey(k => k + 1)
     setSuggestDialogOpen(true)
   }
 
@@ -315,7 +293,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         })
       }
 
-      await fetchUserLists()
+      reloadLists()
     } catch (err) {
       console.error("Failed to create list", err)
       toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
@@ -353,7 +331,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         console.warn('Failed to update list permissions')
       }
 
-      await fetchUserLists()
+      reloadLists()
     } catch (err) {
       console.error("Failed to update list", err)
       toast.error(tGifts.toasts?.saveFailed || "Couldn't save that. Try again.")
@@ -382,7 +360,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
         return
       }
 
-      await fetchUserLists()
+      reloadLists()
       toast(tLists.deleteConfirm?.deleted || 'List deleted')
     } catch (err) {
       console.error("Failed to delete list", err)
@@ -563,6 +541,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
         {/* Edit Gift Dialog */}
         <EditGiftDialog
+          key={editingItem?.id ?? 'none'} // fresh form per gift
           editingItem={editingItem}
           userLists={userLists}
           isOpen={isEditDialogOpen}
@@ -574,6 +553,7 @@ export default function FamilyGiftApp({ currentUser }: FamilyGiftAppProps) {
 
         {/* Suggest Gift Dialog */}
         <SuggestGiftDialog
+          key={suggestDialogKey}
           isOpen={suggestDialogOpen}
           onClose={handleCloseSuggestDialog}
           currentUser={currentUser}

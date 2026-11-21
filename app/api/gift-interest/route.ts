@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const giftItemId = searchParams.get('gift_item_id')
 
     // Get current user from authentication
-    const currentUser = await requireAuth()
+    await requireAuth()
 
     if (!giftItemId) {
       return NextResponse.json(

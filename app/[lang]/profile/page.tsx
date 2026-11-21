@@ -50,7 +50,7 @@ export default function ProfilePage() {
         setProfile(data)
         setName(data.name || '')
         setHasPassword(data.hasPassword)
-      } catch (err) {
+      } catch {
         setError('Failed to load profile')
       } finally {
         setIsLoadingProfile(false)
@@ -81,7 +81,7 @@ export default function ProfilePage() {
       } else {
         setError(data.error || 'Failed to update profile')
       }
-    } catch (err) {
+    } catch {
       setError('Failed to update profile')
     } finally {
       setIsLoading(false)
@@ -127,7 +127,7 @@ export default function ProfilePage() {
       } else {
         setError(data.error || 'Failed to change password')
       }
-    } catch (err) {
+    } catch {
       setError('Failed to change password')
     } finally {
       setIsLoading(false)

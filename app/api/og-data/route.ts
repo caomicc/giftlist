@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     let validUrl: URL
     try {
       validUrl = new URL(url)
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid URL format' },
         { status: 400 }
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
         // Convert relative URLs to absolute
         try {
           ogData.image = new URL(ogData.image, validUrl.origin).toString()
-        } catch (error) {
+        } catch {
           ogData.image = null
         }
       }

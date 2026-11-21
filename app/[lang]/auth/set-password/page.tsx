@@ -47,7 +47,7 @@ export default function SetPasswordPage() {
       } else {
         setMessage(data.error || 'Failed to set password')
       }
-    } catch (error) {
+    } catch {
       setMessage('Failed to set password')
     } finally {
       setIsLoading(false)

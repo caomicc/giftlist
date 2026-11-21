@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -10,12 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Edit, Loader2, CreditCard, Users, Gift } from 'lucide-react'
 import { useTranslation, formatMessage } from "./i18n-provider"
-
-interface User {
-  id: string
-  name: string
-  email: string
-}
 
 interface UserList {
   id: string
@@ -48,48 +42,29 @@ export default function EditGiftDialog({
   const { t } = useTranslation("gifts")
   const { t: tCommon } = useTranslation("common")
 
-  const [editForm, setEditForm] = useState({
-    name: "",
-    description: "",
-    price: "",
-    link: "",
-    imageUrl: "",
-    isGiftCard: false,
-    isGroupGift: false,
-    giftCardTargetAmount: "",
-    selectedListId: ""
-  })
-  const [editFormOGData, setEditFormOGData] = useState<any>(null)
-  const [editFormOGLoading, setEditFormOGLoading] = useState(false)
-
-  // Initialize form when editingItem changes
-  useEffect(() => {
-    if (editingItem) {
-      setEditForm({
-        name: editingItem.name || "",
-        description: editingItem.description || "",
-        price: editingItem.price || "",
-        link: editingItem.link || "",
-        imageUrl: editingItem.image_url || "",
-        isGiftCard: editingItem.is_gift_card || false,
-        isGroupGift: editingItem.is_group_gift || false,
-        giftCardTargetAmount: editingItem.gift_card_target_amount ? editingItem.gift_card_target_amount.toString() : "",
-        selectedListId: editingItem.list_id || ""
-      })
-
-      // Set existing OG data if available
-      if (editingItem.og_title || editingItem.og_description || editingItem.og_image) {
-        setEditFormOGData({
+  // The parent keys this dialog by gift id, so the form starts from the gift being edited.
+  const [editForm, setEditForm] = useState(() => ({
+    name: editingItem?.name || "",
+    description: editingItem?.description || "",
+    price: editingItem?.price || "",
+    link: editingItem?.link || "",
+    imageUrl: editingItem?.image_url || "",
+    isGiftCard: editingItem?.is_gift_card || false,
+    isGroupGift: editingItem?.is_group_gift || false,
+    giftCardTargetAmount: editingItem?.gift_card_target_amount ? editingItem.gift_card_target_amount.toString() : "",
+    selectedListId: editingItem?.list_id || ""
+  }))
+  const [editFormOGData, setEditFormOGData] = useState<any>(() =>
+    editingItem && (editingItem.og_title || editingItem.og_description || editingItem.og_image)
+      ? {
           title: editingItem.og_title,
           description: editingItem.og_description,
           image: editingItem.og_image,
           siteName: editingItem.og_site_name
-        })
-      } else {
-        setEditFormOGData(null)
-      }
-    }
-  }, [editingItem])
+        }
+      : null
+  )
+  const [editFormOGLoading, setEditFormOGLoading] = useState(false)
 
   // Handle OG data fetching for edit form
   const handleEditFormLinkChange = async (link: string) => {

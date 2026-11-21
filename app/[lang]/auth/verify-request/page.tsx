@@ -14,7 +14,7 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Check your email</CardTitle>
           <CardDescription>
-            We've sent a magic link to{' '}
+            We’ve sent a magic link to{' '}
             {email && <span className="font-medium">{email}</span>}
           </CardDescription>
         </CardHeader>
@@ -24,7 +24,7 @@ async function VerifyRequestContent({ searchParams }: { searchParams: Promise<{ 
               <p className="font-medium text-secondary-foreground mb-2">🧪 Development Mode</p>
               <p className="text-secondary-foreground">
                 Check your terminal/console for the magic link!<br />
-                The link is logged there since email isn't configured yet.
+                The link is logged there since email isn’t configured yet.
               </p>
             </div>
           ) : (

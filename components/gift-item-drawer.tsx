@@ -5,7 +5,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -101,11 +100,12 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
   } = useGiftItemComments(open && item ? item.id : null)
 
   // Fetch comments when drawer opens
+  const itemId = item?.id
   useEffect(() => {
-    if (open && item) {
+    if (open && itemId) {
       fetchComments()
     }
-  }, [open, item?.id, fetchComments])
+  }, [open, itemId, fetchComments])
 
   if (!item) return null
 

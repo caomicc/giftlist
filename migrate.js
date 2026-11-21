@@ -1,7 +1,5 @@
 import 'dotenv/config'
 import { neon } from '@neondatabase/serverless'
-import fs from 'fs'
-import path from 'path'
 
 if (!process.env.NEON_DATABASE_URL) {
   console.error('❌ NEON_DATABASE_URL environment variable is not set')

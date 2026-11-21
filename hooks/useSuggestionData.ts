@@ -3,6 +3,34 @@
 import { useState, useEffect, useCallback } from "react"
 import type { GiftSuggestion } from "@/lib/neon"
 
+// Plain data functions (no React state), so effects can call them and set state in callbacks.
+async function getSuggestionsJson(type: string) {
+  const response = await fetch(`/api/gift-suggestions?type=${type}`, { credentials: 'include' })
+  if (response.ok) return response.json()
+  if (response.status !== 401) console.warn(`Suggestions (${type}) fetch failed with status:`, response.status)
+  return null // 401: signed out
+}
+
+async function getSuggestions(type: 'incoming' | 'outgoing'): Promise<GiftSuggestion[]> {
+  try {
+    return ((await getSuggestionsJson(type))?.suggestions ?? []) as GiftSuggestion[]
+  } catch (err) {
+    console.warn(`Failed to fetch ${type} suggestions:`, err)
+    return []
+  }
+}
+
+async function getPendingCount(): Promise<number> {
+  try {
+    return (await getSuggestionsJson('pending_count'))?.count ?? 0
+  } catch (err) {
+    console.warn('Failed to fetch pending count:', err)
+    return 0
+  }
+}
+
+const loadAll = () => Promise.all([getSuggestions('incoming'), getSuggestions('outgoing'), getPendingCount()])
+
 export function useSuggestionData() {
   const [incomingSuggestions, setIncomingSuggestions] = useState<GiftSuggestion[]>([])
   const [outgoingSuggestions, setOutgoingSuggestions] = useState<GiftSuggestion[]>([])
@@ -10,79 +38,16 @@ export function useSuggestionData() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch pending count
+  const applyAll = ([incoming, outgoing, count]: Awaited<ReturnType<typeof loadAll>>) => {
+    setIncomingSuggestions(incoming)
+    setOutgoingSuggestions(outgoing)
+    setPendingCount(count)
+  }
+
   const fetchPendingCount = useCallback(async () => {
-    try {
-      const response = await fetch('/api/gift-suggestions?type=pending_count', {
-        credentials: 'include'
-      })
-      if (response.status === 401) {
-        // User not authenticated, return 0 silently
-        return 0
-      }
-      if (!response.ok) {
-        console.warn('Pending count fetch failed with status:', response.status)
-        return 0
-      }
-      const { count } = await response.json()
-      setPendingCount(count)
-      return count
-    } catch (err) {
-      console.warn('Failed to fetch pending count:', err)
-      return 0
-    }
-  }, [])
-
-  // Fetch incoming suggestions
-  const fetchIncoming = useCallback(async () => {
-    try {
-      const response = await fetch('/api/gift-suggestions?type=incoming', {
-        credentials: 'include'
-      })
-      if (response.status === 401) {
-        // User not authenticated, return empty array silently
-        setIncomingSuggestions([])
-        return []
-      }
-      if (!response.ok) {
-        console.warn('Incoming suggestions fetch failed with status:', response.status)
-        setIncomingSuggestions([])
-        return []
-      }
-      const { suggestions } = await response.json()
-      setIncomingSuggestions(suggestions as GiftSuggestion[])
-      return suggestions
-    } catch (err) {
-      console.warn('Failed to fetch incoming suggestions:', err)
-      setIncomingSuggestions([])
-      return []
-    }
-  }, [])
-
-  // Fetch outgoing suggestions
-  const fetchOutgoing = useCallback(async () => {
-    try {
-      const response = await fetch('/api/gift-suggestions?type=outgoing', {
-        credentials: 'include'
-      })
-      if (response.status === 401) {
-        // User not authenticated, return empty array silently
-        setOutgoingSuggestions([])
-        return []
-      }
-      if (!response.ok) {
-        console.warn('Outgoing suggestions fetch failed with status:', response.status)
-        setOutgoingSuggestions([])
-        return []
-      }
-      const { suggestions } = await response.json()
-      setOutgoingSuggestions(suggestions as GiftSuggestion[])
-      return suggestions
-    } catch (err) {
-      console.warn('Failed to fetch outgoing suggestions:', err)
-      setOutgoingSuggestions([])
-      return []
-    }
+    const count = await getPendingCount()
+    setPendingCount(count)
+    return count
   }, [])
 
   // Create a new suggestion
@@ -225,18 +190,20 @@ export function useSuggestionData() {
     setLoading(true)
     setError(null)
     try {
-      await Promise.all([fetchIncoming(), fetchOutgoing(), fetchPendingCount()])
-    } catch (err) {
-      console.error("Failed to fetch suggestions data", err)
+      applyAll(await loadAll())
     } finally {
       setLoading(false)
     }
-  }, [fetchIncoming, fetchOutgoing, fetchPendingCount])
+  }, [])
 
-  // Initial data fetch
+  // Initial data fetch (loading starts true)
   useEffect(() => {
-    refetch()
-  }, [refetch])
+    let ignore = false
+    loadAll()
+      .then(results => { if (!ignore) applyAll(results) })
+      .finally(() => { if (!ignore) setLoading(false) })
+    return () => { ignore = true }
+  }, [])
 
   return {
     incomingSuggestions,

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { sql } from '@/lib/neon'
-import type { List } from '@/lib/neon'
 
 export async function GET() {
   try {
