@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: main
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5433:5432" # for psql only; 5433 avoids clashing with a Postgres already on 5432
+      - "127.0.0.1:5433:5432" # psql only; 5433 avoids a Postgres already on 5432; loopback so the LAN can't reach it
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -24,7 +24,7 @@ services:
     environment:
       PG_CONNECTION_STRING: postgres://postgres:postgres@postgres:5432/main
     ports:
-      - "4444:4444"
+      - "127.0.0.1:4444:4444" # loopback only
     depends_on:
       postgres:
         condition: service_healthy
