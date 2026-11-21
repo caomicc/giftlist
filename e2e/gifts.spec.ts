@@ -140,6 +140,22 @@ test.describe('claiming', () => {
     await expect(page.getByText('Someone else already claimed this')).toBeVisible()
   })
 
+  test('claimed gifts move below the open ones', async ({ page }) => {
+    await signInAs(page, SEED.riley.email)
+    await page.getByRole('tab', { name: 'Family Lists' }).click()
+    await page.getByRole('button', { name: `${SEED.sam.name}'s Gift Lists` }).click()
+    const titles = () => page.getByRole('region', { name: "Sam's wishlist" }).locator('h3 button').allTextContents()
+    const [first, second] = await titles()
+    await page.getByRole('button', { name: first, exact: true }).locator('xpath=ancestor::div[contains(@class,"py-3")][1]')
+      .getByRole('button', { name: 'I’ll get this' }).click()
+    try {
+      await expect.poll(titles).toEqual([second, first])
+    } finally {
+      await page.getByRole('button', { name: 'You’re getting this' }).click()
+      await expect(page.getByRole('button', { name: 'You’re getting this' })).toHaveCount(0)
+    }
+  })
+
   test('another member sees who claimed it; the owner of a surprise list sees nothing', async ({ page, browser }) => {
     await signInAs(page, SEED.riley.email)
     await openSkillet(page)

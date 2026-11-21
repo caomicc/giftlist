@@ -15,6 +15,12 @@ interface User {
   email: string
 }
 
+/** Claimed, or a gift card that reached its target: nothing left for anyone to do. */
+const isTaken = (item: GiftItemData) => {
+  const target = Number(item.gift_card_target_amount) || 0
+  return !!item.purchased_by || (item.is_gift_card && target > 0 && Number(item.gift_card_total_purchased) >= target)
+}
+
 /** One member's gifts on one of their lists. */
 type ListGroup = { name: string; isPublic?: boolean; items: GiftItemData[] }
 
@@ -150,7 +156,8 @@ export default function FamilyGiftsList({
                           </div>
                         </div>
                         <div className="px-1 md:px-2 divide-y divide-border">
-                          {listData.items.map(item => {
+                          {/* Open gifts first; sort is stable, so each group keeps its order */}
+                          {[...listData.items].sort((a, b) => Number(isTaken(a)) - Number(isTaken(b))).map(item => {
                             const purchaserName = item.purchased_by
                               ? users.find(u => u.id === item.purchased_by)?.name
                               : null
