@@ -113,10 +113,12 @@ export default function MyGiftsList({
       >
         {Object.entries(itemsByList).map(([listId, listData]) => (
           <AccordionItem key={listId} value={listId}>
-            {/* The edit button sits beside the trigger, never inside it (no button in a button) */}
-            <div className="flex items-start gap-1 [&>h3]:flex-1 [&>h3]:min-w-0">
-            <AccordionTrigger className="hover:no-underline items-center flex-1">
-              <div className="flex items-center gap-3 w-full">
+            {/* The trigger spans the whole header; the edit button floats over it, left of the chevron
+                (never inside it: no button in a button). pr-8 keeps the text clear of the button. */}
+            <div className="relative">
+            {/* Chevron and edit button centre on the name's 28px line (16px down): chevron 16+6, button 14+32/2 */}
+            <AccordionTrigger className="hover:no-underline [&>svg]:translate-y-1.5">
+              <div className="flex items-center gap-3 w-full pr-8">
                 <div className="flex-1">
                   <h3 className="font-medium text-lg">{listData.name}</h3>
                   {listData.description && (
@@ -142,7 +144,7 @@ export default function MyGiftsList({
               <Button
                 variant="ghost"
                 size="icon"
-                className="mt-3 size-8 text-muted-foreground hover:text-foreground"
+                className="absolute top-3.5 right-5 size-8 text-muted-foreground hover:text-foreground"
                 onClick={() => onEditList(listId)}
                 aria-label={formatMessage(tLists.editList || 'Edit {{name}}', { name: listData.name })}
                 title={formatMessage(tLists.editList || 'Edit {{name}}', { name: listData.name })}

@@ -38,3 +38,26 @@ test('a user with no lists gets exactly one default list', async ({ page }) => {
   await page.waitForTimeout(500)
   expect(created).toHaveLength(1)
 })
+
+test('a list’s open/close chevron and edit button line up with its name', async ({ page }) => {
+  await signInAs(page, SEED.alex.email)
+  const trigger = page.getByRole('button', { name: /^Alex's wishlist/ })
+  const middle = async (el: import('@playwright/test').Locator) => {
+    const box = (await el.boundingBox())!
+    return box.y + box.height / 2
+  }
+  const title = await middle(trigger.locator('h3'))
+  expect(Math.abs((await middle(trigger.locator(':scope > svg'))) - title)).toBeLessThan(1)
+  expect(Math.abs((await middle(page.getByRole('button', { name: "Edit Alex's wishlist" }).locator('svg'))) - title)).toBeLessThan(1)
+})
+
+test('the edit button sits before the chevron, so the whole header opens and closes the list', async ({ page }) => {
+  await signInAs(page, SEED.alex.email)
+  const trigger = page.getByRole('button', { name: /^Alex's wishlist/ })
+  const chevron = (await trigger.locator(':scope > svg').boundingBox())!
+  const pencil = (await page.getByRole('button', { name: "Edit Alex's wishlist" }).boundingBox())!
+  expect(pencil.x + pencil.width).toBeLessThanOrEqual(chevron.x)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  await page.mouse.click(chevron.x + chevron.width / 2, chevron.y + chevron.height / 2)
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false')
+})
