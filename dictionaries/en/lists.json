@@ -38,7 +38,8 @@
     "hiddenFromSpecific": "Hidden from specific members",
     "visibleOnlyToSpecific": "Visible only to specific members",
     "selectToHide": "Select members to hide from",
-    "selectToShow": "Select members who can view"
+    "selectToShow": "Select members who can view",
+    "pickAtLeastOne": "Pick at least one person who can see this list."
   },
   "listItem": {
     "badges": {

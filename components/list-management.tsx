@@ -34,6 +34,13 @@ export type ListFields = { name: string; description: string | null; is_public: 
 export type NewListData = ListFields & { visibility_mode: VisibilityMode; selected_users: string[] }
 /** Stored exception to a list's default visibility. */
 export type ListPermissionInput = { user_id: string; can_view: boolean }
+
+/**
+ * "Visible only to" with nobody ticked would store no rules, and a list with no rules is visible to everyone
+ * (the mode is read back from the rows). So that choice can't be saved until someone is ticked.
+ */
+const needsViewer = (form: { visibilityMode: VisibilityMode; selectedUsers: string[] }) =>
+  form.visibilityMode === "visible_to" && form.selectedUsers.length === 0
 /** One member's effective visibility, from GET /api/lists/[id]/permissions. */
 export type ListPermissionView = ListPermissionInput & { user_name: string; user_email: string; is_explicit: boolean }
 
@@ -225,6 +232,11 @@ export default function ListManagement({
                     </div>
                   ))}
                 </div>
+                {needsViewer(newListForm) && (
+                  <p className="text-sm text-muted-foreground">
+                    {t.visibility?.pickAtLeastOne || "Pick at least one person who can see this list."}
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -239,7 +251,7 @@ export default function ListManagement({
           </Button>
           <Button
             onClick={handleCreateList}
-            disabled={!newListForm.name.trim() || isSubmitting}
+            disabled={!newListForm.name.trim() || isSubmitting || needsViewer(newListForm)}
           >
             {isSubmitting ? (
               <>
@@ -485,6 +497,11 @@ function EditListDialog({ list, canDelete, otherMembers, onUpdateList, onDeleteL
                       </div>
                     ))}
                   </div>
+                  {needsViewer(editListForm) && (
+                    <p className="text-sm text-muted-foreground">
+                      {t.visibility?.pickAtLeastOne || "Pick at least one person who can see this list."}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -515,7 +532,7 @@ function EditListDialog({ list, canDelete, otherMembers, onUpdateList, onDeleteL
             </Button>
             <Button
               onClick={handleUpdateList}
-              disabled={!editListForm.name.trim() || isSubmitting || !permissionsLoaded}
+              disabled={!editListForm.name.trim() || isSubmitting || !permissionsLoaded || needsViewer(editListForm)}
             >
               {isSubmitting ? (
                 <>

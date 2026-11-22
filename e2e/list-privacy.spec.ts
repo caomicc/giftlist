@@ -81,3 +81,28 @@ test('if a new listâ€™s privacy and its cleanup both fail, the user is told itâ€
     for (const l of lists.filter(l => l.name === name)) await page.request.delete(`/api/lists/${l.id}`)
   }
 })
+
+// Nobody ticked would save no rules, and a list with no rules is visible to everyone
+test('a new list visible only to specific members needs at least one of them', async ({ page }) => {
+  await signInAs(page, SEED.alex.email)
+  await page.getByRole('button', { name: 'New list' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Create New List' })
+  await dialog.getByLabel('List name').fill('E2E never saved')
+  await dialog.getByLabel('Visible only to specific members').check()
+  await expect(dialog.getByText('Pick at least one person who can see this list.')).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Create List' })).toBeDisabled()
+  await dialog.getByLabel(SEED.sam.name).check()
+  await expect(dialog.getByText('Pick at least one person who can see this list.')).toBeHidden()
+  await expect(dialog.getByRole('button', { name: 'Create List' })).toBeEnabled()
+})
+
+test('editing a list to be visible only to specific members needs at least one of them', async ({ page }) => {
+  await signInAs(page, SEED.alex.email)
+  const dialog = await openEditDialog(page)
+  await expect(dialog.getByRole('button', { name: 'Update List' })).toBeEnabled() // permissions loaded
+  await dialog.getByLabel('Visible only to specific members').check()
+  await expect(dialog.getByText('Pick at least one person who can see this list.')).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Update List' })).toBeDisabled()
+  await dialog.getByLabel(SEED.sam.name).check()
+  await expect(dialog.getByRole('button', { name: 'Update List' })).toBeEnabled()
+})
