@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { randomBytes } from 'crypto'
 import bcrypt from 'bcryptjs'
@@ -101,21 +101,20 @@ export async function registerWithPassword(email: string, password: string, name
   return user
 }
 
-// Set password for existing user (e.g., magic-link users wanting to add password)
+// First password for a magic-link user. Never replaces one: changing a password needs the
+// current one (/api/user/change-password), or any session could take over the account.
 export async function setPassword(email: string, password: string) {
-  // Hash password
   const passwordHash = await bcrypt.hash(password, 12)
 
-  // Update user with password
   const [user] = await sql`
     UPDATE users
     SET password_hash = ${passwordHash}
-    WHERE email = ${email}
+    WHERE email = ${email} AND password_hash IS NULL
     RETURNING *
   `
 
   if (!user) {
-    throw new Error('User not found')
+    throw new Error('Password already set')
   }
 
   return user
@@ -290,17 +289,24 @@ export async function verifyMagicLink(token: string, email: string) {
   }
 }
 
-// Get current session
+/** The agent token from an `Authorization: Bearer …` header, if the request has one. */
+export async function getBearerToken(): Promise<string | null> {
+  const authorization = (await headers()).get('authorization')
+  return authorization?.match(/^Bearer\s+(\S+)$/i)?.[1] ?? null
+}
+
+// Get current session: the browser's cookie, or an agent token (a named session row) sent as a bearer header
 export async function getSession(): Promise<Session | null> {
   const cookieStore = await cookies()
-  const sessionToken = cookieStore.get('session-token')?.value
+  const sessionToken = cookieStore.get('session-token')?.value ?? await getBearerToken()
 
   if (!sessionToken) {
     return null
   }
 
+  // Named columns: sessions and users share id, name and created_at
   const [session] = await sql`
-    SELECT s.*, u.* FROM sessions s
+    SELECT s.id, s.user_id, s.expires, u.email, u.name, u.created_at FROM sessions s
     JOIN users u ON s.user_id = u.id
     WHERE s.session_token = ${sessionToken} AND s.expires > NOW()
   `
@@ -319,6 +325,14 @@ export async function getSession(): Promise<Session | null> {
     },
     expires: session.expires
   }
+}
+
+/**
+ * For routes that change how you sign in (passwords, agent tokens): agent tokens may use the
+ * site but not these, so a leaked token can't set a password or mint more tokens.
+ */
+export async function getBrowserSession(): Promise<Session | null> {
+  return (await getBearerToken()) ? null : getSession()
 }
 
 // Sign out

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
+import { getBrowserSession } from '@/lib/auth'
 import { sql } from '@/lib/neon'
 import bcrypt from 'bcryptjs'
 
 // POST - Change password
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession()
+    const session = await getBrowserSession()
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

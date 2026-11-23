@@ -288,7 +288,8 @@ CREATE TABLE public.sessions (
     session_token character varying(255) NOT NULL,
     user_id uuid NOT NULL,
     expires timestamp with time zone NOT NULL,
-    created_at timestamp with time zone DEFAULT now()
+    created_at timestamp with time zone DEFAULT now(),
+    name text
 );
 
 

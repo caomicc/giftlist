@@ -113,6 +113,13 @@ lib/
 - `NEXTAUTH_URL`: Base URL for magic link generation
 - `RAPID_API_KEY` (required for Amazon products): RapidAPI key for Amazon API Scraping service. Get one at https://rapidapi.com/letscrape-6bRBa3QguO5/api/amazon-api-scraping
 - Email service configuration (check `lib/email.ts` for specifics)
+- `CRON_SECRET`: Vercel Cron sends it to `/api/cron/digest` (the daily new-gifts email, scheduled in `vercel.json`)
+
+## Agent access (MCP)
+- `/api/mcp` is a stateless MCP server (Streamable HTTP) for Claude Code, Hermes and other MCP clients.
+- Agents authenticate with a token from the profile page, sent as `Authorization: Bearer <token>`. A token is a `sessions` row with a `name`, so `getSession()` accepts it on every API route.
+- Routes that change how you sign in (passwords, tokens) use `getBrowserSession()`, which rejects agent tokens.
+- MCP tools call the existing route handlers in-process, so permission checks and the surprise-list scrub apply unchanged.
 
 ## Database Migration
 - Use `migrate.js` for schema setup

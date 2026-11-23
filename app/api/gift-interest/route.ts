@@ -1,20 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
-import { requireAuth } from '@/lib/auth'
+import { getApiUser } from '@/lib/auth'
+import { unauthorized, loadVisibleGift, isSurpriseForViewer } from '@/lib/gift-privacy'
+
+const giftNotFound = () => NextResponse.json({ error: 'Gift item not found' }, { status: 404 })
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const giftItemId = searchParams.get('gift_item_id')
 
-    // Get current user from authentication
-    await requireAuth()
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
 
     if (!giftItemId) {
       return NextResponse.json(
         { error: 'Gift item ID is required' },
         { status: 400 }
       )
+    }
+
+    const gift = await loadVisibleGift(giftItemId, currentUser.id)
+    if (!gift) return giftNotFound()
+
+    // The owner of a "Keep Surprise" list never learns who is going in on a gift
+    if (isSurpriseForViewer(gift, currentUser.id)) {
+      return NextResponse.json({ interests: [] })
     }
 
     // Get all users interested in this gift item
@@ -46,8 +57,8 @@ export async function POST(request: NextRequest) {
   try {
     const { gift_item_id, user_id } = await request.json()
 
-    // Get current user from authentication
-    const currentUser = await requireAuth()
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
 
     // Ensure the user can only add interest for themselves
     if (currentUser.id !== user_id) {
@@ -63,6 +74,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    if (!(await loadVisibleGift(gift_item_id, currentUser.id))) return giftNotFound()
 
     // Check if user already expressed interest
     const existing = await sql`
@@ -111,8 +124,8 @@ export async function DELETE(request: NextRequest) {
     const giftItemId = searchParams.get('gift_item_id')
     const userId = searchParams.get('user_id')
 
-    // Get current user from authentication
-    const currentUser = await requireAuth()
+    const currentUser = await getApiUser()
+    if (!currentUser) return unauthorized()
 
     // Ensure the user can only remove their own interest
     if (currentUser.id !== userId) {

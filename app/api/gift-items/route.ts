@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
 import { getApiUser } from '@/lib/auth'
-import { scrubForViewer, unauthorized, forbidden } from '@/lib/gift-privacy'
+import { scrubForViewer, unauthorized, forbidden, loadVisibleGift } from '@/lib/gift-privacy'
 import { isCurrency } from '@/lib/currency'
 
 export async function GET(request: NextRequest) {
@@ -302,12 +302,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unsupported currency' }, { status: 400 })
     }
 
-    const [existing] = await sql`
-      SELECT gi.owner_id, gi.purchased_by, l.is_public
-      FROM gift_items gi
-      JOIN lists l ON gi.list_id = l.id
-      WHERE gi.id = ${id}
-    `
+    // A gift on a list hidden from you is "not found", so it can't be claimed or probed by id
+    const existing = await loadVisibleGift(id, currentUser.id)
     if (!existing) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 })
     }

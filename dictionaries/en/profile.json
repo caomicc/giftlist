@@ -48,5 +48,28 @@
   "locales": {
     "en": "English",
     "ru": "Русский (Russian)"
+  },
+  "agentAccess": {
+    "title": "Agent access",
+    "body": "Let an AI agent such as Claude Code or Hermes act as you: read the family’s lists, add gifts to yours and claim gifts. A token works for a year.",
+    "nameLabel": "Token name",
+    "namePlaceholder": "e.g. Claude Code on my laptop",
+    "create": "Create token",
+    "createError": "Couldn’t create a token. Try again.",
+    "copyNow": "Copy this token now. It won’t be shown again.",
+    "tokenLabel": "Token",
+    "claudeCode": "Claude Code: run this in a terminal",
+    "hermes": "Hermes: add this to ~/.hermes/config.yaml",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyError": "Couldn’t copy. Select the text and copy it instead.",
+    "listLabel": "Your agent tokens",
+    "createdOn": "Created {{date}}",
+    "revoke": "Revoke",
+    "revokeLabel": "Revoke {{name}}",
+    "revokeTitle": "Revoke “{{name}}”?",
+    "revokeBody": "Any agent using this token loses access right away.",
+    "revoked": "Token revoked",
+    "revokeError": "Couldn’t revoke the token. Try again."
   }
 }

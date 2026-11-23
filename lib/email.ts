@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer'
+import { getDictionary, type Locale } from './i18n'
+import { formatCurrency } from './currency'
 
 // Helper to create transporter
 function createTransporter() {
@@ -225,5 +227,74 @@ export async function sendSuggestionDeclinedNotification(
   } catch (error) {
     console.error('Failed to send suggestion declined notification:', error)
     // Don't throw - notification emails are not critical
+  }
+}
+
+export interface DigestItem {
+  name: string
+  owner_name: string | null
+  price: string | null
+  currency: string | null
+}
+
+// Item and owner names are typed by family members, so they are escaped before going into HTML
+const escapeHtml = (s: unknown) =>
+  String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!)
+
+/**
+ * Daily email: gifts other people added in the last day, on lists the recipient can see.
+ * Sent by /api/cron/digest; days with nothing new send nothing.
+ */
+export async function sendNewItemsDigest(
+  toEmail: string,
+  recipientName: string | null,
+  items: DigestItem[],
+  appUrl: string,
+  locale: Locale
+) {
+  const t = (await getDictionary(locale, 'emails')).digest
+  const greeting = t.greeting.replace('{{name}}', recipientName || toEmail)
+  const line = (i: DigestItem) =>
+    [i.owner_name, i.name].filter(Boolean).join(': ') +
+    (i.price ? ` (${formatCurrency(i.price, i.currency || 'USD', locale)})` : '')
+
+  if (!isEmailConfigured()) {
+    console.log('🎁 NEW ITEMS DIGEST (Development Mode)')
+    console.log('📧 To:', toEmail)
+    items.forEach(i => console.log('  •', line(i)))
+    return
+  }
+
+  const mailOptions = {
+    from: process.env.EMAIL_FROM,
+    to: toEmail,
+    subject: t.subject,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">${escapeHtml(t.heading)}</h2>
+        <p>${escapeHtml(greeting)}</p>
+        <p>${escapeHtml(t.intro)}</p>
+        <ul style="background-color: #f5f5f5; padding: 20px 20px 20px 40px; border-radius: 8px; margin: 20px 0;">
+          ${items.map(i => `<li style="margin: 6px 0; color: #333;">${escapeHtml(line(i))}</li>`).join('')}
+        </ul>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${escapeHtml(appUrl)}"
+             style="background-color: #7c3aed; color: white; padding: 12px 24px;
+                    text-decoration: none; border-radius: 6px; display: inline-block;">
+            ${escapeHtml(t.button)}
+          </a>
+        </div>
+        <p style="color: #666; font-size: 14px;">${escapeHtml(t.footer)}</p>
+      </div>
+    `,
+    text: [greeting, '', t.intro, ...items.map(i => `• ${line(i)}`), '', `${t.button}: ${appUrl}`, '', t.footer].join('\n'),
+  }
+
+  try {
+    await createTransporter().sendMail(mailOptions)
+    console.log('New items digest sent to:', toEmail)
+  } catch (error) {
+    console.error('Failed to send new items digest:', error)
+    // Don't throw - one failed digest shouldn't stop the rest
   }
 }

@@ -1,10 +1,10 @@
-import { setPassword, getSession } from '@/lib/auth'
+import { setPassword, getBrowserSession } from '@/lib/auth'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
     // Get current user session
-    const session = await getSession()
+    const session = await getBrowserSession()
     
     if (!session) {
       return NextResponse.json(
@@ -35,10 +35,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Set password error:', error)
     
-    if (error instanceof Error && error.message === 'User not found') {
+    if (error instanceof Error && error.message === 'Password already set') {
       return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
+        { error: 'You already have a password. Change it from your profile.' },
+        { status: 409 }
       )
     }
     

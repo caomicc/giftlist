@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useRouter } from 'next/navigation'
 import { SaveBookmarklet } from '@/components/save-bookmarklet'
+import { AgentAccess } from '@/components/agent-access'
 
 interface UserProfile {
   id: string
@@ -308,6 +309,7 @@ export default function ProfilePage() {
       <div className="hidden w-full justify-center md:flex">
         <SaveBookmarklet />
       </div>
+      <AgentAccess />
     </div>
   )
 }

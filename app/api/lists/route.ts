@@ -14,8 +14,7 @@ export async function GET() {
     const lists = await sql`
       SELECT 
         l.*,
-        COUNT(gi.id) as item_count,
-        COUNT(CASE WHEN gi.purchased_by IS NOT NULL THEN 1 END) as purchased_count
+        COUNT(gi.id) as item_count -- no purchase count: it would tell surprise-list owners what was bought
       FROM lists l
       LEFT JOIN gift_items gi ON l.id = gi.list_id AND NOT gi.archived
       WHERE l.owner_id = ${user.id}

@@ -1,18 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/neon'
 import { getApiUser } from '@/lib/auth'
-import { unauthorized, forbidden } from '@/lib/gift-privacy'
-
-async function loadGiftItem(giftItemId: string) {
-  const [item] = await sql`
-    SELECT gi.id, gi.owner_id, gi.is_gift_card, gi.gift_card_target_amount,
-           gi.gift_card_total_purchased, l.is_public
-    FROM gift_items gi
-    JOIN lists l ON gi.list_id = l.id
-    WHERE gi.id = ${giftItemId}
-  `
-  return item ?? null
-}
+import { unauthorized, forbidden, loadVisibleGift } from '@/lib/gift-privacy'
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,7 +18,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const item = await loadGiftItem(giftItemId)
+    const item = await loadVisibleGift(giftItemId, currentUser.id)
     if (!item) {
       return NextResponse.json({ error: 'Gift item not found' }, { status: 404 })
     }
@@ -42,7 +31,7 @@ export async function GET(request: NextRequest) {
     const purchases = await sql`
       SELECT gcp.*, u.name as purchaser_name
       FROM gift_card_purchases gcp
-      JOIN users u ON gcp.purchaser_id = u.id::text
+      JOIN users u ON gcp.purchaser_id = u.id
       WHERE gcp.gift_item_id = ${giftItemId}
       ORDER BY gcp.created_at DESC
     `
@@ -72,7 +61,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const item = await loadGiftItem(gift_item_id)
+    const item = await loadVisibleGift(gift_item_id, currentUser.id)
     if (!item || !item.is_gift_card) {
       return NextResponse.json({ error: 'Gift card not found' }, { status: 404 })
     }

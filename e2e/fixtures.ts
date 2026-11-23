@@ -23,6 +23,8 @@ export const SEED = {
   sam: { id: id(2), email: 'sam@example.com', name: 'Sam Chen' },
   jordan: { id: id(3), email: 'jordan@example.com', name: 'Jordan Patel' },
   riley: { id: id(4), email: 'riley@example.com', name: 'Riley Okafor' },
+  // No password: signs in by magic link. access-checks.spec.ts sets one and resets it to NULL.
+  morgan: { id: id(5), email: 'morgan@example.com', name: 'Morgan Lee' },
 }
 export const SEED_GIFTS = {
   castIronSkillet: { id: id(201), name: 'Cast iron skillet' },
