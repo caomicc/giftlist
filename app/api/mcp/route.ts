@@ -55,6 +55,7 @@ const giftSummary = (g: Row) => ({
   ...(g.is_gift_card ? { gift_card_target: g.gift_card_target_amount, gift_card_contributed: g.gift_card_total_purchased } : {}),
   is_group_gift: g.is_group_gift,
   added_at: g.created_at,
+  edited_at: g.edited_at ?? null,
 })
 
 async function visibleGifts(): Promise<Row[]> {

@@ -62,7 +62,8 @@ export type GiftItem = {
   og_site_name: string | null
   archived: boolean
   created_at: string
-  updated_at: string
+  updated_at: string // bumped by claims too: never show it, use edited_at
+  edited_at: string | null // last owner edit of the details
   // Joined from lists/users by GET /api/gift-items
   is_public?: boolean
   list_name?: string

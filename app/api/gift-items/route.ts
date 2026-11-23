@@ -383,7 +383,8 @@ export async function PUT(request: NextRequest) {
           og_image = ${og_image || null},
           og_site_name = ${og_site_name || null},
           archived = COALESCE(${archived ?? null}, archived), -- editing details never un-archives
-          updated_at = NOW()
+          updated_at = NOW(),
+          edited_at = NOW() -- shown to everyone, so only owner edits set it (see 16-add-gift-edited-at.sql)
         WHERE id = ${id}
         RETURNING *
       `

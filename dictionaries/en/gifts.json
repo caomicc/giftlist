@@ -175,7 +175,9 @@
     "close": "Close",
     "sendComment": "Send comment",
     "commentsHiddenFromYou": "Family comments stay hidden until you archive this gift.",
-    "commentsHiddenFromOwner": "{{name}} can’t read comments until they archive this gift."
+    "commentsHiddenFromOwner": "{{name}} can’t read comments until they archive this gift.",
+    "added": "Added {{date}}",
+    "edited": "Edited {{date}}"
   },
   "suggestions": {
     "suggestGift": "Suggest a Gift",

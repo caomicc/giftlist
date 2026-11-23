@@ -197,7 +197,8 @@ CREATE TABLE public.gift_items (
     is_group_gift boolean DEFAULT false,
     suggested_by_id text,
     is_anonymous_suggestion boolean DEFAULT false,
-    currency text DEFAULT 'USD'::text NOT NULL
+    currency text DEFAULT 'USD'::text NOT NULL,
+    edited_at timestamp with time zone
 );
 
 

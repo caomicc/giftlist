@@ -30,6 +30,9 @@ test('the owner of a surprise list can’t learn how many of their gifts were bo
     const lists = await (await sam.get('/api/lists')).json()
     expect(lists).toHaveLength(1)
     expect(lists[0]).not.toHaveProperty('purchased_count')
+    // Nor when: the "Edited" time the drawer shows must not move on a claim
+    const { giftItems } = await (await sam.get('/api/gift-items')).json()
+    expect(giftItems.find((g: { id: string }) => g.id === wool).edited_at).toBeNull()
   } finally {
     await jordan.put('/api/gift-items', { data: { id: wool, purchased_by: null } })
     await jordan.dispose()

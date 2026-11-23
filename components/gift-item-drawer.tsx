@@ -171,6 +171,19 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                   )}
                   {item.price && !isGiftCard && <PriceTag price={item.price} currency={item.currency} />}
                 </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  <time dateTime={item.created_at} title={new Date(item.created_at).toLocaleString(locale)}>
+                    {formatMessage(t.drawer?.added || 'Added {{date}}', { date: formatRelativeTime(item.created_at, locale) })}
+                  </time>
+                  {item.edited_at && (
+                    <>
+                      {' · '}
+                      <time dateTime={item.edited_at} title={new Date(item.edited_at).toLocaleString(locale)}>
+                        {formatMessage(t.drawer?.edited || 'Edited {{date}}', { date: formatRelativeTime(item.edited_at, locale) })}
+                      </time>
+                    </>
+                  )}
+                </p>
               </div>
               <DrawerClose asChild>
                 <Button variant="ghost" size="icon" className="shrink-0 size-10" aria-label={t.drawer?.close || 'Close'}>
