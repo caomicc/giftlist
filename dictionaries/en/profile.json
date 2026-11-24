@@ -51,7 +51,7 @@
   },
   "agentAccess": {
     "title": "Agent access",
-    "body": "Let an AI agent such as Claude Code or Hermes act as you: read the family’s lists, add gifts to yours and claim gifts. A token works for a year.",
+    "body": "Let an AI agent such as Claude Code or Hermes act as you: read the family’s lists, manage your own lists and gifts, and claim gifts. A token works for a year.",
     "nameLabel": "Token name",
     "namePlaceholder": "e.g. Claude Code on my laptop",
     "create": "Create token",

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict FTIpqeB8fELPj0iRVSFu72azz8zhLG72srWygcG1ib18SFdpCNf2TMhwmCPo21r
+\restrict 7haM0xzNxReeSzMjnE2CRWFibrt6n3GA8yvBPCAwrSzyvo24VVC2BYxI3dorJ1D
 
 -- Dumped from database version 17.12 (4d8000a)
 -- Dumped by pg_dump version 17.12
@@ -198,7 +198,11 @@ CREATE TABLE public.gift_items (
     suggested_by_id text,
     is_anonymous_suggestion boolean DEFAULT false,
     currency text DEFAULT 'USD'::text NOT NULL,
-    edited_at timestamp with time zone
+    edited_at timestamp with time zone,
+    category text,
+    priority text,
+    idempotency_key text,
+    CONSTRAINT gift_items_priority_check CHECK ((priority = ANY (ARRAY['high'::text, 'medium'::text, 'low'::text])))
 );
 
 
@@ -480,6 +484,13 @@ ALTER TABLE ONLY public.verification_tokens
 --
 
 CREATE INDEX users_sync_deleted_at_idx ON neon_auth.users_sync USING btree (deleted_at);
+
+
+--
+-- Name: gift_items_owner_idempotency_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX gift_items_owner_idempotency_key ON public.gift_items USING btree (owner_id, idempotency_key) WHERE (idempotency_key IS NOT NULL);
 
 
 --
@@ -818,5 +829,5 @@ ALTER TABLE ONLY public.sessions
 -- PostgreSQL database dump complete
 --
 
-\unrestrict FTIpqeB8fELPj0iRVSFu72azz8zhLG72srWygcG1ib18SFdpCNf2TMhwmCPo21r
+\unrestrict 7haM0xzNxReeSzMjnE2CRWFibrt6n3GA8yvBPCAwrSzyvo24VVC2BYxI3dorJ1D
 

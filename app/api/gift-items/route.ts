@@ -169,7 +169,10 @@ export async function POST(request: NextRequest) {
       og_title,
       og_description,
       og_image,
-      og_site_name
+      og_site_name,
+      category,
+      priority,
+      idempotency_key
     } = await request.json()
 
     const currentUser = await getApiUser()
@@ -205,7 +208,7 @@ export async function POST(request: NextRequest) {
     const data = await sql`
       INSERT INTO gift_items (
         name, description, price, currency, link, image_url, owner_id, list_id, is_gift_card, is_group_gift, gift_card_target_amount,
-        og_title, og_description, og_image, og_site_name
+        og_title, og_description, og_image, og_site_name, category, priority, idempotency_key
       )
       VALUES (
         ${name},
@@ -222,12 +225,24 @@ export async function POST(request: NextRequest) {
         ${og_title || null},
         ${og_description || null},
         ${og_image || null},
-        ${og_site_name || null}
+        ${og_site_name || null},
+        ${category || null},
+        ${priority || null},
+        ${idempotency_key || null}
       )
+      ON CONFLICT (owner_id, idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING
       RETURNING *
     `
+    if (data.length) return NextResponse.json({ giftItem: data[0] })
 
-    return NextResponse.json({ giftItem: data[0] })
+    // A key you've used before: a retry. Return that gift, scrubbed like any read, since it may
+    // have been claimed in the meantime.
+    const [earlier] = await sql`
+      SELECT gi.*, l.is_public, l.owner_id AS list_owner_id
+      FROM gift_items gi JOIN lists l ON gi.list_id = l.id
+      WHERE gi.owner_id = ${owner_id} AND gi.idempotency_key = ${idempotency_key}
+    `
+    return NextResponse.json({ giftItem: scrubForViewer(earlier, currentUser.id) })
   } catch (error) {
     console.error('Failed to add gift item:', error)
     return NextResponse.json(
@@ -292,7 +307,9 @@ export async function PUT(request: NextRequest) {
       og_description,
       og_image,
       og_site_name,
-      archived
+      archived,
+      category,
+      priority
     } = await request.json()
 
     const currentUser = await getApiUser()
@@ -385,6 +402,21 @@ export async function PUT(request: NextRequest) {
           archived = COALESCE(${archived ?? null}, archived), -- editing details never un-archives
           updated_at = NOW(),
           edited_at = NOW() -- shown to everyone, so only owner edits set it (see 16-add-gift-edited-at.sql)
+        WHERE id = ${id}
+        RETURNING *
+      `
+      return respond(data[0])
+    }
+
+    // Tags only. The edit form never sends them, so saving a gift there keeps them; null clears one.
+    if (category !== undefined || priority !== undefined) {
+      if (!isOwner) return forbidden()
+      const data = await sql`
+        UPDATE gift_items
+        SET
+          category = CASE WHEN ${category !== undefined} THEN ${category ?? null} ELSE category END,
+          priority = CASE WHEN ${priority !== undefined} THEN ${priority ?? null} ELSE priority END,
+          updated_at = NOW()
         WHERE id = ${id}
         RETURNING *
       `

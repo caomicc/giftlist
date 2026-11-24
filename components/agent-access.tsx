@@ -95,7 +95,7 @@ export function AgentAccess() {
           {t.title || 'Agent access'}
         </CardTitle>
         <CardDescription>
-          {t.body || 'Let an AI agent such as Claude Code or Hermes act as you: read the family’s lists, add gifts to yours and claim gifts. A token works for a year.'}
+          {t.body || 'Let an AI agent such as Claude Code or Hermes act as you: read the family’s lists, manage your own lists and gifts, and claim gifts. A token works for a year.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
