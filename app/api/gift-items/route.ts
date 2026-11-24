@@ -400,6 +400,9 @@ export async function PUT(request: NextRequest) {
           og_image = ${og_image || null},
           og_site_name = ${og_site_name || null},
           archived = COALESCE(${archived ?? null}, archived), -- editing details never un-archives
+          -- Tags only change when sent (the edit form sends both; null clears)
+          category = CASE WHEN ${category !== undefined} THEN ${category || null} ELSE category END,
+          priority = CASE WHEN ${priority !== undefined} THEN ${priority || null} ELSE priority END,
           updated_at = NOW(),
           edited_at = NOW() -- shown to everyone, so only owner edits set it (see 16-add-gift-edited-at.sql)
         WHERE id = ${id}
@@ -408,7 +411,7 @@ export async function PUT(request: NextRequest) {
       return respond(data[0])
     }
 
-    // Tags only. The edit form never sends them, so saving a gift there keeps them; null clears one.
+    // Tags alone (the MCP set_tags tool); null clears one. The edit form sends them with the details above.
     if (category !== undefined || priority !== undefined) {
       if (!isOwner) return forbidden()
       const data = await sql`

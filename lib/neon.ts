@@ -41,6 +41,8 @@ export type ListPermission = {
   updated_at: string
 }
 
+export type Priority = 'high' | 'medium' | 'low'
+
 export type GiftItem = {
   id: string
   name: string
@@ -64,6 +66,8 @@ export type GiftItem = {
   created_at: string
   updated_at: string // bumped by claims too: never show it, use edited_at
   edited_at: string | null // last owner edit of the details
+  category: string | null
+  priority: Priority | null
   // Joined from lists/users by GET /api/gift-items
   is_public?: boolean
   list_name?: string

@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/drawer'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { GiftTagBadges } from './gift-tags'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -169,6 +170,7 @@ const GiftItemDrawer: React.FC<GiftItemDrawerProps> = ({
                       {t.giftItem?.badges?.giftCard || 'Gift Card'}
                     </Badge>
                   )}
+                  <GiftTagBadges category={item.category} priority={item.priority} />
                   {item.price && !isGiftCard && <PriceTag price={item.price} currency={item.currency} />}
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">

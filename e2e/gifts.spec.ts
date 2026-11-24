@@ -44,6 +44,47 @@ test.describe('my list', () => {
     await deleteGift(page, renamed)
   })
 
+  test('a gift’s category and priority show on the list, for the family too', async ({ page, browser }) => {
+    const name = uniqueName()
+    // Both sit under "More details" when adding
+    await page.getByPlaceholder('Paste a link or type a gift').fill(name)
+    await page.getByText('More details').click()
+    await page.getByLabel('Category').fill('Kitchen')
+    await page.getByLabel('Priority').click()
+    await page.getByRole('option', { name: 'High' }).click()
+    await page.getByRole('button', { name: 'Add Gift Idea' }).click()
+    await expand(page, ALEX_LIST)
+    const row = myGiftRow(page, name)
+    await expect(row.getByText('Kitchen', { exact: true })).toBeVisible()
+    await expect(row.getByText('High priority', { exact: true })).toBeVisible()
+
+    const riley = await browser.newContext() // its own session cookie
+    try {
+      const rileyPage = await riley.newPage()
+      await signInAs(rileyPage, SEED.riley.email)
+      await rileyPage.getByRole('tab', { name: 'Family Lists' }).click()
+      await rileyPage.getByRole('button', { name: `${SEED.alex.name}'s Gift Lists` }).click()
+      await rileyPage.getByRole('button', { name }).click()
+      const drawer = rileyPage.getByRole('dialog', { name })
+      await expect(drawer.getByText('Kitchen', { exact: true })).toBeVisible()
+      await expect(drawer.getByText('High priority', { exact: true })).toBeVisible()
+
+      // Editing changes the priority and clears the category
+      await row.getByRole('button', { name: 'Edit' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Edit Gift Item' })
+      await expect(dialog.getByLabel('Category')).toHaveValue('Kitchen')
+      await dialog.getByLabel('Category').fill('')
+      await dialog.getByLabel('Priority').click()
+      await page.getByRole('option', { name: 'Low' }).click()
+      await dialog.getByRole('button', { name: 'Update Gift Item' }).click()
+      await expect(row.getByText('Low priority', { exact: true })).toBeVisible()
+      await expect(row.getByText('Kitchen', { exact: true })).toHaveCount(0)
+    } finally {
+      await riley.close()
+      await deleteGift(page, name)
+    }
+  })
+
   test('my lists are open when the page loads', async ({ page }) => {
     await expect(page.getByText(SEED_GIFTS.chefsKnife.name, { exact: true })).toBeVisible()
   })

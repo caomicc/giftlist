@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import type { User, GiftItem } from "@/lib/neon"
+import type { User, GiftItem, Priority } from "@/lib/neon"
 
 /** Link preview returned by /api/og-data. */
 export type OGData = {
@@ -32,6 +32,8 @@ export type NewGiftItem = {
   og_description?: string
   og_image?: string
   og_site_name?: string
+  category?: string | null
+  priority?: Priority | null
 }
 
 /** Body for PUT /api/gift-items (besides the id). */

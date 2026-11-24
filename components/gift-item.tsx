@@ -9,6 +9,7 @@ import PriceTag from './price-tag';
 import GiftCardPurchaseDialog from './gift-card-purchase-dialog';
 import GiftItemDrawer from './gift-item-drawer';
 import { ClaimButton } from './claim-button';
+import { GiftTagBadges } from './gift-tags';
 import { cn } from '@/lib/utils';
 import { useTranslation, formatMessage } from './i18n-provider';
 
@@ -135,6 +136,7 @@ const GiftItem: React.FC<GiftItemProps> = ({
                 {t.giftItem?.badges?.giftCard || 'Gift Card'}
               </Badge>
             )}
+            <GiftTagBadges category={item.category} priority={item.priority} className="text-xs" />
             {item.price && !isGiftCard && <PriceTag price={item.price} currency={item.currency} />}
             {/* Comment indicator */}
             {item.comment_count && item.comment_count > 0 && (

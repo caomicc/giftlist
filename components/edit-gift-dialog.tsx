@@ -1,6 +1,6 @@
 "use client"
 
-import type { GiftItem } from "@/lib/neon"
+import type { GiftItem, Priority } from "@/lib/neon"
 import type { GiftItemUpdate, OGData } from "@/hooks/useGiftData"
 import { useState } from "react"
 import CurrencySelect from "./currency-select"
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Edit, Loader2, CreditCard, Users, Gift } from 'lucide-react'
 import { useTranslation, formatMessage } from "./i18n-provider"
+import { GiftTagFields } from "./gift-tags"
 
 interface UserList {
   id: string
@@ -56,7 +57,9 @@ export default function EditGiftDialog({
     isGiftCard: editingItem?.is_gift_card || false,
     isGroupGift: editingItem?.is_group_gift || false,
     giftCardTargetAmount: editingItem?.gift_card_target_amount ? editingItem.gift_card_target_amount.toString() : "",
-    selectedListId: editingItem?.list_id || ""
+    selectedListId: editingItem?.list_id || "",
+    category: editingItem?.category || "",
+    priority: (editingItem?.priority || "none") as Priority | "none",
   }))
   const [editFormOGData, setEditFormOGData] = useState<OGData | null>(() =>
     editingItem && (editingItem.og_title || editingItem.og_description || editingItem.og_image)
@@ -105,6 +108,9 @@ export default function EditGiftDialog({
       og_description: editFormOGData?.description,
       og_image: editFormOGData?.image,
       og_site_name: editFormOGData?.siteName,
+      // Always sent, so clearing them in the form clears them on the gift
+      category: editForm.category.trim() || null,
+      priority: editForm.priority === "none" ? null : editForm.priority,
     }
 
     await onUpdateGiftItem(itemData)
@@ -204,6 +210,15 @@ export default function EditGiftDialog({
               disabled={isSubmitting}
             />
           </div>
+
+          <GiftTagFields
+            idPrefix="edit"
+            category={editForm.category}
+            priority={editForm.priority}
+            onCategoryChange={(category) => setEditForm((prev) => ({ ...prev, category }))}
+            onPriorityChange={(priority) => setEditForm((prev) => ({ ...prev, priority }))}
+            disabled={isSubmitting}
+          />
 
           {/* List Selector */}
           <div className="grid gap-2">

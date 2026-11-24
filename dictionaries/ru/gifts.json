@@ -33,7 +33,9 @@
       "targetAmount": "Целевая сумма",
       "isGiftCard": "Это подарочная карта",
       "isGroupGift": "Это групповой подарок",
-      "currency": "Валюта"
+      "currency": "Валюта",
+      "category": "Категория",
+      "priority": "Приоритет"
     },
     "placeholders": {
       "link": "Ссылка (необязательно)",
@@ -42,7 +44,8 @@
       "priceExample": "например, 100.00",
       "imageUrl": "Ссылка изображения (необязательно)",
       "description": "Описание (необязательно)",
-      "selectList": "Выберите список..."
+      "selectList": "Выберите список...",
+      "category": "например, Кухня"
     },
     "messages": {
       "loadingPreview": "Загрузка предпросмотра ссылки...",
@@ -69,6 +72,12 @@
       "nameLabel": "Название",
       "optional": "необязательно",
       "moreDetails": "Подробнее"
+    },
+    "priorities": {
+      "none": "Без приоритета",
+      "high": "Высокий",
+      "medium": "Средний",
+      "low": "Низкий"
     }
   },
   "editDialog": {
@@ -86,7 +95,12 @@
       "archived": "Архив",
       "groupGift": "Групповой подарок",
       "giftCard": "Подарочная карта",
-      "suggestedBy": "Предложено {{name}}"
+      "suggestedBy": "Предложено {{name}}",
+      "priority": {
+        "high": "Высокий приоритет",
+        "medium": "Средний приоритет",
+        "low": "Низкий приоритет"
+      }
     },
     "buttons": {
       "viewLink": "Посмотреть ссылку",

@@ -10,6 +10,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Loader2, CreditCard, Users, Gift, ChevronDown } from 'lucide-react'
 import { useTranslation, formatMessage } from "./i18n-provider"
+import { GiftTagFields } from "./gift-tags"
+import type { Priority } from "@/lib/neon"
 import CurrencySelect from "./currency-select"
 import { isCurrency, parsePrice } from "@/lib/currency"
 
@@ -77,6 +79,8 @@ const emptyItem = (selectedListId: string) => ({
   imageUrl: "",
   type: 'item' as GiftType,
   giftCardTargetAmount: "",
+  category: "",
+  priority: 'none' as Priority | 'none',
   selectedListId,
 })
 
@@ -193,6 +197,8 @@ export default function AddGiftForm({
         og_description: ogData?.description,
         og_image: ogData?.image,
         og_site_name: ogData?.siteName,
+        category: item.category.trim() || undefined,
+        priority: item.priority === 'none' ? undefined : item.priority,
       })
       writeLastList(selectedListId)
       setChosenListId(selectedListId)
@@ -356,6 +362,16 @@ export default function AddGiftForm({
               rows={2}
             />
           </div>
+
+          <GiftTagFields
+            idPrefix="add-gift"
+            category={item.category}
+            priority={item.priority}
+            onCategoryChange={(category) => setItem((prev) => ({ ...prev, category }))}
+            onPriorityChange={(priority) => setItem((prev) => ({ ...prev, priority }))}
+            disabled={isSubmitting}
+            optional={tQuick.optional || 'optional'}
+          />
 
           {!ogData?.image && (
             <div className="flex flex-col gap-2">

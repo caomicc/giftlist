@@ -33,7 +33,9 @@
       "targetAmount": "Target amount",
       "isGiftCard": "This is a gift card",
       "isGroupGift": "This is a group gift",
-      "currency": "Currency"
+      "currency": "Currency",
+      "category": "Category",
+      "priority": "Priority"
     },
     "placeholders": {
       "link": "Link (optional)",
@@ -42,7 +44,8 @@
       "priceExample": "e.g., 100.00",
       "imageUrl": "Image URL (optional)",
       "description": "Description (optional)",
-      "selectList": "Select a list..."
+      "selectList": "Select a list...",
+      "category": "e.g. Kitchen"
     },
     "messages": {
       "loadingPreview": "Loading link preview...",
@@ -69,6 +72,12 @@
       "nameLabel": "Gift name",
       "optional": "optional",
       "moreDetails": "More details"
+    },
+    "priorities": {
+      "none": "No priority",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
     }
   },
   "editDialog": {
@@ -86,7 +95,12 @@
       "archived": "Archived",
       "groupGift": "Group Gift",
       "giftCard": "Gift Card",
-      "suggestedBy": "Suggested by {{name}}"
+      "suggestedBy": "Suggested by {{name}}",
+      "priority": {
+        "high": "High priority",
+        "medium": "Medium priority",
+        "low": "Low priority"
+      }
     },
     "buttons": {
       "viewLink": "View Link",
