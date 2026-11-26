@@ -4,7 +4,8 @@ import { sendNewItemsDigest, type DigestItem } from '@/lib/email'
 import { isValidLocale, defaultLocale } from '@/lib/i18n'
 
 /**
- * Daily email of new gifts, run by Vercel Cron (vercel.json), which sends
+ * Daily email of new gifts. Disabled: no cron schedules it. To re-enable, add a vercel.json with
+ * `{ "crons": [{ "path": "/api/cron/digest", "schedule": "0 14 * * *" }] }`. Vercel Cron sends
  * `Authorization: Bearer $CRON_SECRET`.
  *
  * ponytail: a fixed 24-hour window. Cron timing drifts a little, so an item added near the
