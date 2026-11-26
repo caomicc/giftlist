@@ -6,7 +6,7 @@ import { sql } from './neon'
  * owner what has been bought or contributed. Hiding it in the UI is not enough:
  * the API response itself has to be scrubbed.
  */
-type GiftRow = Record<string, unknown> & {
+export type GiftRow = Record<string, unknown> & {
   owner_id?: string
   list_owner_id?: string
   is_public?: boolean
@@ -26,14 +26,17 @@ export function scrubPurchaseInfo<T extends GiftRow>(row: T): T {
   }
 }
 
-/** Scrub a single row when the viewer owns it on a surprise list. */
+/**
+ * Scrub a single row when the viewer owns it on a surprise list. Pass isPublic for rows without
+ * it (UPDATE ... RETURNING *); it's added to the row so callers can tell scrubbed from unbought.
+ */
 export function scrubForViewer<T extends GiftRow>(
   row: T,
   viewerId: string,
   isPublic?: boolean
 ): T {
   const withVisibility = isPublic === undefined ? row : { ...row, is_public: isPublic }
-  return isSurpriseForViewer(withVisibility, viewerId) ? scrubPurchaseInfo(row) : row
+  return isSurpriseForViewer(withVisibility, viewerId) ? scrubPurchaseInfo(withVisibility) : withVisibility
 }
 
 /**

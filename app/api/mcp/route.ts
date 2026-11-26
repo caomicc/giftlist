@@ -3,7 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import { z } from 'zod'
 import { getApiUser, type User } from '@/lib/auth'
-import { unauthorized } from '@/lib/gift-privacy'
+import { unauthorized, isSurpriseForViewer, type GiftRow } from '@/lib/gift-privacy'
 import { isCurrency, parsePrice } from '@/lib/currency'
 import * as giftItems from '../gift-items/route'
 import * as lists from '../lists/route'
@@ -20,9 +20,11 @@ import * as ogData from '../og-data/route'
  * Upgrade path if this gets awkward: move the SQL into lib/ functions that both call.
  *
  * Surprise lists: gift data only ever comes from routes that scrub purchases for the list's owner,
- * the list tools never count purchases, and update_list always resends is_public, so a partial
- * update can't switch a surprise off.
+ * giftSummary labels those fields hidden rather than empty, the list tools never count purchases,
+ * and update_list always resends is_public, so a partial update can't switch a surprise off.
  */
+
+const HIDDEN = 'hidden: surprise list'
 
 // Bulk adds fetch link previews one by one. With idempotency keys a timed-out batch is safe to retry.
 export const maxDuration = 60
@@ -49,30 +51,6 @@ const withListId = (id: string, handler: (req: Request, ctx: { params: Promise<{
   (req: NextRequest) => handler(req, { params: Promise.resolve({ id }) })
 
 const json = (data: unknown) => ({ content: [{ type: 'text' as const, text: JSON.stringify(data, null, 2) }] })
-
-/** What an agent needs from a gift row; the rest is UI plumbing. */
-const giftSummary = (g: Row) => ({
-  id: g.id,
-  name: g.name,
-  description: g.description,
-  price: g.price,
-  currency: g.currency,
-  link: g.link,
-  image: g.og_image || g.image_url || null, // the website shows og_image first too
-  owner_id: g.owner_id,
-  owner: g.owner_name,
-  list_id: g.list_id,
-  list: g.list_name,
-  claimed_by: g.purchaser_name ?? null,
-  is_gift_card: g.is_gift_card,
-  ...(g.is_gift_card ? { gift_card_target: g.gift_card_target_amount, gift_card_contributed: g.gift_card_total_purchased } : {}),
-  is_group_gift: g.is_group_gift,
-  category: g.category ?? null,
-  priority: g.priority ?? null,
-  archived: g.archived,
-  added_at: g.created_at,
-  edited_at: g.edited_at ?? null,
-})
 
 /** Active gifts, or with archived = true your archived ones (the API never returns anyone else's). */
 async function visibleGifts(archived = false): Promise<Row[]> {
@@ -113,6 +91,35 @@ function buildServer(user: User) {
     surprise: l.is_public === false,
     ...(l.item_count === undefined ? {} : { items: Number(l.item_count) }),
   })
+
+  /** What an agent needs from a gift row (which must carry is_public); the rest is UI plumbing. */
+  const giftSummary = (g: Row) => {
+    // On your own surprise lists the routes scrub purchases to null/0, which would read as "nobody
+    // has bought it". The website shows nothing there, so say it's hidden instead.
+    const hidden = isSurpriseForViewer(g as GiftRow, user.id)
+    return {
+      id: g.id,
+      name: g.name,
+      description: g.description,
+      price: g.price,
+      currency: g.currency,
+      link: g.link,
+      image: g.og_image || g.image_url || null, // the website shows og_image first too
+      owner_id: g.owner_id,
+      owner: g.owner_name,
+      list_id: g.list_id,
+      list: g.list_name,
+      claimed_by: hidden ? HIDDEN : g.purchaser_name ?? null,
+      is_gift_card: g.is_gift_card,
+      ...(g.is_gift_card ? { gift_card_target: g.gift_card_target_amount, gift_card_contributed: hidden ? HIDDEN : g.gift_card_total_purchased } : {}),
+      is_group_gift: g.is_group_gift,
+      category: g.category ?? null,
+      priority: g.priority ?? null,
+      archived: g.archived,
+      added_at: g.created_at,
+      edited_at: g.edited_at ?? null,
+    }
+  }
 
   /** A person's id from 'me', their id, or part of their name. */
   async function personId(who: string): Promise<string> {
@@ -160,7 +167,7 @@ function buildServer(user: User) {
     })
     // A repeated key returns the gift it made first, which may be on another list
     const onList = mine.find(l => l.id === giftItem.list_id) ?? list
-    return giftSummary({ ...giftItem, owner_name: user.name, list_name: onList.name })
+    return giftSummary({ ...giftItem, owner_name: user.name, list_name: onList.name, is_public: onList.is_public })
   }
 
   server.registerTool('whoami', {
@@ -238,7 +245,7 @@ function buildServer(user: User) {
   server.registerTool('list_gifts', {
     description:
       'Gifts on every list you can see, newest first: yours and other family members\'. ' +
-      'claimed_by is who said they will buy it (always null on your own surprise lists).',
+      `claimed_by is who said they will buy it; on your own surprise lists it and gift_card_contributed are "${HIDDEN}".`,
     inputSchema: {
       owner_id: z.string().optional().describe('Only gifts belonging to this person (id from list_people)'),
       list_id: z.string().optional().describe('Only gifts on this list'),

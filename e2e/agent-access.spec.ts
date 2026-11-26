@@ -45,6 +45,8 @@ type Gift = { id: string; name: string; claimed_by: string | null }
 // Seeded lists in db/seed.sql
 const ALEX_LIST = '00000000-0000-4000-8000-000000000101'
 const SAM_LIST = '00000000-0000-4000-8000-000000000102' // a surprise list
+// What the owner of a surprise list sees instead of who claimed a gift (a null would read as unclaimed)
+const HIDDEN = 'hidden: surprise list'
 
 test('an agent token works on the API but can’t change passwords or make more tokens', async ({ request }) => {
   const { token, revoke } = await createToken(SEED.alex.id)
@@ -86,6 +88,7 @@ test('MCP tools respect surprise lists', async ({ request }) => {
 
     listId = (await tool(request, morgan.token, 'create_list', { name: `E2E surprise ${randomUUID()}`, surprise: true })).id
     const gift = await tool(request, morgan.token, 'add_gift', { name: 'Cast iron pan', list_id: listId })
+    expect(gift.claimed_by).toBe(HIDDEN)
 
     // Alex claims a gift on Morgan's surprise list
     const claimed = await tool(request, alex.token, 'set_claimed', { gift_id: gift.id, claimed: true })
@@ -93,9 +96,12 @@ test('MCP tools respect surprise lists', async ({ request }) => {
 
     const forAlex: Gift[] = await tool(request, alex.token, 'list_gifts', { list_id: listId })
     expect(forAlex.find(g => g.id === gift.id)?.claimed_by).toBe(SEED.alex.name)
-    // ...and Morgan can't see that it's been claimed, nor find it by searching for Alex
+    // ...and Morgan can't see whether it's been claimed, nor find it by searching for Alex
     const forMorgan: Gift[] = await tool(request, morgan.token, 'list_gifts', { list_id: listId })
-    expect(forMorgan.find(g => g.id === gift.id)).toMatchObject({ claimed_by: null })
+    expect(forMorgan.find(g => g.id === gift.id)).toMatchObject({ claimed_by: HIDDEN })
+    // Edits answer with the gift too
+    expect(await tool(request, morgan.token, 'set_tags', { gift_id: gift.id, priority: 'high' })).toMatchObject({ claimed_by: HIDDEN })
+    expect(await tool(request, morgan.token, 'set_archived', { gift_id: gift.id, archived: false })).toMatchObject({ claimed_by: HIDDEN })
     expect(await tool(request, morgan.token, 'list_gifts', { list_id: listId, query: 'Alex' })).toEqual([])
 
     // Can't claim your own gift
@@ -178,11 +184,11 @@ test('agents create and update lists without dropping Keep Surprise', async ({ r
     // A rename alone keeps it a surprise (the API makes a list public when is_public is left out)
     const renamed = await tool(request, morgan.token, 'update_list', { list_id: listId, name: `E2E renamed ${randomUUID()}` })
     expect(renamed).toMatchObject({ surprise: true, description: 'Birthday' })
-    expect(await claimedBy()).toBeNull()
+    expect(await claimedBy()).toBe(HIDDEN)
 
     const notYours = await mcp(request, jordan.token, 'tools/call', { name: 'update_list', arguments: { list_id: listId, surprise: false } })
     expect(notYours.isError).toBe(true)
-    expect(await claimedBy()).toBeNull()
+    expect(await claimedBy()).toBe(HIDDEN)
 
     // Turning the surprise off is the owner's call, as on the website, and shows what's been claimed
     expect(await tool(request, morgan.token, 'update_list', { list_id: listId, surprise: false })).toMatchObject({ surprise: false })
