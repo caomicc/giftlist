@@ -113,7 +113,7 @@ lib/
 - `NEXTAUTH_URL`: Base URL for magic link generation
 - `RAPID_API_KEY` (required for Amazon products): RapidAPI key for Amazon API Scraping service. Get one at https://rapidapi.com/letscrape-6bRBa3QguO5/api/amazon-api-scraping
 - Email service configuration (check `lib/email.ts` for specifics)
-- `CRON_SECRET`: Vercel Cron sends it to `/api/cron/digest` (the daily new-gifts email; currently disabled, no cron schedules it)
+- `CRON_SECRET`: Vercel Cron sends it to `/api/cron/digest` (the daily new-gifts email, scheduled in `vercel.json`, sent only to users with `digest_opt_in`)
 
 ## Agent access (MCP)
 - `/api/mcp` is a stateless MCP server (Streamable HTTP) for Claude Code, Hermes and other MCP clients.

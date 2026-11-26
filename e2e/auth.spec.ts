@@ -91,3 +91,21 @@ test('the app can be added to a home screen', async ({ page }) => {
   expect(icon.status()).toBe(200)
   expect(icon.headers()['content-type']).toContain('image/png')
 })
+
+test('the daily email starts unticked at signup and is sent when ticked', async ({ page }) => {
+  let body: { digestOptIn?: boolean } | undefined
+  await page.route('**/api/auth/register', route => {
+    body = route.request().postDataJSON()
+    return route.fulfill({ status: 400, json: { error: 'stop here' } })
+  })
+  await page.goto('/en/auth/register')
+  const optIn = page.getByLabel(/daily list of new gifts/)
+  await expect(optIn).not.toBeChecked()
+  await page.getByLabel('Email address').fill('new@example.com')
+  await page.getByLabel('Password', { exact: true }).fill('secret123')
+  await page.getByLabel('Confirm Password').fill('secret123')
+  await optIn.click()
+  await page.getByRole('button', { name: 'Create Account' }).click()
+  await expect(page.getByText('stop here')).toBeVisible()
+  expect(body?.digestOptIn).toBe(true)
+})

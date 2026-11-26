@@ -14,6 +14,6 @@
     "greeting": "Hi {{name}},",
     "intro": "Here is what the family added in the last day:",
     "button": "Open the gift list",
-    "footer": "You get this email on days when someone adds a gift you can see. Quiet days send nothing."
+    "footer": "You get this email on days when someone adds a gift you can see. Quiet days send nothing. To stop it, untick the daily email on your profile page."
   }
 }

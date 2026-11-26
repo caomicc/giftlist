@@ -4,9 +4,8 @@ import { sendNewItemsDigest, type DigestItem } from '@/lib/email'
 import { isValidLocale, defaultLocale } from '@/lib/i18n'
 
 /**
- * Daily email of new gifts. Disabled: no cron schedules it. To re-enable, add a vercel.json with
- * `{ "crons": [{ "path": "/api/cron/digest", "schedule": "0 14 * * *" }] }`. Vercel Cron sends
- * `Authorization: Bearer $CRON_SECRET`.
+ * Daily email of new gifts, run by Vercel Cron (vercel.json), which sends
+ * `Authorization: Bearer $CRON_SECRET`. Only users who ticked digest_opt_in get it.
  *
  * ponytail: a fixed 24-hour window. Cron timing drifts a little, so an item added near the
  * boundary can show up twice or not at all. Upgrade path: a users.digest_sent_at column.
@@ -35,7 +34,8 @@ export async function GET(request: NextRequest) {
     JOIN lists l ON gi.list_id = l.id
     LEFT JOIN users u_owner ON gi.owner_id = u_owner.id
     LEFT JOIN list_permissions lp ON l.id = lp.list_id AND lp.user_id = u.id
-    WHERE gi.created_at > NOW() - INTERVAL '24 hours'
+    WHERE u.digest_opt_in
+    AND gi.created_at > NOW() - INTERVAL '24 hours'
     AND gi.archived = FALSE
     AND (
       l.owner_id = u.id

@@ -298,7 +298,7 @@ test('gifts on a list hidden from someone stay out of their MCP results and dige
     const claim = await mcp(request, sam.token, 'tools/call', { name: 'set_claimed', arguments: { gift_id: giftId, claimed: true } })
     expect(claim.isError).toBe(true)
 
-    // Daily digest: Jordan hears about it; Sam and Morgan (the owner) don't
+    // Daily digest: Jordan hears about it; Sam and Morgan (the owner) don't, nor Riley (can see it, not opted in)
     expect((await request.get('/api/cron/digest')).status()).toBe(401)
     const digest = await request.get('/api/cron/digest', { headers: bearer(e2eServerEnv.CRON_SECRET) })
     expect(digest.ok()).toBe(true)
@@ -306,6 +306,7 @@ test('gifts on a list hidden from someone stay out of their MCP results and dige
     expect(sent[SEED.jordan.email]).toContain(giftName)
     expect(sent[SEED.sam.email] ?? []).not.toContain(giftName)
     expect(sent[SEED.morgan.email] ?? []).not.toContain(giftName)
+    expect(sent[SEED.riley.email]).toBeUndefined()
   } finally {
     if (giftId) await morganApi.delete(`/api/gift-items?id=${giftId}`)
     await morganApi.delete(`/api/lists/${list.id}`)

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -14,6 +15,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [name, setName] = useState('')
+  const [digestOptIn, setDigestOptIn] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
   const router = useRouter()
@@ -41,7 +43,7 @@ export default function RegisterPage() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, name, digestOptIn }),
       })
 
       const data = await response.json()
@@ -121,6 +123,18 @@ export default function RegisterPage() {
                 className="mt-1"
                 minLength={6}
               />
+            </div>
+
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="digest-opt-in"
+                checked={digestOptIn}
+                onCheckedChange={(checked) => setDigestOptIn(checked === true)}
+                className="mt-0.5"
+              />
+              <Label htmlFor="digest-opt-in" className="cursor-pointer font-normal leading-snug">
+                {(register?.form as Record<string, string>)?.digestOptIn ?? 'Email me a daily list of new gifts (only on days something is added)'}
+              </Label>
             </div>
 
             {message && (

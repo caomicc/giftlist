@@ -59,7 +59,7 @@ export async function signInWithPassword(email: string, password: string) {
 }
 
 // Register with password
-export async function registerWithPassword(email: string, password: string, name?: string) {
+export async function registerWithPassword(email: string, password: string, name?: string, digestOptIn = false) {
   // Check if user already exists
   const [existingUser] = await sql`
     SELECT id FROM users WHERE email = ${email}
@@ -74,8 +74,8 @@ export async function registerWithPassword(email: string, password: string, name
 
   // Create user
   const [user] = await sql`
-    INSERT INTO users (email, password_hash, name, email_verified)
-    VALUES (${email}, ${passwordHash}, ${name || null}, NOW())
+    INSERT INTO users (email, password_hash, name, email_verified, digest_opt_in)
+    VALUES (${email}, ${passwordHash}, ${name || null}, NOW(), ${digestOptIn})
     RETURNING *
   `
 

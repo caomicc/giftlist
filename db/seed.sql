@@ -9,6 +9,8 @@ INSERT INTO public.users (id, email, name, email_verified, password_hash) VALUES
   ('00000000-0000-4000-8000-000000000003', 'jordan@example.com', 'Jordan Patel', now(), '$2b$10$nwvdLIrTQlnf7cq/9hTFVOYF9iWv2rFyspfcLinzuZBzuU3L1EtpG'),
   ('00000000-0000-4000-8000-000000000004', 'riley@example.com',  'Riley Okafor', now(), '$2b$10$nwvdLIrTQlnf7cq/9hTFVOYF9iWv2rFyspfcLinzuZBzuU3L1EtpG'),
   ('00000000-0000-4000-8000-000000000005', 'morgan@example.com', 'Morgan Lee',   now(), NULL);
+-- Only Jordan gets the daily digest (e2e/agent-access.spec.ts checks that Riley, opted out, doesn't).
+UPDATE public.users SET digest_opt_in = true WHERE email = 'jordan@example.com';
 
 -- is_public: whether the owner sees purchase status. Sam keeps surprises hidden.
 INSERT INTO public.lists (id, name, description, owner_id, is_public) VALUES

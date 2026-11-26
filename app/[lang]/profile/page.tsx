@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -17,6 +18,7 @@ interface UserProfile {
   name: string | null
   created_at: string
   hasPassword: boolean
+  digestOptIn: boolean
 }
 
 export default function ProfilePage() {
@@ -84,6 +86,34 @@ export default function ProfilePage() {
       }
     } catch {
       setError('Failed to update profile')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Saves on click, separate from the name form
+  const handleDigestChange = async (digestOptIn: boolean) => {
+    setIsLoading(true)
+    setMessage('')
+    setError('')
+
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ digestOptIn }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setProfile(data)
+        setMessage(digestOptIn ? 'You will get the daily email of new gifts.' : 'Daily email turned off.')
+      } else {
+        setError(data.error || 'Failed to update email preference')
+      }
+    } catch {
+      setError('Failed to update email preference')
     } finally {
       setIsLoading(false)
     }
@@ -232,6 +262,22 @@ export default function ProfilePage() {
                   {isLoading ? 'Updating...' : 'Update Profile'}
                 </Button>
               </form>
+
+              <div className="mt-6 flex items-start gap-3 border-t pt-4">
+                <Checkbox
+                  id="digest-opt-in"
+                  checked={!!profile.digestOptIn}
+                  onCheckedChange={(checked) => handleDigestChange(checked === true)}
+                  disabled={isLoading}
+                  className="mt-0.5"
+                />
+                <div>
+                  <Label htmlFor="digest-opt-in" className="cursor-pointer">Daily email of new gifts</Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Sent on days when someone adds a gift you can see. Quiet days send nothing.
+                  </p>
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="password" className="pt-4">

@@ -311,7 +311,8 @@ CREATE TABLE public.users (
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now(),
     password_hash character varying(255),
-    preferred_locale character varying(5) DEFAULT 'en'::character varying
+    preferred_locale character varying(5) DEFAULT 'en'::character varying,
+    digest_opt_in boolean DEFAULT false NOT NULL
 );
 
 

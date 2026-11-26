@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name } = await request.json()
+    const { email, password, name, digestOptIn } = await request.json()
 
     if (!email || !password) {
       return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const user = await registerWithPassword(email, password, name)
+    const user = await registerWithPassword(email, password, name, digestOptIn === true)
     
     return NextResponse.json({ 
       success: true, 

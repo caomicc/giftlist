@@ -2,10 +2,14 @@ import nodemailer from 'nodemailer'
 import { getDictionary, type Locale } from './i18n'
 import { formatCurrency } from './currency'
 
-// Helper to create transporter
+// SMTP. Resend: EMAIL_SERVER_HOST=smtp.resend.com, EMAIL_SERVER_USER=resend,
+// EMAIL_SERVER_PASSWORD=<API key>. Unset host falls back to Gmail.
 function createTransporter() {
+  const port = Number(process.env.EMAIL_SERVER_PORT || 465)
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: process.env.EMAIL_SERVER_HOST || 'smtp.gmail.com',
+    port,
+    secure: port === 465,
     auth: {
       user: process.env.EMAIL_SERVER_USER,
       pass: process.env.EMAIL_SERVER_PASSWORD,
@@ -32,23 +36,7 @@ export async function sendMagicLink(email: string, magicLink: string) {
     return
   }
 
-  // Production mode - send actual email
-  // const transporter = nodemailer.createTransport({
-  //   host: process.env.EMAIL_SERVER_HOST,
-  //   port: parseInt(process.env.EMAIL_SERVER_PORT || '587'),
-  //   auth: {
-  //     user: process.env.EMAIL_SERVER_USER,
-  //     pass: process.env.EMAIL_SERVER_PASSWORD,
-  //   },
-  // })
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_SERVER_USER,
-      pass: process.env.EMAIL_SERVER_PASSWORD,
-    },
-  })
-
+  const transporter = createTransporter()
 
   const mailOptions = {
     from: process.env.EMAIL_FROM,
